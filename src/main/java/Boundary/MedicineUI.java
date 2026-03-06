@@ -23,7 +23,7 @@ public class MedicineUI {
         this.scanner = new Scanner(System.in);
         
         // Optional: Pre-load some dummy data for easy testing
-        preloadData();
+        //preloadData();
     }
 
     // ==========================================

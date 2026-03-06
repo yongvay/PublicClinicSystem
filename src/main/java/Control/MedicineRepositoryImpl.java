@@ -2,6 +2,7 @@ package Control;
 
 import ADT.List;
 import ADT.ListInterface;
+import DAO.MedicineDAO;
 import Entity.Medicine;
 import java.util.Comparator;
 
@@ -14,10 +15,13 @@ public class MedicineRepositoryImpl implements MedicineRepository {
 
     // Coding to an Interface (CLO2 best practice)
     private ListInterface<Medicine> medicineList;
+    private MedicineDAO medicineDAO; // Instantiate the DAO
 
     public MedicineRepositoryImpl() {
-        // Initialize with your custom ADT
-        this.medicineList = new List<>();
+        this.medicineDAO = new MedicineDAO();
+        
+        // Load existing data from file 
+        this.medicineList = medicineDAO.loadFromFile();
     }
 
     // ==========================================
@@ -27,6 +31,7 @@ public class MedicineRepositoryImpl implements MedicineRepository {
     public void create(Medicine medicine) {
         if (medicine != null) {
             medicineList.add(medicine);
+            medicineDAO.saveToFile(medicineList); // Save after adding
         }
     }
 
@@ -97,17 +102,18 @@ public class MedicineRepositoryImpl implements MedicineRepository {
     public boolean update(Medicine updatedMedicine) {
         if (updatedMedicine == null) return false;
 
-        // Find the 1-based index of the medicine with the same ID
         for (int i = 1; i <= medicineList.getNumberOfEntries(); i++) {
             Medicine current = medicineList.getEntry(i);
             
-            // Updated to match your Entity's getMedicineID()
             if (current.getMedicineID().equalsIgnoreCase(updatedMedicine.getMedicineID())) {
-                // Use your custom ADT's replace method (1-based index)
-                return medicineList.replace(i, updatedMedicine);
+                boolean success = medicineList.replace(i, updatedMedicine);
+                if (success) {
+                    medicineDAO.saveToFile(medicineList); // Save after updating
+                }
+                return success;
             }
         }
-        return false; // Medicine not found
+        return false; 
     }
 
     // ==========================================
@@ -117,8 +123,11 @@ public class MedicineRepositoryImpl implements MedicineRepository {
     public boolean delete(Medicine medicine) {
         if (medicine == null) return false;
         
-        // This works perfectly now because you overrode equals() in Medicine.java
-        return medicineList.remove(medicine);
+        boolean success = medicineList.remove(medicine);
+        if (success) {
+            medicineDAO.saveToFile(medicineList); // Save after deleting
+        }
+        return success;
     }
 
     // ==========================================

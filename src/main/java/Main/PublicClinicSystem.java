@@ -6,7 +6,12 @@ package Main;
  */
 public class PublicClinicSystem {
     public static void main(String[] args) {
-        Boundary.MedicineUI medicineApp = new Boundary.MedicineUI(); // Test out medicine
-        medicineApp.start();
+        
+    //Boundary.MedicineUI medicineApp = new Boundary.MedicineUI(); // Test out medicine
+         //medicineApp.start();
+        
+      Boundary.DoctorUI doctorApp = new Boundary.DoctorUI();
+        doctorApp.start();
+        
     }
 }

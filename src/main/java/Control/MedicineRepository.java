@@ -1,32 +1,32 @@
 package Control;
 
 /**
- * Author: Ng Yong Vay
+ * @author Ng Yong Vay
  */
-  
+ 
+import ADT.ListInterface;
 import Entity.Medicine;
-import ADT.List;
+
 public interface MedicineRepository {
 
   // Create
   void create(Medicine medicine);
 
   // Read
-  List<Medicine> findAll();
+  ListInterface<Medicine> findAll();
   Medicine findById(String id);
-  List<Medicine> findByName(String name);
-  List<Medicine> findOutOfStock();
-  List<Medicine> findBelowReorderLevel();
+  ListInterface<Medicine> findByName(String name);
+  ListInterface<Medicine> findOutOfStock();
+  ListInterface<Medicine> findBelowReorderLevel();
 
   // Update
-  void update(Medicine medicine);
-  //void updateStock(String medicineID, int newStock);
+  boolean update(Medicine medicine);
 
-  // Delete (optional, if needed)
-  void delete(Medicine medicine);
+  // Delete
+  boolean delete(Medicine medicine);
   
   // Sorting methods
-  List<Medicine> findAllSortedByName();
-  List<Medicine> findAllSortedByStock();
-  List<Medicine> findLowStockSorted();
+  ListInterface<Medicine> findAllSortedByName();
+  ListInterface<Medicine> findAllSortedByStock();
+  ListInterface<Medicine> findLowStockSorted();
 }

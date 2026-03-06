@@ -3,109 +3,159 @@ package Control;
 import ADT.List;
 import ADT.ListInterface;
 import Entity.Medicine;
+import java.util.Comparator;
 
 /**
  * @author Ng Yong Vay
+ * Implementation of the MedicineRepository using a custom List ADT.
+ * Acts as the in-memory database for Medicine entities.
  */
-public class MedicineRepositoryImpl {
-    
-    // As per best practices, we declare the variable using the interface type.
+public class MedicineRepositoryImpl implements MedicineRepository {
+
+    // Coding to an Interface (CLO2 best practice)
     private ListInterface<Medicine> medicineList;
 
     public MedicineRepositoryImpl() {
-        // Initialize with our custom ADT implementation
+        // Initialize with your custom ADT
         this.medicineList = new List<>();
     }
 
-    /**
-     * Adds a new medicine to the system.
-     * Prevents duplicate entries based on the Medicine ID.
-     */
-    public boolean addNewMedicine(Medicine newMedicine) {
-        if (searchMedicine(newMedicine.getMedicineID()) != null) {
-            return false; 
+    // ==========================================
+    // CREATE
+    // ==========================================
+    @Override
+    public void create(Medicine medicine) {
+        if (medicine != null) {
+            medicineList.add(medicine);
         }
-        return medicineList.add(newMedicine);
     }
 
-    /**
-     * Dispenses a specific quantity of medicine, reducing the stock.
-     */
-    public boolean dispenseMedicine(String medicineID, int quantityToDispense) {
-        Medicine med = searchMedicine(medicineID);
+    // ==========================================
+    // READ
+    // ==========================================
+    @Override
+    public ListInterface<Medicine> findAll() {
+        return medicineList;
+    }
+
+    @Override
+    public Medicine findById(String id) {
+        if (id == null) return null;
         
-        if (med != null && med.getQuantityInStock() >= quantityToDispense) {
-            med.setQuantityInStock(med.getQuantityInStock() - quantityToDispense);
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * Restocks a specific medicine by adding to its current quantity.
-     */
-    public boolean restockMedicine(String medicineID, int quantityToAdd) {
-        Medicine med = searchMedicine(medicineID);
-        
-        if (med != null && quantityToAdd > 0) {
-            med.setQuantityInStock(med.getQuantityInStock() + quantityToAdd);
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * Searches for a medicine by its unique ID.
-     */
-    public Medicine searchMedicine(String medicineID) {
-        for (Medicine med : medicineList) {
-            if (med.getMedicineID().equalsIgnoreCase(medicineID)) {
-                return med;
+        // Using the Iterable feature of your custom list
+        for (Medicine m : medicineList) {
+            // Updated to match your Entity's getMedicineID()
+            if (m.getMedicineID().equalsIgnoreCase(id)) {
+                return m;
             }
         }
-        return null; // Not found
+        return null;
     }
 
-    /**
-     * Generates a formatted string of all medicines currently in the system.
-     * NEW FUNCTION ADDED HERE.
-     */
-    public String getAllMedicinesReport() {
-        if (medicineList.isEmpty()) {
-            return "No medicines currently available in the system.\n";
-        }
+    @Override
+    public ListInterface<Medicine> findByName(String name) {
+        ListInterface<Medicine> results = new List<>();
+        if (name == null || name.trim().isEmpty()) return results;
 
-        StringBuilder report = new StringBuilder();
-        report.append("\n=== ALL MEDICINES LIST ===\n");
-        
-        for (Medicine med : medicineList) {
-            // Relies on the overridden toString() method in your Entity class
-            report.append(med.toString()).append("\n");
-        }
-        
-        return report.toString();
-    }
-
-    /**
-     * Generates a formatted report of all medicines whose stock is at or below the threshold.
-     */
-    public String generateLowStockReport(int threshold) {
-        StringBuilder report = new StringBuilder();
-        report.append("=== LOW STOCK REPORT (Threshold: ").append(threshold).append(") ===\n");
-        
-        boolean foundLowStock = false;
-        
-        for (Medicine med : medicineList) {
-            if (med.getQuantityInStock() <= threshold) {
-                report.append(med.toString()).append("\n");
-                foundLowStock = true;
+        String searchLower = name.toLowerCase();
+        for (Medicine m : medicineList) {
+            if (m.getName().toLowerCase().contains(searchLower)) {
+                results.add(m);
             }
         }
-        
-        if (!foundLowStock) {
-            report.append("All medicines are sufficiently stocked.\n");
+        return results;
+    }
+
+    @Override
+    public ListInterface<Medicine> findOutOfStock() {
+        ListInterface<Medicine> results = new List<>();
+        for (Medicine m : medicineList) {
+            // Updated to match your Entity's getQuantityInStock()
+            if (m.getQuantityInStock() == 0) {
+                results.add(m);
+            }
         }
+        return results;
+    }
+
+    @Override
+    public ListInterface<Medicine> findBelowReorderLevel() {
+        ListInterface<Medicine> results = new List<>();
+        for (Medicine m : medicineList) {
+            // Utilizing the newly added reorderLevel logic
+            if (m.getQuantityInStock() < m.getReorderLevel()) {
+                results.add(m);
+            }
+        }
+        return results;
+    }
+
+    // ==========================================
+    // UPDATE
+    // ==========================================
+    @Override
+    public boolean update(Medicine updatedMedicine) {
+        if (updatedMedicine == null) return false;
+
+        // Find the 1-based index of the medicine with the same ID
+        for (int i = 1; i <= medicineList.getNumberOfEntries(); i++) {
+            Medicine current = medicineList.getEntry(i);
+            
+            // Updated to match your Entity's getMedicineID()
+            if (current.getMedicineID().equalsIgnoreCase(updatedMedicine.getMedicineID())) {
+                // Use your custom ADT's replace method (1-based index)
+                return medicineList.replace(i, updatedMedicine);
+            }
+        }
+        return false; // Medicine not found
+    }
+
+    // ==========================================
+    // DELETE
+    // ==========================================
+    @Override
+    public boolean delete(Medicine medicine) {
+        if (medicine == null) return false;
         
-        return report.toString();
+        // This works perfectly now because you overrode equals() in Medicine.java
+        return medicineList.remove(medicine);
+    }
+
+    // ==========================================
+    // SORTING
+    // ==========================================
+    @Override
+    public ListInterface<Medicine> findAllSortedByName() {
+        // Passing a custom Comparator to your ADT's merge sort
+        return medicineList.sort(new Comparator<Medicine>() {
+            @Override
+            public int compare(Medicine m1, Medicine m2) {
+                return m1.getName().compareToIgnoreCase(m2.getName());
+            }
+        });
+    }
+
+    @Override
+    public ListInterface<Medicine> findAllSortedByStock() {
+        return medicineList.sort(new Comparator<Medicine>() {
+            @Override
+            public int compare(Medicine m1, Medicine m2) {
+                return Integer.compare(m1.getQuantityInStock(), m2.getQuantityInStock());
+            }
+        });
+    }
+
+    @Override
+    public ListInterface<Medicine> findLowStockSorted() {
+        // First, filter the list to only those below reorder level
+        ListInterface<Medicine> lowStock = findBelowReorderLevel();
+        
+        // Then sort the filtered list by stock (ascending)
+        return lowStock.sort(new Comparator<Medicine>() {
+            @Override
+            public int compare(Medicine m1, Medicine m2) {
+                return Integer.compare(m1.getQuantityInStock(), m2.getQuantityInStock());
+            }
+        });
     }
 }

@@ -18,7 +18,7 @@ public class DoctorUI {
     public DoctorUI() {
         this.doctorRepo = new DoctorRepositoryImpl();
         this.scanner = new Scanner(System.in);
-        preloadData();
+        
     }
 
     public void start() {
@@ -228,12 +228,5 @@ public class DoctorUI {
         }
     }
 
-    // Preloads dummy data for testing purposes
-    private void preloadData() {
-        doctorRepo.create(new Doctor("D001", "Dr. Ahmad", "General Practice", "012-3456789", true));
-        doctorRepo.create(new Doctor("D002", "Dr. Sarah", "Cardiology", "019-8765432", true));
-        doctorRepo.create(new Doctor("D003", "Dr. Chong", "Pediatrics", "011-2233445", false)); 
-        doctorRepo.create(new Doctor("D004", "Dr. Priya", "Orthopedics", "017-9988776", true));
-        doctorRepo.create(new Doctor("D005", "Dr. Lee", "Cardiology", "013-5544332", false)); 
-    }
+    
 }

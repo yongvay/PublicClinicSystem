@@ -2,25 +2,40 @@ package Control;
 
 import ADT.List;
 import ADT.ListInterface;
+import DAO.DoctorDAO; // Import your new DAO
 import Entity.Doctor;
 import java.util.Comparator;
 
 /**
  * @author Xing Szen
- * Implementation of the DoctorRepository using the custom List ADT.
  */
 public class DoctorRepositoryImpl implements DoctorRepository {
 
     private ListInterface<Doctor> doctorList;
+    private DoctorDAO doctorDAO; // Declare the DAO
 
     public DoctorRepositoryImpl() {
-        this.doctorList = new List<>();
+        this.doctorDAO = new DoctorDAO(); // Initialize the DAO
+        // Load the data from the text file instead of starting empty!
+        this.doctorList = doctorDAO.loadFromFile(); 
+        
+        // Failsafe: If the file was completely empty, initialize an empty list
+        if (this.doctorList == null) {
+            this.doctorList = new List<>();
+        }
     }
 
-    @Override
+   @Override
     public void create(Doctor doctor) {
         if (doctor != null) {
-            doctorList.add(doctor);
+            // Failsafe: Check if the ID already exists before adding
+            if (findById(doctor.getDoctorID()) == null) {
+                doctorList.add(doctor);
+                doctorDAO.saveToFile(doctorList); 
+            } else {
+                // Silent fail for backend, UI handles the actual error message
+                System.err.println(" The enterered ID is a;ready exist. " + doctor.getDoctorID());
+            }
         }
     }
 
@@ -79,11 +94,14 @@ public class DoctorRepositoryImpl implements DoctorRepository {
     public boolean update(Doctor updatedDoctor) {
         if (updatedDoctor == null) return false;
 
-        // Use 1-based index to work with the custom ADT's replace method
         for (int i = 1; i <= doctorList.getNumberOfEntries(); i++) {
             Doctor current = doctorList.getEntry(i);
             if (current.getDoctorID().equalsIgnoreCase(updatedDoctor.getDoctorID())) {
-                return doctorList.replace(i, updatedDoctor);
+                boolean success = doctorList.replace(i, updatedDoctor);
+                if (success) {
+                    doctorDAO.saveToFile(doctorList); // SAVE TO FILE AFTER UPDATING
+                }
+                return success;
             }
         }
         return false;
@@ -92,8 +110,12 @@ public class DoctorRepositoryImpl implements DoctorRepository {
     @Override
     public boolean delete(Doctor doctor) {
         if (doctor == null) return false;
-        // Relies on the overridden equals() method in the Doctor entity
-        return doctorList.remove(doctor);
+        
+        boolean success = doctorList.remove(doctor);
+        if (success) {
+            doctorDAO.saveToFile(doctorList); // SAVE TO FILE AFTER DELETING
+        }
+        return success;
     }
 
     @Override

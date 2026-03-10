@@ -13,8 +13,10 @@ public class PublicClinicSystem {
 //    Boundary.DoctorUI doctorApp = new Boundary.DoctorUI();
 //    doctorApp.start();
     
-    Boundary.PatientUI patientTest = new Boundary.PatientUI();
-    patientTest.start();    
+//    Boundary.PatientUI patientTest = new Boundary.PatientUI();
+//   patientTest.start();    
         
+    Boundary.RoomUI roomTest = new Boundary.RoomUI();
+    roomTest.start();
     }
 }

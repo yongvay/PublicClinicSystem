@@ -1,0 +1,6 @@
+101|Ward|false
+102|Ward|true
+103|Ward|true
+201|Consultation|true
+202|Consultation|false
+301|ICU|true

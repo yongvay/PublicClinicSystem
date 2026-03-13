@@ -1,22 +1,15 @@
 package Main;
 
+import Boundary.ClinicSystemUI;
+
 /**
- *
+ * Main application entry point.
  * @author Ng Yong Vay
  */
 public class PublicClinicSystem {
     public static void main(String[] args) {
-        
-    //Boundary.MedicineUI medicineApp = new Boundary.MedicineUI(); // Test out medicine
-         //medicineApp.start();
-        
-//    Boundary.DoctorUI doctorApp = new Boundary.DoctorUI();
-//    doctorApp.start();
-    
-//    Boundary.PatientUI patientTest = new Boundary.PatientUI();
-//   patientTest.start();    
-        
-    Boundary.RoomUI roomTest = new Boundary.RoomUI();
-    roomTest.start();
+        // Initialize the central UI portal and start the system
+        ClinicSystemUI mainApp = new ClinicSystemUI();
+        mainApp.start();
     }
 }

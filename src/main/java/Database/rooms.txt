@@ -1,6 +1,6 @@
 101|Ward|true
 102|Ward|true
 103|Ward|true
-201|Consultation|true
-202|Consultation|true
+201|Consultation|false
+202|Consultation|false
 301|ICU|true

@@ -1,5 +1,5 @@
-D001|Dr. Ahmad|General Practice|012-3456789|true
-D002|Dr. Sarah|Cardiology|019-8765432|true
+D001|Dr. Ahmad|General Practice|012-3456789|false
+D002|Dr. Sarah|Cardiology|019-8765432|false
 D004|Dr. Priya|Orthopedics|017-9988776|true
 D005|Dr. Lee|Cardiology|013-5544332|false
 D006|Dr. Lam|Radiology|010-2283973|true

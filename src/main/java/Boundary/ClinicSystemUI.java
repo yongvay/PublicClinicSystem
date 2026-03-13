@@ -14,6 +14,7 @@ public class ClinicSystemUI {
     private MedicineUI medicineUI;
     private PatientUI patientUI;
     private RoomUI roomUI;
+    private AppointmentUI appointmentUI;
     private Scanner scanner;
 
     public ClinicSystemUI() {
@@ -21,6 +22,7 @@ public class ClinicSystemUI {
         this.medicineUI = new MedicineUI();
         this.patientUI = new PatientUI();
         this.roomUI = new RoomUI();
+        this.appointmentUI = new AppointmentUI();
         this.scanner = new Scanner(System.in);
     }
 
@@ -49,29 +51,20 @@ public class ClinicSystemUI {
         System.out.println("2. Medicine Management Module");
         System.out.println("3. Patient Management Module");
         System.out.println("4. Room Management Module");
+        System.out.println("5. Appointment Booking Module");
         System.out.println("0. Exit System");
         System.out.println("==========================================");
     }
 
     private void processChoice(int choice) {
         switch (choice) {
-            case 1: 
-                doctorUI.start(); 
-                break;
-            case 2: 
-                medicineUI.start(); 
-                break;
-            case 3: 
-                patientUI.start(); 
-                break;
-            case 4: 
-                roomUI.start(); 
-                break;
-            case 0: 
-                System.out.println("Saving all data... Shutting down system. Goodbye!"); 
-                break;
-            default: 
-                System.out.println("Invalid choice. Please try again.");
+            case 1: doctorUI.start(); break;
+            case 2: medicineUI.start(); break;
+            case 3: patientUI.start(); break;
+            case 4: roomUI.start(); break;
+            case 5: appointmentUI.start(); break; // ADD THIS
+            case 0: System.out.println("Shutting down... Goodbye!"); break;
+            default: System.out.println("Invalid choice.");
         }
     }
 }

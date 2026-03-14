@@ -1,6 +1,12 @@
 package Boundary;
 
 import java.util.Scanner;
+import Control.AppointmentRepository;
+import Control.AppointmentRepositoryImpl;
+import Control.PatientRepository;
+import Control.PatientRepositoryImpl;
+import Control.DoctorRepository;
+import Control.DoctorRepositoryImpl;
 
 /**
  * Central Boundary class that ties all subsystems together.
@@ -22,7 +28,15 @@ public class ClinicSystemUI {
         this.medicineUI = new MedicineUI();
         this.patientUI = new PatientUI();
         this.roomUI = new RoomUI();
-        this.appointmentUI = new AppointmentUI();
+        
+        // 1. Instantiate the required Control repositories
+        AppointmentRepository appointmentRepo = new AppointmentRepositoryImpl();
+        PatientRepository patientRepo = new PatientRepositoryImpl();
+        DoctorRepository doctorRepo = new DoctorRepositoryImpl();
+        
+        // 2. Pass them into the AppointmentUI constructor
+        this.appointmentUI = new AppointmentUI(appointmentRepo, patientRepo, doctorRepo);
+        
         this.scanner = new Scanner(System.in);
     }
 
@@ -62,7 +76,7 @@ public class ClinicSystemUI {
             case 2: medicineUI.start(); break;
             case 3: patientUI.start(); break;
             case 4: roomUI.start(); break;
-            case 5: appointmentUI.start(); break; // ADD THIS
+            case 5: appointmentUI.displayAppointmentMenu(); break;
             case 0: System.out.println("Shutting down... Goodbye!"); break;
             default: System.out.println("Invalid choice.");
         }

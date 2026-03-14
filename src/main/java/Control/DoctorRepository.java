@@ -13,11 +13,14 @@ public interface DoctorRepository {
 
     // Read (searchDoctor, getAllDoctors, getAvailableDoctor)
     ListInterface<Doctor> findAll();
+
     Doctor findById(String id);
+
     Doctor findFirstAvailableDoctor(); // fetch one free doctor for the queue
-    
+
     //finders
     ListInterface<Doctor> findBySpecialization(String specialization);
+
     ListInterface<Doctor> findAllAvailableDoctors();
 
     // Update (updateDoctorDetails)
@@ -25,8 +28,12 @@ public interface DoctorRepository {
 
     // Delete (deleteDoctor)
     boolean delete(Doctor doctor);
-    
+
     //Sorting methods
     ListInterface<Doctor> findAllSortedByName();
+
     ListInterface<Doctor> findAllSortedBySpecialization();
+
+    // Logic to check specialization against the collection of doctors
+    boolean specializationExists(String specialization);
 }

@@ -17,21 +17,21 @@ public class DoctorRepositoryImpl implements DoctorRepository {
     public DoctorRepositoryImpl() {
         this.doctorDAO = new DoctorDAO(); // Initialize the DAO
         // Load the data from the text file instead of starting empty!
-        this.doctorList = doctorDAO.loadFromFile(); 
-        
+        this.doctorList = doctorDAO.loadFromFile();
+
         // Failsafe: If the file was completely empty, initialize an empty list
         if (this.doctorList == null) {
             this.doctorList = new List<>();
         }
     }
 
-   @Override
+    @Override
     public void create(Doctor doctor) {
         if (doctor != null) {
             // Failsafe: Check if the ID already exists before adding
             if (findById(doctor.getDoctorID()) == null) {
                 doctorList.add(doctor);
-                doctorDAO.saveToFile(doctorList); 
+                doctorDAO.saveToFile(doctorList);
             } else {
                 // Silent fail for backend, UI handles the actual error message
                 System.err.println("Error : The enterered ID is a;ready exist. " + doctor.getDoctorID());
@@ -46,7 +46,9 @@ public class DoctorRepositoryImpl implements DoctorRepository {
 
     @Override
     public Doctor findById(String id) {
-        if (id == null) return null;
+        if (id == null) {
+            return null;
+        }
         for (Doctor d : doctorList) {
             if (d.getDoctorID().equalsIgnoreCase(id)) {
                 return d;
@@ -68,7 +70,9 @@ public class DoctorRepositoryImpl implements DoctorRepository {
     @Override
     public ListInterface<Doctor> findBySpecialization(String specialization) {
         ListInterface<Doctor> results = new List<>();
-        if (specialization == null || specialization.trim().isEmpty()) return results;
+        if (specialization == null || specialization.trim().isEmpty()) {
+            return results;
+        }
 
         String searchLower = specialization.toLowerCase();
         for (Doctor d : doctorList) {
@@ -92,7 +96,9 @@ public class DoctorRepositoryImpl implements DoctorRepository {
 
     @Override
     public boolean update(Doctor updatedDoctor) {
-        if (updatedDoctor == null) return false;
+        if (updatedDoctor == null) {
+            return false;
+        }
 
         for (int i = 1; i <= doctorList.getNumberOfEntries(); i++) {
             Doctor current = doctorList.getEntry(i);
@@ -109,13 +115,26 @@ public class DoctorRepositoryImpl implements DoctorRepository {
 
     @Override
     public boolean delete(Doctor doctor) {
-        if (doctor == null) return false;
-        
+        if (doctor == null) {
+            return false;
+        }
+
         boolean success = doctorList.remove(doctor);
         if (success) {
             doctorDAO.saveToFile(doctorList); // SAVE TO FILE AFTER DELETING
         }
         return success;
+    }
+
+    @Override
+    public boolean specializationExists(String specialization) {
+        // Iterate through our custom ADT
+        for (int i = 1; i <= doctorList.getNumberOfEntries(); i++) {
+            if (doctorList.getEntry(i).getSpecialization().equalsIgnoreCase(specialization)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

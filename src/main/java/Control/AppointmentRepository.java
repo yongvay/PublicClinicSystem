@@ -11,6 +11,7 @@ import Entity.Appointment;
 public interface AppointmentRepository {
     // The orchestration method
     boolean bookAppointment(String patientId, String requiredSpecialization);
+    boolean completeAppointment(String appointmentID);
     
     ListInterface<Appointment> getAllAppointments();
 }

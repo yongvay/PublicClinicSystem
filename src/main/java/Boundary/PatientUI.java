@@ -212,9 +212,6 @@ public class PatientUI {
 
         patientRepo.update(existing);
         System.out.println("Patient updated.");
-
-        patientRepo.update(existing);
-        System.out.println("Patient updated.");
     }
 
     private void deletePatient() {

@@ -26,13 +26,33 @@ public class AppointmentRepositoryImpl implements AppointmentRepository {
     private int appointmentCounter = 1;
 
     public AppointmentRepositoryImpl() {
-        this.appointmentList = new List<>();
         this.patientRepo = new PatientRepositoryImpl();
         this.doctorRepo = new DoctorRepositoryImpl();
         this.roomRepo = new RoomRepositoryImpl();
-        this.appointmentDAO = new AppointmentDAO(); // INITIALIZE DAO
+        this.appointmentDAO = new AppointmentDAO();
+        
+        // BUG FIX: Load existing appointments instead of starting with a blank list
+        this.appointmentList = appointmentDAO.loadFromFile(patientRepo, doctorRepo, roomRepo);
+        if (this.appointmentList == null) {
+            this.appointmentList = new List<>();
+        }
     }
 
+    private String generateAppointmentID() {
+        int max = 0;
+        if (appointmentList.isEmpty()) {
+            return "A001";
+        }
+
+        for (Appointment a : appointmentList) {
+            int num = Integer.parseInt(a.getAppointmentID().substring(1));
+            if (num > max) {
+                max = num;
+            }
+        }
+        return "A" + String.format("%03d", max + 1);
+    }
+    
     @Override
     public boolean bookAppointment(String patientId, String requiredSpecialization) {
         // 1. Check Patient Validity
@@ -75,21 +95,18 @@ public class AppointmentRepositoryImpl implements AppointmentRepository {
         // 4. If all checks pass, finalize the transaction
         // Update statuses to "Occupied" (false) to prevent double-booking
         assignedDoctor.setStatus(false);
-        doctorRepo.update(assignedDoctor);
-
+        doctorRepo.update(assignedDoctor); 
+        
         assignedRoom.setAvailable(false);
         roomRepo.update(assignedRoom);
 
-        // 1. Create the appointment entity
-        String aptId = "A" + String.format("%03d", appointmentCounter++);
-        Appointment newApt = new Appointment(aptId, patient, assignedDoctor, assignedRoom, LocalDate.now(), "Booked");
-
-        // 2. Save to Memory (ADT List)
+        // BUG FIX: Use the dynamic ID generator here
+        String aptId = generateAppointmentID();
+        Appointment newApt = new Appointment(aptId, patient, assignedDoctor, assignedRoom, LocalDate.now(), "Scheduled");
+        
         appointmentList.add(newApt);
-
-        // 3. Save to Text File (Persistent Storage)
         appointmentDAO.saveAppointment(newApt);
-
+        
         System.out.println("Success! Appointment successfully booked.");
         System.out.println(newApt.toString());
         return true;

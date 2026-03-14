@@ -34,7 +34,7 @@ public class DoctorRepositoryImpl implements DoctorRepository {
                 doctorDAO.saveToFile(doctorList); 
             } else {
                 // Silent fail for backend, UI handles the actual error message
-                System.err.println(" The enterered ID is a;ready exist. " + doctor.getDoctorID());
+                System.err.println("Error : The enterered ID is a;ready exist. " + doctor.getDoctorID());
             }
         }
     }

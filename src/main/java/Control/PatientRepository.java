@@ -29,5 +29,4 @@ public interface PatientRepository {
 
     // Delete
     boolean delete(Patient patient);
-
 }

@@ -3,6 +3,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package Boundary;
+import ADT.List;
 import Control.PatientRepository;
 import Control.PatientRepositoryImpl;
 import Entity.Patient;
@@ -81,7 +82,9 @@ public class PatientUI {
         int choice = -1;
 
         do {
-            System.out.println("\n===== PATIENT MENU =====");
+            System.out.println("\n==========================================");
+            System.out.println("       CLINIC SUBSYSTEM: PATIENT MENU    ");
+            System.out.println("==========================================");
             System.out.println("1 Add Patient");
             System.out.println("2 View All Patients");
             System.out.println("3 Search Patient by ID");
@@ -89,7 +92,9 @@ public class PatientUI {
             System.out.println("5 Search Patient with Allergy");            
             System.out.println("6 Update Patient");
             System.out.println("7 Delete Patient");
-            System.out.println("0 Exit");
+            System.out.println("8. View Patient Report");
+            System.out.println("0 Exit to Main Menu");
+            System.out.println("==========================================");            
 
             System.out.print("Enter choice: ");
             choice = scanner.nextInt();
@@ -103,6 +108,7 @@ public class PatientUI {
                 case 5 -> searchPatientsWithAllergy();
                 case 6 -> updatePatient();
                 case 7 -> deletePatient();
+                case 8 -> generatePatientReport();
                 case 0 -> System.out.println("Exiting Patient Subsystem...");
                 default -> System.out.println("Invalid choice. Please try again.");
             }
@@ -226,6 +232,7 @@ public class PatientUI {
             System.out.println("Patient deleted.");
         }
     }
+    
     // Iterates through and prints the list
     private void displayList(ListInterface<Patient> list) {
         if (list == null || list.isEmpty()) {
@@ -236,4 +243,100 @@ public class PatientUI {
             System.out.println(p.toString());
         }
     }
-}
+
+    public void generatePatientReport() {
+
+       ListInterface<Patient> list = patientRepo.findAll();
+       if (list.isEmpty()) {
+           System.out.println("No patient data available.");
+           return;
+       }
+       int total = list.getNumberOfEntries();
+       int totalAge = 0;
+       int minAge = Integer.MAX_VALUE;
+       int maxAge = Integer.MIN_VALUE;
+       int allergyCount = 0;
+       int noAllergyCount = 0;
+
+       // Age group counters
+       int youngCount = 0;   // 0-18
+       int adultCount = 0;   // 19-40
+       int seniorCount = 0;  // 41+
+
+       // Allergy Lists 
+       ListInterface<String> allergyNames = new List<>();
+       ListInterface<Integer> allergyCounts = new List<>();
+
+       for (int i = 1; i <= total; i++) {
+           Patient p = list.getEntry(i);
+           int age = p.getAge();
+
+           totalAge += age;
+           if (age < minAge) minAge = age;
+           if (age > maxAge) maxAge = age;
+
+           // Age Group
+           if (age <= 18) youngCount++;
+           else if (age <= 40) adultCount++;
+           else seniorCount++;
+
+           // Allergy
+           String allergy = p.getAllergies();
+           if (allergy.equalsIgnoreCase("None")) {
+               noAllergyCount++;
+           } else {
+               allergyCount++;
+
+               // 查找 allergyNames 是否已有
+               boolean found = false;
+               for (int j = 1; j <= allergyNames.getNumberOfEntries(); j++) {
+                   if (allergyNames.getEntry(j).equalsIgnoreCase(allergy)) {
+                       int count = allergyCounts.getEntry(j);
+                       allergyCounts.replace(j, count + 1);
+                       found = true;
+                       break;
+                   }
+               }
+               if (!found) {
+                   allergyNames.add(allergy);
+                   allergyCounts.add(1);
+               }
+           }
+       }
+       double avgAge = (double) totalAge / total;
+       String time = java.time.LocalDateTime.now()
+               .format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
+
+       // Print Out Report
+       System.out.println("\n======================");
+       System.out.println("=== PATIENT REPORT ===");
+       System.out.println("======================");
+       System.out.println("Generated At: " + time);
+       System.out.println("Total Patients: " + total);
+
+       System.out.println("\n--- Age Statistics ---");
+       System.out.println("Average Age: " + String.format("%.2f", avgAge));
+       System.out.println("Youngest: " + minAge);
+       System.out.println("Oldest: " + maxAge);
+
+       System.out.println("\n--- Age Group ---");
+       System.out.println("0-18: " + youngCount);
+       System.out.println("19-40: " + adultCount);
+       System.out.println("41+: " + seniorCount);
+
+       System.out.println("\n--- Allergy Statistics ---");
+       System.out.println("With Allergy: " + allergyCount);
+       System.out.println("Without Allergy: " + noAllergyCount);
+
+       System.out.println("\n--- Top Allergies ---");
+       if (allergyNames.isEmpty()) {
+           System.out.println("None");
+       } else {
+           for (int k = 1; k <= allergyNames.getNumberOfEntries(); k++) {
+               System.out.println(allergyNames.getEntry(k) + " : " + allergyCounts.getEntry(k));
+           }
+       }
+       System.out.println("======================\n");
+   }  
+}  
+ 

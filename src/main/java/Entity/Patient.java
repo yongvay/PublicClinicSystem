@@ -72,7 +72,7 @@ public class Patient {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
         return String.format(
-                "ID: %s | Name: %s | Birth Date: %s | Age: %d | History: %s | Allergies: %s",
+                "ID: %-6s | Name: %-20s | Birth Date: %-12s | Age: %-4d | History: %-30s | Allergies: %-15s",
                 patientID,
                 patientName,
                 birthDate.format(formatter),

@@ -8,6 +8,7 @@ import Control.RoomRepository;
 import Control.RoomRepositoryImpl;
 import Entity.Room;
 import ADT.ListInterface;
+import ADT.List; 
 import java.util.Scanner;
 
 /**
@@ -20,7 +21,6 @@ public class RoomUI {
     private RoomRepository roomRepo;
     private Scanner scanner;
 
-    // Replace the constructor:
     public RoomUI(RoomRepository roomRepo) {
         this.roomRepo = roomRepo;
         this.scanner = new Scanner(System.in);
@@ -57,6 +57,7 @@ public class RoomUI {
         System.out.println("5. View Available Rooms");
         System.out.println("6. Update Room Details");
         System.out.println("7. Delete Room");
+        System.out.println("8. View Room Report");
         System.out.println("0. Exit to Main Menu");
         System.out.println("==========================================");
     }
@@ -70,6 +71,7 @@ public class RoomUI {
             case 5: viewAvailableRooms(); break;
             case 6: updateRoom(); break;
             case 7: deleteRoom(); break;
+            case 8: generateRoomReport(); break;
             case 0: System.out.println("Exiting Room Subsystem..."); break;
             default: System.out.println("Invalid choice. Please try again.");
         }
@@ -199,5 +201,90 @@ public class RoomUI {
         for (Room r : list) {
             System.out.println(r.toString());
         }
+    }
+
+    // ==========================================
+    // REPORT GENERATION
+    // ==========================================
+    public void generateRoomReport() {
+        ListInterface<Room> list = roomRepo.findAll();
+        if (list.isEmpty()) {
+            System.out.println("No room data available.");
+            return;
+        }
+
+        int totalRooms = list.getNumberOfEntries();
+        int availableCount = 0;
+        int occupiedCount = 0;
+
+        // Custom ADT Lists to track room types and their availability counts
+        ListInterface<String> roomTypes = new List<>();
+        ListInterface<Integer> typeTotalCounts = new List<>();
+        ListInterface<Integer> typeAvailableCounts = new List<>();
+
+        for (int i = 1; i <= totalRooms; i++) {
+            Room r = list.getEntry(i);
+
+            // Track overall availability
+            if (r.isAvailable()) {
+                availableCount++;
+            } else {
+                occupiedCount++;
+            }
+
+            // Track Room Type distribution
+            String type = r.getRoomType();
+            boolean found = false;
+            
+            for (int j = 1; j <= roomTypes.getNumberOfEntries(); j++) {
+                if (roomTypes.getEntry(j).equalsIgnoreCase(type)) {
+                    // Update total count for this type
+                    int currentTotal = typeTotalCounts.getEntry(j);
+                    typeTotalCounts.replace(j, currentTotal + 1);
+                    
+                    // Update available count for this type
+                    if (r.isAvailable()) {
+                        int currentAvail = typeAvailableCounts.getEntry(j);
+                        typeAvailableCounts.replace(j, currentAvail + 1);
+                    }
+                    found = true;
+                    break;
+                }
+            }
+            
+            // If it's a new room type we haven't seen yet
+            if (!found) {
+                roomTypes.add(type);
+                typeTotalCounts.add(1);
+                typeAvailableCounts.add(r.isAvailable() ? 1 : 0);
+            }
+        }
+
+        double occupancyRate = (double) occupiedCount / totalRooms * 100;
+        String time = java.time.LocalDateTime.now()
+                .format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
+
+        // Print Out Report
+        System.out.println("\n======================");
+        System.out.println("==== ROOM REPORT ====");
+        System.out.println("======================");
+        System.out.println("Generated At: " + time);
+        System.out.println("Total Rooms: " + totalRooms);
+
+        System.out.println("\n--- Overall Utilization ---");
+        System.out.println("Available Rooms: " + availableCount);
+        System.out.println("Occupied Rooms: " + occupiedCount);
+        System.out.println("Current Occupancy Rate: " + String.format("%.2f%%", occupancyRate));
+
+        System.out.println("\n--- Distribution by Room Type ---");
+        for (int k = 1; k <= roomTypes.getNumberOfEntries(); k++) {
+            String rType = roomTypes.getEntry(k);
+            int tCount = typeTotalCounts.getEntry(k);
+            int aCount = typeAvailableCounts.getEntry(k);
+            
+            System.out.printf("%-15s : %2d Total ( %2d Available, %2d Occupied )\n", 
+                    rType, tCount, aCount, (tCount - aCount));
+        }
+        System.out.println("======================\n");
     }
 }

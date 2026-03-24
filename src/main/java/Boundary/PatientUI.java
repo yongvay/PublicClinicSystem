@@ -24,9 +24,10 @@ public class PatientUI {
 
     private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
-    public PatientUI() {
-        patientRepo = new PatientRepositoryImpl();
-        scanner = new Scanner(System.in);
+   
+    public PatientUI(PatientRepository patientRepo) {
+        this.patientRepo = patientRepo;
+        this.scanner = new Scanner(System.in);
     }
 
     private String inputString(String prompt) {
@@ -338,5 +339,4 @@ public class PatientUI {
        }
        System.out.println("======================\n");
    }  
-}  
- 
+}

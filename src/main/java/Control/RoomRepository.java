@@ -13,7 +13,7 @@ import Entity.Room;
 public interface RoomRepository {
 
     // Create 
-    void create(Room room);
+    boolean create(Room room);
 
     // Read 
     ListInterface<Room> findAll();

@@ -26,17 +26,15 @@ public class DoctorRepositoryImpl implements DoctorRepository {
     }
 
     @Override
-    public void create(Doctor doctor) {
+    public boolean create(Doctor doctor) {
         if (doctor != null) {
-            // Failsafe: Check if the ID already exists before adding
             if (findById(doctor.getDoctorID()) == null) {
                 doctorList.add(doctor);
                 doctorDAO.saveToFile(doctorList);
-            } else {
-                // Silent fail for backend, UI handles the actual error message
-                System.err.println("Error : The enterered ID is a;ready exist. " + doctor.getDoctorID());
+                return true; // Success
             }
         }
+        return false; 
     }
 
     @Override

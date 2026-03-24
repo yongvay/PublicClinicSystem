@@ -20,9 +20,9 @@ public class RoomUI {
     private RoomRepository roomRepo;
     private Scanner scanner;
 
-    public RoomUI() {
-        // Initialize the repository and scanner
-        this.roomRepo = new RoomRepositoryImpl();
+    // Replace the constructor:
+    public RoomUI(RoomRepository roomRepo) {
+        this.roomRepo = roomRepo;
         this.scanner = new Scanner(System.in);
     }
 

@@ -1,17 +1,19 @@
 package Control;
 
-/**
- *
- * @author Ng Yong Vay
-*/
-
 import ADT.ListInterface;
 import Entity.Appointment;
+import Entity.Medicine;
 
+/**
+ * @author Ng Yong Vay
+ */
 public interface AppointmentRepository {
-    // The orchestration method
-    boolean bookAppointment(String patientId, String requiredSpecialization);
-    boolean completeAppointment(String appointmentID);
+    
+    String bookAppointment(String patientId, String requiredSpecialization);
+    
+    String completeAppointment(String appointmentID, String targetRoomType, ListInterface<Medicine> prescribedMeds);
+    
+    String transferPatient(String appointmentID, String targetRoomType, ListInterface<Medicine> prescribedMeds);
     
     ListInterface<Appointment> getAllAppointments();
 }

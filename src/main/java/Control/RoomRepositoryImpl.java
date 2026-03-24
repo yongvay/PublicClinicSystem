@@ -34,16 +34,15 @@ public class RoomRepositoryImpl implements RoomRepository {
     // CREATE
     // ==========================================
     @Override
-    public void create(Room room) {
+    public boolean create(Room room) {
         if (room != null) {
-            // Failsafe: Check if the room number already exists before adding
             if (findById(room.getRoomNumber()) == null) {
                 roomList.add(room);
-                roomDAO.saveToFile(roomList); // Save to file after adding
-            } else {
-                System.err.println("The entered Room Number already exists: " + room.getRoomNumber());
+                roomDAO.saveToFile(roomList); 
+                return true; // Success
             }
         }
+        return false; // Failed (Already exists or null)
     }
 
     // ==========================================

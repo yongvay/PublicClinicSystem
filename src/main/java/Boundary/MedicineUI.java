@@ -17,13 +17,9 @@ public class MedicineUI {
     private MedicineRepository medicineRepo;
     private Scanner scanner;
 
-    public MedicineUI() {
-        // Initialize the repository and scanner
-        this.medicineRepo = new MedicineRepositoryImpl();
+    public MedicineUI(MedicineRepository medicineRepo) {
+        this.medicineRepo = medicineRepo;
         this.scanner = new Scanner(System.in);
-        
-        // Optional: Pre-load some dummy data for easy testing
-        //preloadData();
     }
 
     // ==========================================

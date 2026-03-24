@@ -15,10 +15,9 @@ public class DoctorUI {
     private DoctorRepository doctorRepo;
     private Scanner scanner;
 
-    public DoctorUI() {
-        this.doctorRepo = new DoctorRepositoryImpl();
+  public DoctorUI(DoctorRepository doctorRepo) {
+        this.doctorRepo = doctorRepo;
         this.scanner = new Scanner(System.in);
-        
     }
 
     public void start() {

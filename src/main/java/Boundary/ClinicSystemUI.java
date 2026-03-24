@@ -1,18 +1,23 @@
 package Boundary;
 
 import java.util.Scanner;
+
+// --- ALL REQUIRED IMPORTS ---
 import Control.AppointmentRepository;
 import Control.AppointmentRepositoryImpl;
-import Control.PatientRepository;
-import Control.PatientRepositoryImpl;
 import Control.DoctorRepository;
 import Control.DoctorRepositoryImpl;
+import Control.MedicineRepository;
+import Control.MedicineRepositoryImpl;
+import Control.PatientRepository;
+import Control.PatientRepositoryImpl;
+import Control.RoomRepository;
+import Control.RoomRepositoryImpl;
 
 /**
  * Central Boundary class that ties all subsystems together.
  * @author Ng Yong Vay
-*/
-
+ */
 public class ClinicSystemUI {
 
     // Instantiate all sub-boundaries
@@ -24,18 +29,20 @@ public class ClinicSystemUI {
     private Scanner scanner;
 
     public ClinicSystemUI() {
-        this.doctorUI = new DoctorUI();
-        this.medicineUI = new MedicineUI();
-        this.patientUI = new PatientUI();
-        this.roomUI = new RoomUI();
-        
-        // 1. Instantiate the required Control repositories
-        AppointmentRepository appointmentRepo = new AppointmentRepositoryImpl();
+        // 1. Instantiate the shared Control repositories ONCE (Shared Memory)
         PatientRepository patientRepo = new PatientRepositoryImpl();
         DoctorRepository doctorRepo = new DoctorRepositoryImpl();
+        RoomRepository roomRepo = new RoomRepositoryImpl();
+        MedicineRepository medicineRepo = new MedicineRepositoryImpl();
         
-        // 2. Pass them into the AppointmentUI constructor
-        this.appointmentUI = new AppointmentUI(appointmentRepo, patientRepo, doctorRepo);
+        AppointmentRepository appointmentRepo = new AppointmentRepositoryImpl(patientRepo, doctorRepo, roomRepo, medicineRepo);
+        
+        // 2. Pass the exact same shared repositories into the Sub-UIs
+        this.doctorUI = new DoctorUI(doctorRepo);
+        this.medicineUI = new MedicineUI(medicineRepo);
+        this.patientUI = new PatientUI(patientRepo);
+        this.roomUI = new RoomUI(roomRepo);
+        this.appointmentUI = new AppointmentUI(appointmentRepo, patientRepo, doctorRepo, medicineRepo);
         
         this.scanner = new Scanner(System.in);
     }

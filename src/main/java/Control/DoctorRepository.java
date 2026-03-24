@@ -9,7 +9,7 @@ import Entity.Doctor;
 public interface DoctorRepository {
 
     // Create 
-    void create(Doctor doctor);
+    boolean create(Doctor doctor);
 
     // Read (searchDoctor, getAllDoctors, getAvailableDoctor)
     ListInterface<Doctor> findAll();

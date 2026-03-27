@@ -37,10 +37,9 @@ public class AppointmentUI {
         do {
             System.out.println("\n--- Appointment Management ---");
             System.out.println("1. Book New Appointment");
-            System.out.println("2. Complete Appointment / Admit Patient");
-            System.out.println("3. Transfer / Discharge Admitted Patient");
-            System.out.println("4. View Appointments");
-            System.out.println("5. Delete / Cancel Appointment");
+            System.out.println("2. Process / Transfer / Discharge Patient");
+            System.out.println("3. View Appointments");
+            System.out.println("4. Delete / Cancel Appointment");
             System.out.println("0. Back to Main Menu");
             System.out.print("Choice: ");
             choice = scanner.nextInt();
@@ -48,10 +47,9 @@ public class AppointmentUI {
 
             switch (choice) {
                 case 1 -> bookAppointment(scanner);
-                case 2 -> completeAppointment(scanner);
-                case 3 -> transferPatient(scanner);
-                case 4 -> viewAppointments();
-                case 5 -> deleteAppointment(scanner);
+                case 2 -> processAppointment(scanner); // New Combined Method
+                case 3 -> viewAppointments();
+                case 4 -> deleteAppointment(scanner);
             }
         } while (choice != 0);
     }
@@ -154,31 +152,51 @@ public class AppointmentUI {
         System.out.println("\n" + resultMessage);
     }
 
-    private void completeAppointment(Scanner scanner) {
-        System.out.print("Enter Appointment ID to process: ");
+    private void processAppointment(Scanner scanner) {
+        System.out.print("Enter Appointment ID to process/transfer/discharge: ");
         String appId = scanner.nextLine();
         
-        System.out.println("Does the patient need further admission?");
-        System.out.print("Enter 'Ward', 'ICU', or type 'None' if going home: ");
-        String targetRoomType = scanner.nextLine();
-        
-        ListInterface<Medicine> meds = selectMedicines(scanner); 
-        
-        String resultMessage = appointmentRepo.completeAppointment(appId, targetRoomType, meds);
-        System.out.println("\n" + resultMessage);
-    }
+        // Find the appointment to check its current status
+        Appointment targetApt = null;
+        ListInterface<Appointment> list = appointmentRepo.getAllAppointments();
+        for (int i = 1; i <= list.getNumberOfEntries(); i++) {
+            Appointment a = list.getEntry(i);
+            if (a.getAppointmentID().equalsIgnoreCase(appId)) {
+                targetApt = a;
+                break;
+            }
+        }
 
-    private void transferPatient(Scanner scanner) {
-        System.out.print("Enter Appointment ID to transfer/discharge: ");
-        String appId = scanner.nextLine();
-        
-        System.out.println("Where is the admitted patient moving to?");
-        System.out.print("Enter 'ICU', 'Ward', or type 'None' to discharge them home: ");
+        if (targetApt == null) {
+            System.out.println("Error: Appointment ID [" + appId + "] not found.");
+            return;
+        }
+
+        // Determine prompts based on current status
+        if (targetApt.getStatus().equalsIgnoreCase("Scheduled")) {
+            System.out.println("Current Status: Scheduled for Consultation.");
+            System.out.println("Does the patient need further admission?");
+            System.out.print("Enter 'Ward', 'ICU', or type 'None' if going home: ");
+        } else if (targetApt.getStatus().equalsIgnoreCase("Admitted")) {
+            System.out.println("Current Status: Admitted in " + targetApt.getRoom().getRoomType() + ".");
+            System.out.println("Where is the admitted patient moving to?");
+            System.out.print("Enter 'ICU', 'Ward', or type 'None' to discharge them home: ");
+        } else {
+            System.out.println("Error: Cannot process. Appointment is already marked as '" + targetApt.getStatus() + "'.");
+            return;
+        }
+
         String targetRoomType = scanner.nextLine();
-        
         ListInterface<Medicine> meds = selectMedicines(scanner); 
         
-        String resultMessage = appointmentRepo.transferPatient(appId, targetRoomType, meds);
+        // Call the appropriate repository method based on the status
+        String resultMessage = "";
+        if (targetApt.getStatus().equalsIgnoreCase("Scheduled")) {
+            resultMessage = appointmentRepo.completeAppointment(appId, targetRoomType, meds);
+        } else if (targetApt.getStatus().equalsIgnoreCase("Admitted")) {
+            resultMessage = appointmentRepo.transferPatient(appId, targetRoomType, meds);
+        }
+        
         System.out.println("\n" + resultMessage);
     }
 

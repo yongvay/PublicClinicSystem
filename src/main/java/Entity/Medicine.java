@@ -11,18 +11,16 @@ public class Medicine {
     private String description;
     private String dosage;  // e.g., "tablet", "mg", "ml", "capsule"
     private int quantityInStock;
-    private float price;
     private int reorderLevel; // e.g., if stock drops below 10, trigger a reorder alert
 
     // Constructor
-    public Medicine(String medicineID, String name, String description, String dosage, int quantityInStock, int reorderLevel, float price) {
+    public Medicine(String medicineID, String name, String description, String dosage, int quantityInStock, int reorderLevel) {
         this.medicineID = medicineID;
         this.name = name;
         this.description = description;
         this.dosage = dosage;
         this.quantityInStock = quantityInStock;
-        this.reorderLevel = reorderLevel; // New field
-        this.price = price;
+        this.reorderLevel = reorderLevel;
     }
 
     // ==========================================
@@ -46,10 +44,6 @@ public class Medicine {
 
     public int getQuantityInStock() {
         return quantityInStock;
-    }
-
-    public float getPrice() {
-        return price;
     }
 
     public int getReorderLevel() { 
@@ -78,10 +72,6 @@ public class Medicine {
     public void setQuantityInStock(int quantityInStock) {
         this.quantityInStock = quantityInStock;
     }
-
-    public void setPrice(float price) {
-        this.price = price;
-    }
     
     public void setReorderLevel(int reorderLevel) { 
         this.reorderLevel = reorderLevel; 
@@ -105,7 +95,7 @@ public class Medicine {
 
     @Override
     public String toString() {
-        return String.format("ID: %s | Name: %s | Desc: %s | Dosage: %s | Stock: %d | Price: RM%.2f",
-                medicineID, name, description, dosage, quantityInStock, price);
+        return String.format("ID: %s | Name: %s | Desc: %s | Dosage: %s | Stock: %d",
+                medicineID, name, description, dosage, quantityInStock);
     }
 }

@@ -1,4 +1,4 @@
-M003|Ibuprofen|Nonsteroidal anti-inflammatory drug|400mg tablet|7|10|2.5
-M004|Cough Syrup|Relieves dry cough|100ml bottle|0|5|12.0
-M005|Loratadine|Antihistamine for allergies|10mg tablet|200|30|0.8
-M006|Omeprazole|Proton pump inhibitor for acid reflux|20mg capsule|45|50|3.2
+M001|Ibuprofen|Nonsteroidal anti-inflammatory drug|400mg tablet|7|10
+M002|Cough Syrup|Relieves dry cough|100ml bottle|0|5
+M003|Loratadine|Antihistamine for allergies|10mg tablet|200|30
+M004|Omeprazole|Proton pump inhibitor for acid reflux|20mg capsule|45|50

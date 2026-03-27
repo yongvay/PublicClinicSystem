@@ -30,8 +30,7 @@ public class MedicineDAO {
                               m.getDescription() + SEPARATOR +
                               m.getDosage() + SEPARATOR +
                               m.getQuantityInStock() + SEPARATOR +
-                              m.getReorderLevel() + SEPARATOR +
-                              m.getPrice();
+                              m.getReorderLevel();
                 
                 writer.write(line);
                 writer.newLine(); // Move to the next line
@@ -66,8 +65,7 @@ public class MedicineDAO {
                         parts[2], 
                         parts[3], 
                         Integer.parseInt(parts[4]), // Quantity in Stock
-                        Integer.parseInt(parts[5]), // Reorder Level
-                        Float.parseFloat(parts[6])  // Price
+                        Integer.parseInt(parts[5]) // Reorder Level
                     );
                     loadedList.add(m);
                 }

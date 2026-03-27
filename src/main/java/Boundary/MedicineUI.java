@@ -97,11 +97,9 @@ public class MedicineUI {
         int stock = scanner.nextInt();
         System.out.print("Enter Reorder Level: ");
         int reorderLevel = scanner.nextInt();
-        System.out.print("Enter Price (RM): ");
-        float price = scanner.nextFloat();
         scanner.nextLine(); // Consume newline
 
-        Medicine newMed = new Medicine(id, name, desc, dosage, stock, reorderLevel, price);
+        Medicine newMed = new Medicine(id, name, desc, dosage, stock, reorderLevel);
         medicineRepo.create(newMed);
         System.out.println("Success: Medicine added successfully!");
     }
@@ -244,15 +242,5 @@ public class MedicineUI {
         for (Medicine m : list) {
             System.out.println(m.toString());
         }
-    }
-
-    /*
-     * Preloads dummy data 
-    */
-    private void preloadData() {
-        medicineRepo.create(new Medicine("M001", "Paracetamol", "Pain reliever and fever reducer", "500mg tablet", 100, 20, 1.50f));
-        medicineRepo.create(new Medicine("M002", "Amoxicillin", "Antibiotic for bacterial infections", "250mg capsule", 50, 15, 5.00f));
-        medicineRepo.create(new Medicine("M003", "Ibuprofen", "Nonsteroidal anti-inflammatory drug", "400mg tablet", 8, 10, 2.50f)); // Low stock!
-        medicineRepo.create(new Medicine("M004", "Cough Syrup", "Relieves dry cough", "100ml bottle", 0, 5, 12.00f)); // Out of stock!
     }
 }

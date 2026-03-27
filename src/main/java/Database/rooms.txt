@@ -3,4 +3,5 @@
 103|Ward|true
 201|Consultation|false
 202|Consultation|true
+203|Consultation|true
 301|ICU|true

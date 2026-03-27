@@ -9,6 +9,9 @@ import Control.MedicineRepository;
 import Entity.Appointment;
 import Entity.Patient;
 import Entity.Medicine;
+
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Scanner;
 
 /**
@@ -80,19 +83,64 @@ public class AppointmentUI {
     }
 
     private void bookAppointment(Scanner scanner) {
-        System.out.print("Enter Patient ID: ");
-        String patientId = scanner.nextLine();
+        System.out.println("\n--- Booking Options ---");
+        System.out.println("1. Register New Patient & Book");
+        System.out.println("2. Book for Existing Patient");
+        System.out.print("Choice: ");
+        String ptChoice = scanner.nextLine();
 
-        Patient patient = patientRepo.findById(patientId);
+        Patient patient = null;
 
-        if (patient == null) {
-            System.out.println("Error: Patient ID [" + patientId + "] does not exist.");
-            return; 
+        if (ptChoice.equals("1")) {
+            // --- NEW PATIENT QUICK REGISTRATION ---
+            System.out.println("\n--- Quick Patient Registration ---");
+            String newId = patientRepo.generatePatientID(); 
+            
+            System.out.print("Enter Patient Name: ");
+            String name = scanner.nextLine();
+            
+            System.out.print("Enter Birth Date (dd/MM/yyyy): ");
+            String dateStr = scanner.nextLine();
+            DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+            
+            LocalDate birthDate;
+            try {
+                birthDate = LocalDate.parse(dateStr, fmt);
+            } catch (Exception e) {
+                System.out.println("Invalid date format! Returning to menu.");
+                return;
+            }
+            
+            System.out.print("Enter Medical History: ");
+            String history = scanner.nextLine();
+            
+            System.out.print("Enter Allergies (or type 'None'): ");
+            String allergies = scanner.nextLine();
+            
+            patient = new Patient(newId, name, birthDate, history, allergies);
+            patientRepo.create(patient);
+            
+            System.out.println("Success! New Patient registered with ID: " + newId);
+
+        } else if (ptChoice.equals("2")) {
+            // --- EXISTING PATIENT SEARCH ---
+            System.out.print("\nEnter Patient ID: ");
+            String patientId = scanner.nextLine();
+            patient = patientRepo.findById(patientId);
+            
+            if (patient == null) {
+                System.out.println("Error: Patient ID [" + patientId + "] does not exist.");
+                return;
+            }
+            System.out.println("Patient Found: " + patient.getPatientName());
+            
+        } else {
+            System.out.println("Invalid choice. Returning to menu.");
+            return;
         }
 
-        System.out.println("Patient Found: " + patient.getPatientName());
-
-        System.out.print("Enter Required Specialization: ");
+        // --- CONTINUE WITH APPOINTMENT BOOKING ---
+        System.out.print("\nEnter Required Specialization (e.g., Cardiology, General Practice): ");
         String specialization = scanner.nextLine();
 
         if (!doctorRepo.specializationExists(specialization)) {
@@ -100,8 +148,7 @@ public class AppointmentUI {
             return;
         }
 
-        // ECB FIX: Capture the string and let the Boundary do the printing
-        String resultMessage = appointmentRepo.bookAppointment(patientId, specialization);
+        String resultMessage = appointmentRepo.bookAppointment(patient.getPatientID(), specialization);
         System.out.println("\n" + resultMessage);
     }
 
@@ -115,7 +162,6 @@ public class AppointmentUI {
         
         ListInterface<Medicine> meds = selectMedicines(scanner); 
         
-        // ECB FIX: Capture the string and let the Boundary do the printing
         String resultMessage = appointmentRepo.completeAppointment(appId, targetRoomType, meds);
         System.out.println("\n" + resultMessage);
     }
@@ -130,7 +176,6 @@ public class AppointmentUI {
         
         ListInterface<Medicine> meds = selectMedicines(scanner); 
         
-        // ECB FIX: Capture the string and let the Boundary do the printing
         String resultMessage = appointmentRepo.transferPatient(appId, targetRoomType, meds);
         System.out.println("\n" + resultMessage);
     }

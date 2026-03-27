@@ -41,7 +41,10 @@ public class ClinicSystemUI {
         this.doctorUI = new DoctorUI(doctorRepo);
         this.medicineUI = new MedicineUI(medicineRepo);
         this.patientUI = new PatientUI(patientRepo);
-        this.roomUI = new RoomUI(roomRepo);
+        
+        // UPDATED: Pass appointmentRepo to RoomUI so it can look up patients
+        this.roomUI = new RoomUI(roomRepo, appointmentRepo); 
+        
         this.appointmentUI = new AppointmentUI(appointmentRepo, patientRepo, doctorRepo, medicineRepo);
         
         this.scanner = new Scanner(System.in);

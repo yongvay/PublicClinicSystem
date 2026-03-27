@@ -1,12 +1,9 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package Boundary;
 
 import Control.RoomRepository;
-import Control.RoomRepositoryImpl;
+import Control.AppointmentRepository;
 import Entity.Room;
+import Entity.Appointment;
 import ADT.ListInterface;
 import ADT.List; 
 import java.util.Scanner;
@@ -19,10 +16,12 @@ import java.util.Scanner;
 public class RoomUI {
 
     private RoomRepository roomRepo;
+    private AppointmentRepository appointmentRepo;
     private Scanner scanner;
 
-    public RoomUI(RoomRepository roomRepo) {
+    public RoomUI(RoomRepository roomRepo, AppointmentRepository appointmentRepo) {
         this.roomRepo = roomRepo;
+        this.appointmentRepo = appointmentRepo;
         this.scanner = new Scanner(System.in);
     }
 
@@ -93,7 +92,6 @@ public class RoomUI {
         System.out.print("Enter Room Type (e.g., Consultation, Ward, ICU): ");
         String roomType = scanner.nextLine();
         
-        // By default, a newly added room should be available
         Room newRoom = new Room(roomNumber, roomType, true);
         roomRepo.create(newRoom);
         System.out.println("Success: Room added successfully!");
@@ -217,7 +215,6 @@ public class RoomUI {
         int availableCount = 0;
         int occupiedCount = 0;
 
-        // Custom ADT Lists to track room types and their availability counts
         ListInterface<String> roomTypes = new List<>();
         ListInterface<Integer> typeTotalCounts = new List<>();
         ListInterface<Integer> typeAvailableCounts = new List<>();
@@ -225,24 +222,20 @@ public class RoomUI {
         for (int i = 1; i <= totalRooms; i++) {
             Room r = list.getEntry(i);
 
-            // Track overall availability
             if (r.isAvailable()) {
                 availableCount++;
             } else {
                 occupiedCount++;
             }
 
-            // Track Room Type distribution
             String type = r.getRoomType();
             boolean found = false;
             
             for (int j = 1; j <= roomTypes.getNumberOfEntries(); j++) {
                 if (roomTypes.getEntry(j).equalsIgnoreCase(type)) {
-                    // Update total count for this type
                     int currentTotal = typeTotalCounts.getEntry(j);
                     typeTotalCounts.replace(j, currentTotal + 1);
                     
-                    // Update available count for this type
                     if (r.isAvailable()) {
                         int currentAvail = typeAvailableCounts.getEntry(j);
                         typeAvailableCounts.replace(j, currentAvail + 1);
@@ -252,7 +245,6 @@ public class RoomUI {
                 }
             }
             
-            // If it's a new room type we haven't seen yet
             if (!found) {
                 roomTypes.add(type);
                 typeTotalCounts.add(1);
@@ -264,7 +256,6 @@ public class RoomUI {
         String time = java.time.LocalDateTime.now()
                 .format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
 
-        // Print Out Report
         System.out.println("\n======================");
         System.out.println("==== ROOM REPORT ====");
         System.out.println("======================");
@@ -284,6 +275,35 @@ public class RoomUI {
             
             System.out.printf("%-15s : %2d Total ( %2d Available, %2d Occupied )\n", 
                     rType, tCount, aCount, (tCount - aCount));
+        }
+
+        System.out.println("\n--- Occupied Rooms Details ---");
+        if (occupiedCount == 0) {
+            System.out.println("All rooms are currently empty.");
+        } else {
+            ListInterface<Appointment> allApts = appointmentRepo.getAllAppointments();
+            
+            for (int i = 1; i <= totalRooms; i++) {
+                Room r = list.getEntry(i);
+                
+                if (!r.isAvailable()) {
+                    String occupantName = "Unknown Patient";
+                    String status = "";
+                    
+                    for (int j = 1; j <= allApts.getNumberOfEntries(); j++) {
+                        Appointment apt = allApts.getEntry(j);
+                        
+                        if (apt.getRoom() != null && apt.getRoom().getRoomNumber().equals(r.getRoomNumber())) {
+                            if (apt.getStatus().equalsIgnoreCase("Scheduled") || apt.getStatus().equalsIgnoreCase("Admitted")) {
+                                occupantName = apt.getPatient().getPatientName();
+                                status = apt.getStatus();
+                                break;
+                            }
+                        }
+                    }
+                    System.out.printf("Room %-4s (%-12s) - Occupied by: %s [%s]\n", r.getRoomNumber(), r.getRoomType(), occupantName, status);
+                }
+            }
         }
         System.out.println("======================\n");
     }

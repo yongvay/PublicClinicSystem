@@ -4,6 +4,7 @@ import Control.DoctorRepository;
 import Control.DoctorRepositoryImpl;
 import Entity.Doctor;
 import ADT.ListInterface;
+import ADT.List; // NEW: Imported for parallel lists in the report
 import java.util.Scanner;
 
 /**
@@ -15,7 +16,7 @@ public class DoctorUI {
     private DoctorRepository doctorRepo;
     private Scanner scanner;
 
-  public DoctorUI(DoctorRepository doctorRepo) {
+    public DoctorUI(DoctorRepository doctorRepo) {
         this.doctorRepo = doctorRepo;
         this.scanner = new Scanner(System.in);
     }
@@ -49,6 +50,7 @@ public class DoctorUI {
         System.out.println("6. Update Doctor Details");
         System.out.println("7. Remove Doctor");
         System.out.println("8. View Sorted Doctors (By Name/Specialization)");
+        System.out.println("9. View Doctor Report"); // NEW ADDITION
         System.out.println("0. Exit to Main Menu");
         System.out.println("==========================================");
     }
@@ -63,6 +65,7 @@ public class DoctorUI {
             case 6: updateDoctor(); break;
             case 7: deleteDoctor(); break;
             case 8: viewSortedDoctors(); break;
+            case 9: generateDoctorReport(); break; // NEW ADDITION
             case 0: System.out.println("Exiting Doctor Subsystem..."); break;
             default: System.out.println("Invalid choice. Please try again.");
         }
@@ -227,5 +230,88 @@ public class DoctorUI {
         }
     }
 
-    
+    // ==========================================
+    // REPORT GENERATION
+    // ==========================================
+    public void generateDoctorReport() {
+        ListInterface<Doctor> list = doctorRepo.findAll();
+        if (list.isEmpty()) {
+            System.out.println("No doctor data available.");
+            return;
+        }
+
+        int totalDoctors = list.getNumberOfEntries();
+        int availableCount = 0;
+        int occupiedCount = 0;
+
+        // Custom ADT Lists to track specializations and their counts dynamically
+        ListInterface<String> specializations = new List<>();
+        ListInterface<Integer> specTotalCounts = new List<>();
+        ListInterface<Integer> specAvailableCounts = new List<>();
+
+        for (int i = 1; i <= totalDoctors; i++) {
+            Doctor d = list.getEntry(i);
+
+            // Track overall availability
+            if (d.getStatus()) {
+                availableCount++;
+            } else {
+                occupiedCount++;
+            }
+
+            // Track Specialization distribution
+            String spec = d.getSpecialization();
+            boolean found = false;
+            
+            for (int j = 1; j <= specializations.getNumberOfEntries(); j++) {
+                if (specializations.getEntry(j).equalsIgnoreCase(spec)) {
+                    // Update total count for this specialization
+                    int currentTotal = specTotalCounts.getEntry(j);
+                    specTotalCounts.replace(j, currentTotal + 1);
+                    
+                    // Update available count for this specialization
+                    if (d.getStatus()) {
+                        int currentAvail = specAvailableCounts.getEntry(j);
+                        specAvailableCounts.replace(j, currentAvail + 1);
+                    }
+                    found = true;
+                    break;
+                }
+            }
+            
+            // If it's a new specialization we haven't seen yet
+            if (!found) {
+                specializations.add(spec);
+                specTotalCounts.add(1);
+                specAvailableCounts.add(d.getStatus() ? 1 : 0);
+            }
+        }
+
+        double availabilityRate = (double) availableCount / totalDoctors * 100;
+        String time = java.time.LocalDateTime.now()
+                .format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
+
+        // Print Out Report
+        System.out.println("\n======================");
+        System.out.println("==== DOCTOR REPORT ===");
+        System.out.println("======================");
+        System.out.println("Generated At: " + time);
+        System.out.println("Total Doctors: " + totalDoctors);
+
+        System.out.println("\n--- Overall Availability ---");
+        System.out.println("Available Doctors: " + availableCount);
+        System.out.println("Occupied Doctors:  " + occupiedCount);
+        System.out.println("Current Availability Rate: " + String.format("%.2f%%", availabilityRate));
+
+        System.out.println("\n--- Distribution by Specialization ---");
+        for (int k = 1; k <= specializations.getNumberOfEntries(); k++) {
+            String spec = specializations.getEntry(k);
+            int tCount = specTotalCounts.getEntry(k);
+            int aCount = specAvailableCounts.getEntry(k);
+            
+            System.out.printf("%-15s : %2d Total ( %2d Available, %2d Occupied )\n", 
+                    spec, tCount, aCount, (tCount - aCount));
+        }
+        System.out.println("======================\n");
+    }
 }

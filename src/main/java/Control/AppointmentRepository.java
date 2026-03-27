@@ -15,5 +15,7 @@ public interface AppointmentRepository {
     
     String transferPatient(String appointmentID, String targetRoomType, ListInterface<Medicine> prescribedMeds);
     
+    String deleteAppointment(String appointmentID);
+    
     ListInterface<Appointment> getAllAppointments();
 }

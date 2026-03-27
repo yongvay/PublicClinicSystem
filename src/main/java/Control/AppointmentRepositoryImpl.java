@@ -305,6 +305,54 @@ public class AppointmentRepositoryImpl implements AppointmentRepository {
     }
 
     @Override
+    public String deleteAppointment(String appointmentID) {
+        Appointment aptToDelete = null;
+        for (int i = 1; i <= appointmentList.getNumberOfEntries(); i++) {
+            Appointment a = appointmentList.getEntry(i);
+            if (a.getAppointmentID().equalsIgnoreCase(appointmentID)) {
+                aptToDelete = a;
+                break;
+            }
+        }
+
+        if (aptToDelete == null) {
+            return "Error: Appointment ID not found.";
+        }
+
+        // Free up resources if the patient is currently occupying them
+        if (aptToDelete.getStatus().equalsIgnoreCase("Scheduled")) {
+            Doctor doc = aptToDelete.getDoctor();
+            if (doc != null) {
+                doc.setStatus(true); // Free the doctor
+                doctorRepo.update(doc);
+            }
+            Room room = aptToDelete.getRoom();
+            if (room != null) {
+                room.setAvailable(true); // Free the room
+                roomRepo.update(room);
+            }
+        } else if (aptToDelete.getStatus().equalsIgnoreCase("Admitted")) {
+            Room room = aptToDelete.getRoom();
+            if (room != null) {
+                room.setAvailable(true); // Free the room
+                roomRepo.update(room);
+            }
+        }
+        // If "Waitlisted" or "Completed", no resources are currently tied up, so we just proceed to remove.
+
+        // Remove from the custom ADT List
+        appointmentList.remove(aptToDelete);
+        
+        // Since we might have freed up a doctor/room, check if waitlisted patients can take them
+        String waitlistMessage = processWaitlist();
+        
+        // Save the updated list to appointments.txt
+        appointmentDAO.saveAllToFile(appointmentList);
+        
+        return "Success: Appointment " + appointmentID + " has been deleted/cancelled." + waitlistMessage;
+    }
+
+    @Override
     public ListInterface<Appointment> getAllAppointments() {
         return appointmentList;
     }

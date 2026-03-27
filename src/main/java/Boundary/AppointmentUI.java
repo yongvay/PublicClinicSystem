@@ -40,6 +40,7 @@ public class AppointmentUI {
             System.out.println("2. Complete Appointment / Admit Patient");
             System.out.println("3. Transfer / Discharge Admitted Patient");
             System.out.println("4. View Appointments");
+            System.out.println("5. Delete / Cancel Appointment");
             System.out.println("0. Back to Main Menu");
             System.out.print("Choice: ");
             choice = scanner.nextInt();
@@ -50,6 +51,7 @@ public class AppointmentUI {
                 case 2 -> completeAppointment(scanner);
                 case 3 -> transferPatient(scanner);
                 case 4 -> viewAppointments();
+                case 5 -> deleteAppointment(scanner);
             }
         } while (choice != 0);
     }
@@ -190,6 +192,21 @@ public class AppointmentUI {
             for (int i = 1; i <= list.getNumberOfEntries(); i++) {
                 System.out.println(list.getEntry(i).toString());
             }
+        }
+    }
+
+    private void deleteAppointment(Scanner scanner) {
+        System.out.print("\nEnter Appointment ID to delete/cancel (e.g., A001): ");
+        String appId = scanner.nextLine();
+        
+        System.out.print("Are you sure you want to delete appointment " + appId + "? (Y/N): ");
+        String confirm = scanner.nextLine();
+        
+        if (confirm.equalsIgnoreCase("Y")) {
+            String resultMessage = appointmentRepo.deleteAppointment(appId);
+            System.out.println("\n" + resultMessage);
+        } else {
+            System.out.println("\nDeletion cancelled.");
         }
     }
 }

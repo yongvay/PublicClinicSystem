@@ -66,6 +66,10 @@ public class Patient {
         this.allergies = allergies; 
     }
     
+    public Patient(String patientID) {
+    this.patientID = patientID;
+    }
+    
     //Overriden Methods
     @Override
     public String toString() {
@@ -80,5 +84,14 @@ public class Patient {
                 medicalHistory,
                 allergies
         );
+    }
+    
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+
+        Patient other = (Patient) obj;
+        return this.patientID.equalsIgnoreCase(other.patientID);
     }
 }

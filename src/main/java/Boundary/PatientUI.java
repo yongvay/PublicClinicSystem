@@ -5,7 +5,7 @@
 package Boundary;
 import ADT.List;
 import Control.PatientRepository;
-import Control.PatientRepositoryImpl;
+//import Control.PatientRepositoryImpl;
 import Entity.Patient;
 import ADT.ListInterface;
 
@@ -222,7 +222,6 @@ public class PatientUI {
     }
 
     private void deletePatient() {
-
         System.out.print("Enter patient ID: ");
         String id = scanner.nextLine();
 
@@ -246,97 +245,133 @@ public class PatientUI {
     }
 
     public void generatePatientReport() {
+        ListInterface<Patient> list = patientRepo.findAll();
 
-       ListInterface<Patient> list = patientRepo.findAll();
-       if (list.isEmpty()) {
-           System.out.println("No patient data available.");
-           return;
-       }
-       int total = list.getNumberOfEntries();
-       int totalAge = 0;
-       int minAge = Integer.MAX_VALUE;
-       int maxAge = Integer.MIN_VALUE;
-       int allergyCount = 0;
-       int noAllergyCount = 0;
+        if (list.isEmpty()) {
+            System.out.println("No patient data available.");
+            return;
+        }
 
-       // Age group counters
-       int youngCount = 0;   // 0-18
-       int adultCount = 0;   // 19-40
-       int seniorCount = 0;  // 41+
+        int total = list.getNumberOfEntries();
+        int totalAge = 0;
+        int minAge = Integer.MAX_VALUE;
+        int maxAge = Integer.MIN_VALUE;
+        int allergyCount = 0;
+        int noAllergyCount = 0;
 
-       // Allergy Lists 
-       ListInterface<String> allergyNames = new List<>();
-       ListInterface<Integer> allergyCounts = new List<>();
+        // Age group counters
+        int youngCount = 0;
+        int adultCount = 0;
+        int seniorCount = 0;
 
-       for (int i = 1; i <= total; i++) {
-           Patient p = list.getEntry(i);
-           int age = p.getAge();
+        // Allergy Lists
+        ListInterface<String> allergyNames = new List<>();
+        ListInterface<Integer> allergyCounts = new List<>();
 
-           totalAge += age;
-           if (age < minAge) minAge = age;
-           if (age > maxAge) maxAge = age;
+        for (int i = 1; i <= total; i++) {
+            Patient p = list.getEntry(i);
+            int age = p.getAge();
 
-           // Age Group
-           if (age <= 18) youngCount++;
-           else if (age <= 40) adultCount++;
-           else seniorCount++;
+            totalAge += age;
 
-           // Allergy
-           String allergy = p.getAllergies();
-           if (allergy.equalsIgnoreCase("None")) {
-               noAllergyCount++;
-           } else {
-               allergyCount++;
+            if (age < minAge) minAge = age;
+            if (age > maxAge) maxAge = age;
 
-               // 查找 allergyNames 是否已有
-               boolean found = false;
-               for (int j = 1; j <= allergyNames.getNumberOfEntries(); j++) {
-                   if (allergyNames.getEntry(j).equalsIgnoreCase(allergy)) {
-                       int count = allergyCounts.getEntry(j);
-                       allergyCounts.replace(j, count + 1);
-                       found = true;
-                       break;
-                   }
-               }
-               if (!found) {
-                   allergyNames.add(allergy);
-                   allergyCounts.add(1);
-               }
-           }
-       }
-       double avgAge = (double) totalAge / total;
-       String time = java.time.LocalDateTime.now()
-               .format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
+            // Age Group
+            if (age <= 18) youngCount++;
+            else if (age <= 40) adultCount++;
+            else seniorCount++;
 
-       // Print Out Report
-       System.out.println("\n======================");
-       System.out.println("=== PATIENT REPORT ===");
-       System.out.println("======================");
-       System.out.println("Generated At: " + time);
-       System.out.println("Total Patients: " + total);
+            // Allergy
+            String allergy = p.getAllergies();
 
-       System.out.println("\n--- Age Statistics ---");
-       System.out.println("Average Age: " + String.format("%.2f", avgAge));
-       System.out.println("Youngest: " + minAge);
-       System.out.println("Oldest: " + maxAge);
+            if (allergy.equalsIgnoreCase("None")) {
+                noAllergyCount++;
+            } else {
+                allergyCount++;
 
-       System.out.println("\n--- Age Group ---");
-       System.out.println("0-18: " + youngCount);
-       System.out.println("19-40: " + adultCount);
-       System.out.println("41+: " + seniorCount);
+                boolean found = false;
 
-       System.out.println("\n--- Allergy Statistics ---");
-       System.out.println("With Allergy: " + allergyCount);
-       System.out.println("Without Allergy: " + noAllergyCount);
+                for (int j = 1; j <= allergyNames.getNumberOfEntries(); j++) {
+                    if (allergyNames.getEntry(j).equalsIgnoreCase(allergy)) {
+                        int count = allergyCounts.getEntry(j);
+                        allergyCounts.replace(j, count + 1);
+                        found = true;
+                        break;
+                    }
+                }
 
-       System.out.println("\n--- Top Allergies ---");
-       if (allergyNames.isEmpty()) {
-           System.out.println("None");
-       } else {
-           for (int k = 1; k <= allergyNames.getNumberOfEntries(); k++) {
-               System.out.println(allergyNames.getEntry(k) + " : " + allergyCounts.getEntry(k));
-           }
-       }
-       System.out.println("======================\n");
-   }  
+                if (!found) {
+                    allergyNames.add(allergy);
+                    allergyCounts.add(1);
+                }
+            }
+        }
+
+        double avgAge = (double) totalAge / total;
+
+        String time = java.time.LocalDateTime.now()
+                .format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
+
+        System.out.println("\n======================");
+        System.out.println("=== PATIENT REPORT ===");
+        System.out.println("======================");
+        System.out.println("Generated At: " + time);
+        System.out.println("Total Patients: " + total);
+
+        System.out.println("\n--- Age Statistics ---");
+        System.out.println("Average Age: " + String.format("%.2f", avgAge));
+        System.out.println("Youngest: " + minAge);
+        System.out.println("Oldest: " + maxAge);
+
+        System.out.println("\n--- Age Group ---");
+        System.out.println("0-18: " + youngCount);
+        System.out.println("19-40: " + adultCount);
+        System.out.println("41+: " + seniorCount);
+
+        System.out.println("\n--- Allergy Statistics ---");
+        System.out.println("With Allergy: " + allergyCount);
+        System.out.println("Without Allergy: " + noAllergyCount);
+
+        System.out.println("\n--- Top Allergies ---");
+        if (allergyNames.isEmpty()) {
+            System.out.println("None");
+        } else {
+            for (int k = 1; k <= allergyNames.getNumberOfEntries(); k++) {
+                System.out.println(allergyNames.getEntry(k) + " : " + allergyCounts.getEntry(k));
+            }
+        }
+
+        System.out.println("\n--- Top 5 Oldest Patients ---");
+        ListInterface<Patient> sortedDesc = patientRepo.getPatientsSortedByAgeDesc();
+
+        for (int i = 1; i <= Math.min(5, sortedDesc.getNumberOfEntries()); i++) {
+            Patient p = sortedDesc.getEntry(i);
+            System.out.printf("%-10s %-20s Age: %d\n",
+                    p.getPatientID(),
+                    p.getPatientName(),
+                    p.getAge());
+        }
+
+        System.out.println("\n--- Top 5 Youngest Patients ---");
+        ListInterface<Patient> sortedAsc = patientRepo.getPatientsSortedByAgeAsc();
+
+        for (int i = 1; i <= Math.min(5, sortedAsc.getNumberOfEntries()); i++) {
+            Patient p = sortedAsc.getEntry(i);
+            System.out.printf("%-10s %-20s Age: %d\n",
+                    p.getPatientID(),
+                    p.getPatientName(),
+                    p.getAge());
+        }
+
+        System.out.println("\n--- Patients (Alphabetical Order) ---");
+        ListInterface<Patient> sortedName = patientRepo.getPatientsSortedByName();
+
+        for (int i = 1; i <= sortedName.getNumberOfEntries(); i++) {
+            Patient p = sortedName.getEntry(i);
+            System.out.printf("%-10s %-20s\n",
+                    p.getPatientID(),
+                    p.getPatientName());
+        }
+    }    
 }

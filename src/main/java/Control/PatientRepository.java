@@ -20,9 +20,14 @@ public interface PatientRepository {
 
     // Read
     ListInterface<Patient> findAll();
+    
+    // Search
     Patient findById(String id);
     ListInterface<Patient> findByName(String name);
     ListInterface<Patient> findPatientsWithAllergy();
+    ListInterface<Patient> getPatientsSortedByName();
+    ListInterface<Patient> getPatientsSortedByAgeAsc();
+    ListInterface<Patient> getPatientsSortedByAgeDesc();
     
     // Update
     boolean update(Patient patient);

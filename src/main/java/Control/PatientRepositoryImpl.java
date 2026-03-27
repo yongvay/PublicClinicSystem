@@ -51,17 +51,20 @@ public class PatientRepositoryImpl implements PatientRepository {
     public ListInterface<Patient> findAll() {
         return patientList;
     }
-
+    
+    // SEARCH
     @Override
     public Patient findById(String id) {
-        for (Patient p : patientList) {
-            if (p.getPatientID().equalsIgnoreCase(id)) {
-                return p;
-            }
+        Patient dummy = new Patient(id);
+        int pos = patientList.getPosition(dummy); 
+
+        if (pos != -1) {
+            return patientList.getEntry(pos);
         }
         return null;
     }
-
+    
+    //Partial Search
     @Override
     public ListInterface<Patient> findByName(String name) {
         ListInterface<Patient> results = new List<>();
@@ -86,20 +89,38 @@ public class PatientRepositoryImpl implements PatientRepository {
         return results;
     }
     
+    public ListInterface<Patient> getPatientsSortedByName() {
+        return patientList.sort((p1, p2) -> p1.getPatientName().compareToIgnoreCase(p2.getPatientName())
+        );
+    }
+    
+    public ListInterface<Patient> getPatientsSortedByAgeAsc() {
+        return patientList.sort((p1, p2) ->
+            Integer.compare(p1.getAge(), p2.getAge())
+        );
+    }   
+    
+
+    public ListInterface<Patient> getPatientsSortedByAgeDesc() {
+        return patientList.sort((p1, p2) ->
+            Integer.compare(p2.getAge(), p1.getAge())
+        );
+    }  
+       
     // UPDATE
     @Override
     public boolean update(Patient updatedPatient) {
-        for (int i = 1; i <= patientList.getNumberOfEntries(); i++) {
-            Patient current = patientList.getEntry(i);
+        int pos = patientList.getPosition(updatedPatient); // ✅ ADT
 
-            if (current.getPatientID().equalsIgnoreCase(updatedPatient.getPatientID())) {
-                boolean success = patientList.replace(i, updatedPatient);
-                if (success) {
-                    patientDAO.saveToFile(patientList);
-                }
-                return success;
+        if (pos != -1) {
+            boolean success = patientList.replace(pos, updatedPatient); // ✅ ADT
+
+            if (success) {
+                patientDAO.saveToFile(patientList);
             }
+            return success;
         }
+
         return false;
     }
 

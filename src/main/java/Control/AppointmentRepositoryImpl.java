@@ -23,7 +23,6 @@ public class AppointmentRepositoryImpl implements AppointmentRepository {
     private MedicineRepository medicineRepo; 
     private AppointmentDAO appointmentDAO;
 
-
     public AppointmentRepositoryImpl(PatientRepository patientRepo, DoctorRepository doctorRepo, RoomRepository roomRepo, MedicineRepository medicineRepo) {
         this.patientRepo = patientRepo;
         this.doctorRepo = doctorRepo;
@@ -86,7 +85,7 @@ public class AppointmentRepositoryImpl implements AppointmentRepository {
                 Room availRoom = null;
                 ListInterface<Room> availRooms = roomRepo.findAllAvailableRooms();
                 for(int j = 1; j <= availRooms.getNumberOfEntries(); j++){
-                    if(availRooms.getEntry(j).getRoomType().equalsIgnoreCase("Consultation")){
+                    if(availRooms.getEntry(j).getRoomType().equalsIgnoreCase("Consult")){
                         availRoom = availRooms.getEntry(j);
                         break;
                     }
@@ -153,7 +152,7 @@ public class AppointmentRepositoryImpl implements AppointmentRepository {
         ListInterface<Room> availableRooms = roomRepo.findAllAvailableRooms();
         for (int i = 1; i <= availableRooms.getNumberOfEntries(); i++) {
             Room r = availableRooms.getEntry(i);
-            if (r.getRoomType().equalsIgnoreCase("Consultation")) {
+            if (r.getRoomType().equalsIgnoreCase("Consult")) {
                 assignedRoom = r;
                 break;
             }
@@ -178,7 +177,7 @@ public class AppointmentRepositoryImpl implements AppointmentRepository {
             if (!doctorIsAvailable) {
                 resultMessage = "Notice: Doctor is currently busy. Patient placed on Waitlist.\n" + newApt.toString();
             } else {
-                resultMessage = "Notice: Consultation rooms are full. Patient placed on Waitlist.\n" + newApt.toString();
+                resultMessage = "Notice: Consult rooms are full. Patient placed on Waitlist.\n" + newApt.toString();
             }
         }
         
@@ -225,10 +224,10 @@ public class AppointmentRepositoryImpl implements AppointmentRepository {
         doc.setStatus(true); 
         doctorRepo.update(doc);
 
-        Room freedConsultationRoom = aptToComplete.getRoom();
-        if (freedConsultationRoom != null) {
-            freedConsultationRoom.setAvailable(true); 
-            roomRepo.update(freedConsultationRoom);
+        Room freedConsultRoom = aptToComplete.getRoom();
+        if (freedConsultRoom != null) {
+            freedConsultRoom.setAvailable(true); 
+            roomRepo.update(freedConsultRoom);
         }
 
         String mainMessage;
@@ -319,34 +318,29 @@ public class AppointmentRepositoryImpl implements AppointmentRepository {
             return "Error: Appointment ID not found.";
         }
 
-        // Free up resources if the patient is currently occupying them
         if (aptToDelete.getStatus().equalsIgnoreCase("Scheduled")) {
             Doctor doc = aptToDelete.getDoctor();
             if (doc != null) {
-                doc.setStatus(true); // Free the doctor
+                doc.setStatus(true); 
                 doctorRepo.update(doc);
             }
             Room room = aptToDelete.getRoom();
             if (room != null) {
-                room.setAvailable(true); // Free the room
+                room.setAvailable(true); 
                 roomRepo.update(room);
             }
         } else if (aptToDelete.getStatus().equalsIgnoreCase("Admitted")) {
             Room room = aptToDelete.getRoom();
             if (room != null) {
-                room.setAvailable(true); // Free the room
+                room.setAvailable(true); 
                 roomRepo.update(room);
             }
         }
-        // If "Waitlisted" or "Completed", no resources are currently tied up, so we just proceed to remove.
-
-        // Remove from the custom ADT List
+        
         appointmentList.remove(aptToDelete);
         
-        // Since we might have freed up a doctor/room, check if waitlisted patients can take them
         String waitlistMessage = processWaitlist();
         
-        // Save the updated list to appointments.txt
         appointmentDAO.saveAllToFile(appointmentList);
         
         return "Success: Appointment " + appointmentID + " has been deleted/cancelled." + waitlistMessage;

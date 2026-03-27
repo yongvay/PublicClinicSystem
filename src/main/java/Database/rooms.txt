@@ -1,7 +1,9 @@
-101|Ward|true
-102|Ward|true
-103|Ward|true
-201|Consultation|false
-202|Consultation|true
-203|Consultation|true
-301|ICU|true
+101|Consult|true
+102|Consult|true
+103|Consult|true
+201|Treatment|true
+202|Treatment|true
+203|Treatment|true
+301|Observation|true
+302|Observation|true
+303|Observation|true

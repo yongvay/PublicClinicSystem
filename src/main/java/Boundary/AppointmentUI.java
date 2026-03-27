@@ -47,7 +47,7 @@ public class AppointmentUI {
 
             switch (choice) {
                 case 1 -> bookAppointment(scanner);
-                case 2 -> processAppointment(scanner); // New Combined Method
+                case 2 -> processAppointment(scanner);
                 case 3 -> viewAppointments();
                 case 4 -> deleteAppointment(scanner);
             }
@@ -92,7 +92,6 @@ public class AppointmentUI {
         Patient patient = null;
 
         if (ptChoice.equals("1")) {
-            // --- NEW PATIENT QUICK REGISTRATION ---
             System.out.println("\n--- Quick Patient Registration ---");
             String newId = patientRepo.generatePatientID(); 
             
@@ -123,7 +122,6 @@ public class AppointmentUI {
             System.out.println("Success! New Patient registered with ID: " + newId);
 
         } else if (ptChoice.equals("2")) {
-            // --- EXISTING PATIENT SEARCH ---
             System.out.print("\nEnter Patient ID: ");
             String patientId = scanner.nextLine();
             patient = patientRepo.findById(patientId);
@@ -139,7 +137,6 @@ public class AppointmentUI {
             return;
         }
 
-        // --- CONTINUE WITH APPOINTMENT BOOKING ---
         System.out.print("\nEnter Required Specialization (e.g., Cardiology, General Practice): ");
         String specialization = scanner.nextLine();
 
@@ -156,7 +153,6 @@ public class AppointmentUI {
         System.out.print("Enter Appointment ID to process/transfer/discharge: ");
         String appId = scanner.nextLine();
         
-        // Find the appointment to check its current status
         Appointment targetApt = null;
         ListInterface<Appointment> list = appointmentRepo.getAllAppointments();
         for (int i = 1; i <= list.getNumberOfEntries(); i++) {
@@ -172,15 +168,14 @@ public class AppointmentUI {
             return;
         }
 
-        // Determine prompts based on current status
         if (targetApt.getStatus().equalsIgnoreCase("Scheduled")) {
             System.out.println("Current Status: Scheduled for Consultation.");
             System.out.println("Does the patient need further admission?");
-            System.out.print("Enter 'Ward', 'ICU', or type 'None' if going home: ");
+            System.out.print("Enter 'Treatment', 'Observation', or type 'None' if going home: ");
         } else if (targetApt.getStatus().equalsIgnoreCase("Admitted")) {
             System.out.println("Current Status: Admitted in " + targetApt.getRoom().getRoomType() + ".");
             System.out.println("Where is the admitted patient moving to?");
-            System.out.print("Enter 'ICU', 'Ward', or type 'None' to discharge them home: ");
+            System.out.print("Enter 'Treatment', 'Observation', or type 'None' to discharge them home: ");
         } else {
             System.out.println("Error: Cannot process. Appointment is already marked as '" + targetApt.getStatus() + "'.");
             return;
@@ -189,7 +184,6 @@ public class AppointmentUI {
         String targetRoomType = scanner.nextLine();
         ListInterface<Medicine> meds = selectMedicines(scanner); 
         
-        // Call the appropriate repository method based on the status
         String resultMessage = "";
         if (targetApt.getStatus().equalsIgnoreCase("Scheduled")) {
             resultMessage = appointmentRepo.completeAppointment(appId, targetRoomType, meds);

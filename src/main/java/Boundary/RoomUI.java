@@ -10,8 +10,6 @@ import java.util.Scanner;
 
 /**
  * @author Ng Zhi Xuan
- * Boundary class for the Room Subsystem.
- * Handles all user interactions (input/output) for clinic rooms.
  */
 public class RoomUI {
 
@@ -25,9 +23,6 @@ public class RoomUI {
         this.scanner = new Scanner(System.in);
     }
 
-    // ==========================================
-    // MAIN START METHOD
-    // ==========================================
     public void start() {
         int choice = -1;
         do {
@@ -36,11 +31,11 @@ public class RoomUI {
             
             if (scanner.hasNextInt()) {
                 choice = scanner.nextInt();
-                scanner.nextLine(); // Consume newline
+                scanner.nextLine(); 
                 processChoice(choice);
             } else {
                 System.out.println("Invalid input. Please enter a number.");
-                scanner.nextLine(); // Clear bad input
+                scanner.nextLine(); 
             }
         } while (choice != 0);
     }
@@ -76,9 +71,6 @@ public class RoomUI {
         }
     }
 
-    // ==========================================
-    // UI HELPER METHODS
-    // ==========================================
     private void addRoom() {
         System.out.println("\n--- Add New Room ---");
         System.out.print("Enter Room Number (e.g., 101): ");
@@ -89,7 +81,7 @@ public class RoomUI {
             return;
         }
 
-        System.out.print("Enter Room Type (e.g., Consultation, Ward, ICU): ");
+        System.out.print("Enter Room Type (e.g., Consult, Treatment, Observation): ");
         String roomType = scanner.nextLine();
         
         Room newRoom = new Room(roomNumber, roomType, true);
@@ -115,7 +107,7 @@ public class RoomUI {
     }
 
     private void searchByRoomType() {
-        System.out.print("\nEnter Room Type to search (e.g., Ward): ");
+        System.out.print("\nEnter Room Type to search (e.g., Treatment): ");
         String type = scanner.nextLine();
         ListInterface<Room> results = roomRepo.findByType(type);
         
@@ -188,9 +180,6 @@ public class RoomUI {
         }
     }
 
-    // ==========================================
-    // UTILITY METHODS
-    // ==========================================
     private void displayList(ListInterface<Room> list) {
         if (list == null || list.isEmpty()) {
             System.out.println("No records found.");
@@ -201,9 +190,6 @@ public class RoomUI {
         }
     }
 
-    // ==========================================
-    // REPORT GENERATION
-    // ==========================================
     public void generateRoomReport() {
         ListInterface<Room> list = roomRepo.findAll();
         if (list.isEmpty()) {

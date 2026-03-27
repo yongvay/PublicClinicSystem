@@ -25,6 +25,35 @@ public class MedicineRepositoryImpl implements MedicineRepository {
     }
 
     // ==========================================
+    // AUTO-GENERATE ID
+    // ==========================================
+    @Override
+    public String generateNextMedicineId() {
+        int maxId = 0;
+        
+        // Loop through the custom Iterable List to find the highest ID
+        for (Medicine m : medicineList) {
+            String currentIdStr = m.getMedicineID();
+            
+            // Check if the ID starts with "M" to safely parse the number
+            if (currentIdStr != null && currentIdStr.startsWith("M")) {
+                try {
+                    // Extract the numeric part (e.g., "001" from "M001")
+                    int currentIdNum = Integer.parseInt(currentIdStr.substring(1));
+                    if (currentIdNum > maxId) {
+                        maxId = currentIdNum;
+                    }
+                } catch (NumberFormatException e) {
+                    // Ignore any badly formatted IDs
+                }
+            }
+        }
+        
+        // Add 1 to the max ID found, and format it back to "M" + 3 digits (e.g., M005)
+        return String.format("M%03d", maxId + 1);
+    }
+    
+    // ==========================================
     // CREATE
     // ==========================================
     @Override

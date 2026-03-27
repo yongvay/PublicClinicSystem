@@ -79,26 +79,29 @@ public class MedicineUI {
     // ==========================================
     private void addMedicine() {
         System.out.println("\n--- Add New Medicine ---");
-        System.out.print("Enter Medicine ID: ");
-        String id = scanner.nextLine();
         
-        if (medicineRepo.findById(id) != null) {
-            System.out.println("Error: Medicine ID already exists!");
-            return;
-        }
+        // 1. Auto-generate the ID instead of asking the user
+        String id = medicineRepo.generateNextMedicineId();
+        System.out.println("Auto-generated Medicine ID: " + id);
 
+        // 2. Continue asking for the rest of the details
         System.out.print("Enter Name: ");
         String name = scanner.nextLine();
+        
         System.out.print("Enter Description: ");
         String desc = scanner.nextLine();
+        
         System.out.print("Enter Dosage (e.g., 500mg tablet): ");
         String dosage = scanner.nextLine();
+        
         System.out.print("Enter Initial Stock Quantity: ");
         int stock = scanner.nextInt();
+        
         System.out.print("Enter Reorder Level: ");
         int reorderLevel = scanner.nextInt();
         scanner.nextLine(); // Consume newline
 
+        // 3. Create and save the medicine
         Medicine newMed = new Medicine(id, name, desc, dosage, stock, reorderLevel);
         medicineRepo.create(newMed);
         System.out.println("Success: Medicine added successfully!");

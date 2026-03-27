@@ -10,6 +10,8 @@ import Entity.Medicine;
 
 public interface MedicineRepository {
 
+  String generateNextMedicineId();
+    
   // Create
   void create(Medicine medicine);
 

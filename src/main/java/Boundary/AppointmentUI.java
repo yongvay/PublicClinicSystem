@@ -9,6 +9,7 @@ import Control.MedicineRepository;
 import Entity.Appointment;
 import Entity.Patient;
 import Entity.Medicine;
+import Entity.Doctor; // <-- Added missing import here!
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -35,12 +36,15 @@ public class AppointmentUI {
         Scanner scanner = new Scanner(System.in);
         int choice;
         do {
-            System.out.println("\n--- Appointment Management ---");
+            System.out.println("\n==========================================");
+            System.out.println("          APPOINTMENT MANAGEMENT          ");
+            System.out.println("==========================================");
             System.out.println("1. Book New Appointment");
             System.out.println("2. Process / Transfer / Discharge Patient");
             System.out.println("3. View Appointments");
             System.out.println("4. Delete / Cancel Appointment");
             System.out.println("0. Back to Main Menu");
+            System.out.println("==========================================");
             System.out.print("Choice: ");
             choice = scanner.nextInt();
             scanner.nextLine(); 
@@ -82,7 +86,7 @@ public class AppointmentUI {
         return prescribedMeds;
     }
 
-    private void bookAppointment(Scanner scanner) {
+   private void bookAppointment(Scanner scanner) {
         System.out.println("\n--- Booking Options ---");
         System.out.println("1. Register New Patient & Book");
         System.out.println("2. Book for Existing Patient");
@@ -137,13 +141,54 @@ public class AppointmentUI {
             return;
         }
 
-        System.out.print("\nEnter Required Specialization (e.g., Cardiology, General Practice): ");
-        String specialization = scanner.nextLine();
-
-        if (!doctorRepo.specializationExists(specialization)) {
-            System.out.println("Error: No doctors found for specialization: " + specialization);
+        ListInterface<Doctor> allDoctors = doctorRepo.findAll();
+        if (allDoctors.isEmpty()) {
+            System.out.println("Error: No doctors are currently registered in the system.");
             return;
         }
+
+        ListInterface<String> specializations = new List<>();
+        for (int i = 1; i <= allDoctors.getNumberOfEntries(); i++) {
+            String spec = allDoctors.getEntry(i).getSpecialization();
+            boolean exists = false;
+            
+            for (int j = 1; j <= specializations.getNumberOfEntries(); j++) {
+                if (specializations.getEntry(j).equalsIgnoreCase(spec)) {
+                    exists = true;
+                    break;
+                }
+            }
+            if (!exists) {
+                specializations.add(spec);
+            }
+        }
+
+        // --- NEW CLEAN MENU FORMATTING ---
+        System.out.println("\n==========================================");
+        System.out.println("         AVAILABLE SPECIALIZATIONS        ");
+        System.out.println("==========================================");
+        for (int i = 1; i <= specializations.getNumberOfEntries(); i++) {
+            System.out.printf("  [%d] %s\n", i, specializations.getEntry(i));
+        }
+        System.out.println("==========================================");
+
+        System.out.print("Select Specialization (Enter number): ");
+        int specChoice = -1;
+        if (scanner.hasNextInt()) {
+            specChoice = scanner.nextInt();
+            scanner.nextLine(); 
+        } else {
+            System.out.println("Error: Invalid input. Please enter a number.");
+            scanner.nextLine(); 
+            return;
+        }
+
+        if (specChoice < 1 || specChoice > specializations.getNumberOfEntries()) {
+            System.out.println("Error: Invalid selection. Returning to menu.");
+            return;
+        }
+
+        String specialization = specializations.getEntry(specChoice);
 
         String resultMessage = appointmentRepo.bookAppointment(patient.getPatientID(), specialization);
         System.out.println("\n" + resultMessage);
@@ -171,11 +216,11 @@ public class AppointmentUI {
         if (targetApt.getStatus().equalsIgnoreCase("Scheduled")) {
             System.out.println("Current Status: Scheduled for Consultation.");
             System.out.println("Does the patient need further admission?");
-            System.out.print("Enter 'Treatment', 'Observation', or type 'None' if going home: ");
+            System.out.print("Enter 'Ward', 'ICU', or type 'None' if going home: ");
         } else if (targetApt.getStatus().equalsIgnoreCase("Admitted")) {
             System.out.println("Current Status: Admitted in " + targetApt.getRoom().getRoomType() + ".");
             System.out.println("Where is the admitted patient moving to?");
-            System.out.print("Enter 'Treatment', 'Observation', or type 'None' to discharge them home: ");
+            System.out.print("Enter 'ICU', 'Ward', or type 'None' to discharge them home: ");
         } else {
             System.out.println("Error: Cannot process. Appointment is already marked as '" + targetApt.getStatus() + "'.");
             return;
@@ -222,3 +267,7 @@ public class AppointmentUI {
         }
     }
 }
+
+
+
+

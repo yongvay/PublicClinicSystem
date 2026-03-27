@@ -1,1 +1,3 @@
 A002|P005|D005|201|2026-03-27|Completed|None
+A003|P002|D005|201|2026-03-27|Scheduled|None
+A004|P005|D002|None|2026-03-27|Waitlisted|None

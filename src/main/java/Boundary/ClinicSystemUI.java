@@ -38,7 +38,7 @@ public class ClinicSystemUI {
         AppointmentRepository appointmentRepo = new AppointmentRepositoryImpl(patientRepo, doctorRepo, roomRepo, medicineRepo);
         
         // 2. Pass the exact same shared repositories into the Sub-UIs
-        this.doctorUI = new DoctorUI(doctorRepo);
+        this.doctorUI = new DoctorUI(doctorRepo, appointmentRepo);
         this.medicineUI = new MedicineUI(medicineRepo);
         this.patientUI = new PatientUI(patientRepo);
         

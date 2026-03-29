@@ -12,6 +12,9 @@ import Entity.Room;
  */
 public interface RoomRepository {
 
+    // Auto Generate Room Number
+    String generateNextRoomId();
+
     // Create 
     boolean create(Room room);
 

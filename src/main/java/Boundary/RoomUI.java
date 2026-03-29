@@ -73,20 +73,22 @@ public class RoomUI {
 
     private void addRoom() {
         System.out.println("\n--- Add New Room ---");
-        System.out.print("Enter Room Number (e.g., 101): ");
-        String roomNumber = scanner.nextLine();
         
-        if (roomRepo.findById(roomNumber) != null) {
-            System.out.println("Error: Room Number already exists!");
-            return;
-        }
+        // 1. Auto-generate the ID instead of asking the user
+        String roomNumber = roomRepo.generateNextRoomId();
+        System.out.println("Auto-generated Room Number: " + roomNumber);
 
+        // 2. Ask for the remaining details
         System.out.print("Enter Room Type (e.g., Consult, Treatment, Observation): ");
         String roomType = scanner.nextLine();
         
         Room newRoom = new Room(roomNumber, roomType, true);
-        roomRepo.create(newRoom);
-        System.out.println("Success: Room added successfully!");
+        
+        if (roomRepo.create(newRoom)) {
+            System.out.println("Success: Room added successfully!");
+        } else {
+            System.out.println("Error: Failed to add room.");
+        }
     }
 
     private void viewAllRooms() {

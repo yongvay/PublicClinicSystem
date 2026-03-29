@@ -1,9 +1,9 @@
 101|Consult|true
 102|Consult|true
 103|Consult|true
-201|Treatment|true
-202|Treatment|true
-203|Treatment|true
-301|Observation|true
-302|Observation|true
-303|Observation|true
+104|Treatment|true
+105|Treatment|true
+106|Treatment|true
+107|Observation|true
+108|Observation|true
+109|Observation|true

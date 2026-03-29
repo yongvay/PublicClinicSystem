@@ -31,6 +31,45 @@ public class RoomRepositoryImpl implements RoomRepository {
     }
 
     // ==========================================
+    // AUTO-GENERATE ID
+    // ==========================================
+    @Override
+    public String generateNextRoomId() {
+        int maxId = 0;
+        
+        // Loop through the custom Iterable List to find the highest room number
+        for (Room r : roomList) {
+            String currentIdStr = r.getRoomNumber();
+            
+            if (currentIdStr != null) {
+                try {
+                    int currentIdNum;
+                    // Check if it has a prefix like "R101" or if it's purely numeric like "101"
+                    if (currentIdStr.toUpperCase().startsWith("R")) {
+                        currentIdNum = Integer.parseInt(currentIdStr.substring(1));
+                    } else {
+                        currentIdNum = Integer.parseInt(currentIdStr);
+                    }
+                    
+                    if (currentIdNum > maxId) {
+                        maxId = currentIdNum;
+                    }
+                } catch (NumberFormatException e) {
+                    // Ignore any badly formatted Room Numbers
+                }
+            }
+        }
+        
+        // If the list is empty, start at 101. Otherwise, increment the max found.
+        if (maxId == 0) {
+            return "101";
+        }
+        
+        // Return the next number as a String. 
+        return String.valueOf(maxId + 1); 
+    }
+
+    // ==========================================
     // CREATE
     // ==========================================
     @Override

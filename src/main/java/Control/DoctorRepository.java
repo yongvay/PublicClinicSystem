@@ -8,7 +8,8 @@ import Entity.Doctor;
  */
 public interface DoctorRepository {
 
-    // Create 
+    String generateNextDoctorId();
+    
     boolean create(Doctor doctor);
 
     // Read (searchDoctor, getAllDoctors, getAvailableDoctor)
@@ -16,24 +17,24 @@ public interface DoctorRepository {
 
     Doctor findById(String id);
 
-    Doctor findFirstAvailableDoctor(); // fetch one free doctor for the queue
-
+    Doctor findFirstAvailableDoctor(); 
+   
     //finders
     ListInterface<Doctor> findBySpecialization(String specialization);
 
     ListInterface<Doctor> findAllAvailableDoctors();
-
+  
     // Update (updateDoctorDetails)
     boolean update(Doctor doctor);
-
+  
     // Delete (deleteDoctor)
     boolean delete(Doctor doctor);
-
+  
     //Sorting methods
     ListInterface<Doctor> findAllSortedByName();
 
     ListInterface<Doctor> findAllSortedBySpecialization();
-
+  
     // Logic to check specialization against the collection of doctors
     boolean specializationExists(String specialization);
 }

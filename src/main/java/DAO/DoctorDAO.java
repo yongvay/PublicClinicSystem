@@ -11,42 +11,38 @@ import java.io.*;
  */
 public class DoctorDAO {
     
-    // The text file where data will be stored
+    
     private static final String FILE_NAME = "src\\main\\java\\Database\\doctors.txt";
     private static final String DELIMITER = "\\|"; // Regex for splitting
     private static final String SEPARATOR = "|";   // String for joining
 
-    /**
-     * Saves the entire custom list to the text file.
-     */
+   
     public void saveToFile(ListInterface<Doctor> doctorList) {
-        // Using try-with-resources to ensure the file writer closes automatically
+        
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_NAME))) {
             
             for (Doctor d : doctorList) {
-                // Construct a single delimited string line matching the Doctor attributes
+               
                 String line = d.getDoctorID() + SEPARATOR +
                               d.getName() + SEPARATOR +
                               d.getSpecialization() + SEPARATOR +
                               d.getContactNum() + SEPARATOR +
-                              d.getStatus(); // boolean gets converted to "true" or "false"
+                              d.getStatus(); 
                 
                 writer.write(line);
-                writer.newLine(); // Move to the next line
+                writer.newLine(); 
             }
         } catch (IOException e) {
             System.err.println("Critical Error: Unable to save data to file -> " + e.getMessage());
         }
     }
 
-    /**
-     * Reads the text file and populates a new custom list.
-     */
+   
     public ListInterface<Doctor> loadFromFile() {
         ListInterface<Doctor> loadedList = new List<>();
         File file = new File(FILE_NAME);
         
-        // If it's the first time running and no file exists, return the empty list
+        
         if (!file.exists()) {
             return loadedList;
         }
@@ -56,14 +52,14 @@ public class DoctorDAO {
             while ((line = reader.readLine()) != null) {
                 String[] parts = line.split(DELIMITER);
                 
-                // Ensure the line has exactly 5 parts (matching Doctor attributes)
+                
                 if (parts.length == 5) {
                     Doctor d = new Doctor(
                         parts[0], // Doctor ID
                         parts[1], // Name
                         parts[2], // Specialization
                         parts[3], // Contact Number
-                        Boolean.parseBoolean(parts[4]) // Status (Available = true/false)
+                        Boolean.parseBoolean(parts[4]) // Status 
                     );
                     loadedList.add(d);
                 }

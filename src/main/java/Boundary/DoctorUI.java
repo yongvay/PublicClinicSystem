@@ -21,7 +21,7 @@ import java.io.PrintWriter;
 public class DoctorUI {
 
     private DoctorRepository doctorRepo;
-    private AppointmentRepository appointmentRepo; // Added for the detailed report
+    private AppointmentRepository appointmentRepo; 
     private Scanner scanner;
 
     // IMPORTANT: Constructor now requires AppointmentRepository
@@ -39,7 +39,7 @@ public class DoctorUI {
             
             if (scanner.hasNextInt()) {
                 choice = scanner.nextInt();
-                scanner.nextLine(); // Consume newline
+                scanner.nextLine(); 
                 processChoice(choice);
             } else {
                 System.out.println("Invalid input. Please enter a number.");
@@ -83,21 +83,22 @@ public class DoctorUI {
 
     private void addDoctor() {
         System.out.println("\n--- Add New Doctor ---");
-        System.out.print("Enter Doctor ID: ");
-        String id = scanner.nextLine();
         
-        if (doctorRepo.findById(id) != null) {
-            System.out.println("Error: Doctor ID already exists!");
-            return;
-        }
+        
+        String id = doctorRepo.generateNextDoctorId();
+        System.out.println("Doctor ID: " + id);
 
+        
         System.out.print("Enter Name: ");
         String name = scanner.nextLine();
+        
         System.out.print("Enter Specialization: ");
         String spec = scanner.nextLine();
+        
         System.out.print("Enter Contact Number: ");
         String contact = scanner.nextLine();
 
+        // New doctors are available by default
         Doctor newDoc = new Doctor(id, name, spec, contact, true);
         doctorRepo.create(newDoc);
         System.out.println("Success: Doctor added successfully!");
@@ -303,7 +304,7 @@ public class DoctorUI {
                 specApptCounts.add(total);
             }
 
-            // SUMMARY ROW: Replaced the "---" with empty spaces ("")
+           
             report.append(String.format("| %-9s | %-18s | %-5d | %-9d | %-10d | %-9d | %-10s | %-18s | %-11s | %-30s |\n",
                     doc.getDoctorID(), doc.getName(), total, completed, waitlisted, scheduled, "", "", "", ""));
 
@@ -327,7 +328,7 @@ public class DoctorUI {
                         if (pName.length() > 18) pName = pName.substring(0, 15) + "...";
                         if (medsStr.length() > 30) medsStr = medsStr.substring(0, 27) + "...";
 
-                        // PATIENT ROW: Only shows patient data, leaving doctor columns blank
+                        
                         report.append(String.format("| %-9s | %-18s | %-5s | %-9s | %-10s | %-9s | %-10s | %-18s | %-11s | %-30s |\n",
                                 "", "", "", "", "", "", 
                                 appt.getPatient().getPatientID(), pName, appt.getStatus(), medsStr));

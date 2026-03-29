@@ -2,7 +2,7 @@ package Control;
 
 import ADT.List;
 import ADT.ListInterface;
-import DAO.DoctorDAO; // Import your new DAO
+import DAO.DoctorDAO; 
 import Entity.Doctor;
 import java.util.Comparator;
 
@@ -12,17 +12,42 @@ import java.util.Comparator;
 public class DoctorRepositoryImpl implements DoctorRepository {
 
     private ListInterface<Doctor> doctorList;
-    private DoctorDAO doctorDAO; // Declare the DAO
+    private DoctorDAO doctorDAO; 
 
     public DoctorRepositoryImpl() {
-        this.doctorDAO = new DoctorDAO(); // Initialize the DAO
-        // Load the data from the text file instead of starting empty!
+        this.doctorDAO = new DoctorDAO(); 
         this.doctorList = doctorDAO.loadFromFile();
 
-        // Failsafe: If the file was completely empty, initialize an empty list
+        
         if (this.doctorList == null) {
             this.doctorList = new List<>();
         }
+    }
+    
+    @Override
+    public String generateNextDoctorId() {
+        int maxId = 0;
+        
+        // Loop through the custom Iterable List to find the highest ID
+        for (Doctor d : doctorList) {
+            String currentIdStr = d.getDoctorID();
+            
+            
+            if (currentIdStr != null && currentIdStr.startsWith("D")) {
+                try {
+                   
+                    int currentIdNum = Integer.parseInt(currentIdStr.substring(1));
+                    if (currentIdNum > maxId) {
+                        maxId = currentIdNum;
+                    }
+                } catch (NumberFormatException e) {
+                    
+                }
+            }
+        }
+        
+        // Add 1 to the max ID found, and format it back to "D" + 3 digits (e.g., D007)
+        return String.format("D%03d", maxId + 1);
     }
 
     @Override
@@ -31,7 +56,7 @@ public class DoctorRepositoryImpl implements DoctorRepository {
             if (findById(doctor.getDoctorID()) == null) {
                 doctorList.add(doctor);
                 doctorDAO.saveToFile(doctorList);
-                return true; // Success
+                return true; 
             }
         }
         return false; 
@@ -119,7 +144,7 @@ public class DoctorRepositoryImpl implements DoctorRepository {
 
         boolean success = doctorList.remove(doctor);
         if (success) {
-            doctorDAO.saveToFile(doctorList); // SAVE TO FILE AFTER DELETING
+            doctorDAO.saveToFile(doctorList); 
         }
         return success;
     }

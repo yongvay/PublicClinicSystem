@@ -9,7 +9,7 @@ import Control.MedicineRepository;
 import Entity.Appointment;
 import Entity.Patient;
 import Entity.Medicine;
-import Entity.Doctor; // <-- Added missing import here!
+import Entity.Doctor; 
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -163,7 +163,7 @@ public class AppointmentUI {
             }
         }
 
-        // --- NEW CLEAN MENU FORMATTING ---
+      
         System.out.println("\n==========================================");
         System.out.println("         AVAILABLE SPECIALIZATIONS        ");
         System.out.println("==========================================");
@@ -216,11 +216,11 @@ public class AppointmentUI {
         if (targetApt.getStatus().equalsIgnoreCase("Scheduled")) {
             System.out.println("Current Status: Scheduled for Consultation.");
             System.out.println("Does the patient need further admission?");
-            System.out.print("Enter 'Ward', 'ICU', or type 'None' if going home: ");
+            System.out.print("Enter 'Treatment', 'Observation', or type 'None' if going home: ");
         } else if (targetApt.getStatus().equalsIgnoreCase("Admitted")) {
             System.out.println("Current Status: Admitted in " + targetApt.getRoom().getRoomType() + ".");
             System.out.println("Where is the admitted patient moving to?");
-            System.out.print("Enter 'ICU', 'Ward', or type 'None' to discharge them home: ");
+            System.out.print("Enter 'Treatment', 'Observation', or type 'None' to discharge them home: ");
         } else {
             System.out.println("Error: Cannot process. Appointment is already marked as '" + targetApt.getStatus() + "'.");
             return;

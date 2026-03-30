@@ -71,21 +71,34 @@ public class MedicineRepositoryImpl implements MedicineRepository {
     public ListInterface<Medicine> findAll() {
         return medicineList;
     }
-
+    
+    // Edited but not used
     @Override
     public Medicine findById(String id) {
         if (id == null) return null;
         
-        // Using the Iterable feature of your custom list
-        for (Medicine m : medicineList) {
-            // Updated to match your Entity's getMedicineID()
-            if (m.getMedicineID().equalsIgnoreCase(id)) {
-                return m;
-            }
+        // Create a dummy object with the target ID for the ADT to compare against.
+        Medicine dummy = new Medicine(id, null, null, null, 0, 0);
+        
+        int position = medicineList.getPosition(dummy);
+        
+        // If found (1-based position), return the actual entry from the list 
+        if (position != -1) {
+            return medicineList.getEntry(position);
         }
         return null;
+        
+//        // Using the Iterable feature of your custom list
+//        for (Medicine m : medicineList) {
+//            // Updated to match your Entity's getMedicineID()
+//            if (m.getMedicineID().equalsIgnoreCase(id)) {
+//                return m;
+//            }
+//        }
+//        return null;
     }
-
+    
+    // Not Used
     @Override
     public ListInterface<Medicine> findByName(String name) {
         ListInterface<Medicine> results = new List<>();
@@ -100,6 +113,7 @@ public class MedicineRepositoryImpl implements MedicineRepository {
         return results;
     }
 
+    // Not Used
     @Override
     public ListInterface<Medicine> findOutOfStock() {
         ListInterface<Medicine> results = new List<>();
@@ -112,6 +126,7 @@ public class MedicineRepositoryImpl implements MedicineRepository {
         return results;
     }
 
+    // Not Used
     @Override
     public ListInterface<Medicine> findBelowReorderLevel() {
         ListInterface<Medicine> results = new List<>();
@@ -127,24 +142,24 @@ public class MedicineRepositoryImpl implements MedicineRepository {
     // ==========================================
     // UPDATE
     // ==========================================
+    // Edited 
     @Override
     public boolean update(Medicine updatedMedicine) {
         if (updatedMedicine == null) return false;
 
-        for (int i = 1; i <= medicineList.getNumberOfEntries(); i++) {
-            Medicine current = medicineList.getEntry(i);
+        int position = medicineList.getPosition(updatedMedicine);
+        
+        if (position != -1) {
+            boolean success = medicineList.replace(position, updatedMedicine);
             
-            if (current.getMedicineID().equalsIgnoreCase(updatedMedicine.getMedicineID())) {
-                boolean success = medicineList.replace(i, updatedMedicine);
-                if (success) {
-                    medicineDAO.saveToFile(medicineList); // Save after updating
-                }
-                return success;
+            if (success) {
+                medicineDAO.saveToFile(medicineList);
             }
+            return success;
         }
-        return false; 
+        return false;
     }
-
+    
     // ==========================================
     // DELETE
     // ==========================================

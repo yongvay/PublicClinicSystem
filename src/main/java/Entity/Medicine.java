@@ -13,6 +13,12 @@ public class Medicine {
     private int quantityInStock;
     private int reorderLevel; // e.g., if stock drops below 10, trigger a reorder alert
 
+    // For search dummy only
+    // This allows creating "dummy" objects for searching using only an ID.
+    public Medicine(String medicineID) {
+        this.medicineID = medicineID;
+    }
+    
     // Constructor
     public Medicine(String medicineID, String name, String description, String dosage, int quantityInStock, int reorderLevel) {
         this.medicineID = medicineID;
@@ -88,9 +94,11 @@ public class Medicine {
         if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
-        Medicine medicine = (Medicine) obj;
-        // Two medicines are considered equal if they have the same Medicine ID
-        return medicineID != null && medicineID.equals(medicine.medicineID);
+        Medicine other = (Medicine) obj;
+        
+        // Use equalsIgnoreCase for case-insensitive ID comparison.
+        // This ensures "M001" matches "m001" during ADT searches.
+        return this.medicineID != null && this.medicineID.equalsIgnoreCase(other.medicineID);
     }
 
     @Override

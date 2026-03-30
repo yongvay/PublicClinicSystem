@@ -178,8 +178,10 @@ public class List<T> implements ListInterface<T> {
     @Override
     public T findFirst(SearchCriteria<T> criteria) {
         for (T element : this) {
-            if (criteria.isMatch(element))
+            // The null check ensures we don't crash if the array contains nulls
+            if (element != null && criteria.isMatch(element)) {
                 return element;
+            }
         }
         return null;
     }
@@ -188,8 +190,10 @@ public class List<T> implements ListInterface<T> {
     public ListInterface<T> findAll(SearchCriteria<T> criteria) {
         ListInterface<T> results = new List<>();
         for (T element : this) {
-            if (criteria.isMatch(element))
+            // Safe check: verify the element exists before applying the search rule
+            if (element != null && criteria.isMatch(element)) {
                 results.add(element);
+            }
         }
         return results;
     }

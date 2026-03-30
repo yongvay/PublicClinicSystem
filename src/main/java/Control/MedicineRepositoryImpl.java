@@ -163,7 +163,7 @@ public class MedicineRepositoryImpl implements MedicineRepository {
     // SORTING
     // ==========================================
     @Override
-    public ListInterface<Medicine> findAllSortedByName() {
+    public ListInterface<Medicine> sortedByName() {
         // Passing a custom Comparator to your ADT's merge sort
         return medicineList.sort(new Comparator<Medicine>() {
             @Override
@@ -174,7 +174,7 @@ public class MedicineRepositoryImpl implements MedicineRepository {
     }
 
     @Override
-    public ListInterface<Medicine> findAllSortedByStock() {
+    public ListInterface<Medicine> sortedByStock() {
         return medicineList.sort(new Comparator<Medicine>() {
             @Override
             public int compare(Medicine m1, Medicine m2) {
@@ -184,7 +184,7 @@ public class MedicineRepositoryImpl implements MedicineRepository {
     }
 
     @Override
-    public ListInterface<Medicine> findLowStockSorted() {
+    public ListInterface<Medicine> lowStockSorted() {
         // First, filter the list to only those below reorder level
         ListInterface<Medicine> lowStock = findBelowReorderLevel();
         

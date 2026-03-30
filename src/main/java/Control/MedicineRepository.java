@@ -29,7 +29,7 @@ public interface MedicineRepository {
   boolean delete(Medicine medicine);
   
   // Sorting methods
-  ListInterface<Medicine> findAllSortedByName();
-  ListInterface<Medicine> findAllSortedByStock();
-  ListInterface<Medicine> findLowStockSorted();
+  ListInterface<Medicine> sortedByName();
+  ListInterface<Medicine> sortedByStock();
+  ListInterface<Medicine> lowStockSorted(); //Not used
 }

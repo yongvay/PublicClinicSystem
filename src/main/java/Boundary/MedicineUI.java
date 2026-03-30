@@ -213,9 +213,9 @@ public class MedicineUI {
             
             ListInterface<Medicine> sortedList = null;
             if (choice == 1) {
-                sortedList = medicineRepo.findAllSortedByName();
+                sortedList = medicineRepo.sortedByName();
             } else if (choice == 2) {
-                sortedList = medicineRepo.findAllSortedByStock();
+                sortedList = medicineRepo.sortedByStock();
             } else {
                 System.out.println("Invalid choice.");
                 return;

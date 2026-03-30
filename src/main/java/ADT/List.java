@@ -31,7 +31,6 @@ public class List<T> implements ListInterface<T>, Iterable<T> {
         }
     }
 
-    // --- Interface Method Implementations ---
     @Override
     public int getNumberOfEntries() {
         return numberOfEntries;

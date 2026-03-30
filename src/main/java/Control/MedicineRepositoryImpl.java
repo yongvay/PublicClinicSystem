@@ -8,8 +8,6 @@ import java.util.Comparator;
 
 /**
  * @author Ng Yong Vay
- * Implementation of the MedicineRepository using a custom List ADT.
- * Acts as the in-memory database for Medicine entities.
  */
 public class MedicineRepositoryImpl implements MedicineRepository {
 
@@ -19,22 +17,20 @@ public class MedicineRepositoryImpl implements MedicineRepository {
 
     public MedicineRepositoryImpl() {
         this.medicineDAO = new MedicineDAO();
-        
-        // Load existing data from file 
+
+        // Load existing data from file
         this.medicineList = medicineDAO.loadFromFile();
     }
 
-    // ==========================================
-    // AUTO-GENERATE ID
-    // ==========================================
+    // Auto Generate Medicine ID
     @Override
     public String generateNextMedicineId() {
         int maxId = 0;
-        
+
         // Loop through the custom Iterable List to find the highest ID
         for (Medicine m : medicineList) {
             String currentIdStr = m.getMedicineID();
-            
+
             // Check if the ID starts with "M" to safely parse the number
             if (currentIdStr != null && currentIdStr.startsWith("M")) {
                 try {
@@ -48,11 +44,11 @@ public class MedicineRepositoryImpl implements MedicineRepository {
                 }
             }
         }
-        
+
         // Add 1 to the max ID found, and format it back to "M" + 3 digits (e.g., M005)
         return String.format("M%03d", maxId + 1);
     }
-    
+
     // ==========================================
     // CREATE
     // ==========================================
@@ -71,38 +67,31 @@ public class MedicineRepositoryImpl implements MedicineRepository {
     public ListInterface<Medicine> findAll() {
         return medicineList;
     }
-    
-    // Edited but not used
+
     @Override
     public Medicine findById(String id) {
-        if (id == null) return null;
-        
+        if (id == null)
+            return null;
+
         // Create a dummy object with the target ID for the ADT to compare against.
-        Medicine dummy = new Medicine(id, null, null, null, 0, 0);
-        
+        Medicine dummy = new Medicine(id);
+
         int position = medicineList.getPosition(dummy);
-        
-        // If found (1-based position), return the actual entry from the list 
+
+        // If found (1-based position), return the actual entry from the list
         if (position != -1) {
             return medicineList.getEntry(position);
         }
         return null;
-        
-//        // Using the Iterable feature of your custom list
-//        for (Medicine m : medicineList) {
-//            // Updated to match your Entity's getMedicineID()
-//            if (m.getMedicineID().equalsIgnoreCase(id)) {
-//                return m;
-//            }
-//        }
-//        return null;
     }
-    
-    // Not Used
+
+    // Not Edited
+    // getAll(SearchRule<T> rule)
     @Override
-    public ListInterface<Medicine> findByName(String name) {
+    public ListInterface<Medicine> findByName(String name) {   
         ListInterface<Medicine> results = new List<>();
-        if (name == null || name.trim().isEmpty()) return results;
+        if (name == null || name.trim().isEmpty())
+            return results;
 
         String searchLower = name.toLowerCase();
         for (Medicine m : medicineList) {
@@ -113,7 +102,7 @@ public class MedicineRepositoryImpl implements MedicineRepository {
         return results;
     }
 
-    // Not Used
+    // Not Edited
     @Override
     public ListInterface<Medicine> findOutOfStock() {
         ListInterface<Medicine> results = new List<>();
@@ -126,7 +115,7 @@ public class MedicineRepositoryImpl implements MedicineRepository {
         return results;
     }
 
-    // Not Used
+    // Not Edited
     @Override
     public ListInterface<Medicine> findBelowReorderLevel() {
         ListInterface<Medicine> results = new List<>();
@@ -142,16 +131,16 @@ public class MedicineRepositoryImpl implements MedicineRepository {
     // ==========================================
     // UPDATE
     // ==========================================
-    // Edited 
     @Override
     public boolean update(Medicine updatedMedicine) {
-        if (updatedMedicine == null) return false;
+        if (updatedMedicine == null)
+            return false;
 
         int position = medicineList.getPosition(updatedMedicine);
-        
+
         if (position != -1) {
             boolean success = medicineList.replace(position, updatedMedicine);
-            
+
             if (success) {
                 medicineDAO.saveToFile(medicineList);
             }
@@ -159,14 +148,15 @@ public class MedicineRepositoryImpl implements MedicineRepository {
         }
         return false;
     }
-    
+
     // ==========================================
     // DELETE
     // ==========================================
     @Override
     public boolean delete(Medicine medicine) {
-        if (medicine == null) return false;
-        
+        if (medicine == null)
+            return false;
+
         boolean success = medicineList.remove(medicine);
         if (success) {
             medicineDAO.saveToFile(medicineList); // Save after deleting
@@ -202,7 +192,7 @@ public class MedicineRepositoryImpl implements MedicineRepository {
     public ListInterface<Medicine> lowStockSorted() {
         // First, filter the list to only those below reorder level
         ListInterface<Medicine> lowStock = findBelowReorderLevel();
-        
+
         // Then sort the filtered list by stock (ascending)
         return lowStock.sort(new Comparator<Medicine>() {
             @Override

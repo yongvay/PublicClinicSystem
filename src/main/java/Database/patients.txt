@@ -3,3 +3,5 @@ P002|Tan|03/03/1998|Diabetes|None
 P003|Raj|10/01/1990|Hypertension|Seafood
 P004|Tam Wan Jin|18/09/2005|Hypertension|None
 P005|Grace|08/12/2000|None|None
+P006|Chan|03/05/2005|fever|None
+P007|Lee|03/03/2004|None|None

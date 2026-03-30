@@ -17,7 +17,7 @@ public interface MedicineRepository {
 
   // Read
   ListInterface<Medicine> findAll();
-  Medicine findById(String id);
+  Medicine findById(String id); // Not used but implemented
   ListInterface<Medicine> findByName(String name);
   ListInterface<Medicine> findOutOfStock();
   ListInterface<Medicine> findBelowReorderLevel();

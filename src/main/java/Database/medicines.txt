@@ -1,2 +1,4 @@
 M001|Panaldo|Fever|500|50|10
+M002|Gastric |To cure gastric|100|50
 M002|Gastric |To cure gastric|100|50|10
+

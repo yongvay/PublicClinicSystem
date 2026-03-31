@@ -1,0 +1,42 @@
+============================================================
+                 CLINIC PATIENT REPORT
+Generated At: 01/04/2026 01:18
+============================================================
+
+[1] SUMMARY
+Total Patients : 7
+Average Age    : 25.14
+Youngest       : 20
+Oldest         : 36
+
+[2] AGE GROUP
+Child (0-12)   : 0
+Teen (13-18)   : 0
+Adult (19-40)  : 7
+Senior (41+)   : 0
+
+[3] TOP 5 OLDEST
+P003 - Raj (36)
+P002 - Tan (28)
+P001 - Ali (25)
+P005 - Grace (25)
+P007 - Lee (22)
+
+[4] TOP 5 YOUNGEST
+P004 - Tam Wan Jin (20)
+P006 - Chan (20)
+P007 - Lee (22)
+P001 - Ali (25)
+P005 - Grace (25)
+
+[5] PATIENT LIST (A-Z)
+P001 - Ali (25)
+P006 - Chan (20)
+P005 - Grace (25)
+P007 - Lee (22)
+P003 - Raj (36)
+P004 - Tam Wan Jin (20)
+P002 - Tan (28)
+
+============================================================
+

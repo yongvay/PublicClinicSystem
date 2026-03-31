@@ -255,45 +255,17 @@ public class MedicineUI {
     }
 
     private void generateMedicineReport() {
-        // 1. Get the formatted report data from the Control layer
         String reportText = medicineRepo.generateInventoryReport();
-
-        // 2. Display it to the User (Boundary responsibility)
         System.out.println(reportText);
 
-        // 3. Handle User Interaction (Boundary responsibility)
         if (!reportText.equals("No medicine data available to generate report.\n")) {
             System.out.print("\nWould you like to export this report to a .txt file? (Y/N): ");
             String exportChoice = scanner.nextLine().trim();
 
             if (exportChoice.equalsIgnoreCase("Y")) {
-                exportReportToFile(reportText);
+                // CALL THE SHARED UTILITY METHOD HERE
+                Utilities.exportReportToFile(reportText, "MedicineInventoryReport.txt");
             }
-        }
-    }
-
-    private void exportReportToFile(String reportContent) {
-        // 1. Define a RELATIVE folder path inside your project directory
-        String folderName = "src\\main\\java\\GeneratedReports\\";
-        String fileName = "MedicineInventoryReport.txt";
-
-        // Use File object to handle directory creation safely
-        java.io.File directory = new java.io.File(folderName);
-
-        // 2. If the folder doesn't exist, create it dynamically
-        if (!directory.exists()) {
-            directory.mkdir();
-        }
-
-        // 3. Construct the full relative path
-        java.io.File file = new java.io.File(directory, fileName);
-
-        // 4. Write the file
-        try (java.io.PrintWriter out = new java.io.PrintWriter(new java.io.FileWriter(file))) {
-            out.println(reportContent);
-            System.out.println("Success! Report exported to: " + file.getPath());
-        } catch (java.io.IOException e) {
-            System.out.println("Error: Failed to export report. " + e.getMessage());
         }
     }
 

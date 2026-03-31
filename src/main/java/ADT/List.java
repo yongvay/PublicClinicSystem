@@ -5,10 +5,11 @@ import java.util.Comparator;
 
 /**
  * @author Ng Yong Vay Custom List Implementation using an array. Note:
- * Positional methods use 1-based indexing (1 to numberOfEntries) as per the
- * assignment's recommended good practices.
+ *         Positional methods use 1-based indexing (1 to numberOfEntries) as per
+ *         the
+ *         assignment's recommended good practices.
  */
-public class List<T> implements ListInterface<T>, Iterable<T> {
+public class List<T> implements ListInterface<T> {
 
     private T[] elements;
     private int numberOfEntries;
@@ -97,16 +98,17 @@ public class List<T> implements ListInterface<T>, Iterable<T> {
         return result;
     }
 
-//    @Override
-//    public boolean remove(T anEntry) {
-//        for (int index = 0; index < numberOfEntries; index++) {
-//            if (anEntry == null ? elements[index] == null : anEntry.equals(elements[index])) {
-//                remove(index + 1); // Pass 1-based index to the other remove method
-//                return true;
-//            }
-//        }
-//        return false;
-//    }
+    // @Override
+    // public boolean remove(T anEntry) {
+    // for (int index = 0; index < numberOfEntries; index++) {
+    // if (anEntry == null ? elements[index] == null :
+    // anEntry.equals(elements[index])) {
+    // remove(index + 1); // Pass 1-based index to the other remove method
+    // return true;
+    // }
+    // }
+    // return false;
+    // }
     @Override
     public boolean remove(T anEntry) {
         // Reuse getPosition to find the 1-based index
@@ -145,16 +147,17 @@ public class List<T> implements ListInterface<T>, Iterable<T> {
         return result;
     }
 
-//    @Override
-//    public boolean contains(T anEntry) {
-//        boolean found = false;
-//        for (int index = 0; !found && (index < numberOfEntries); index++) {
-//            if (anEntry == null ? elements[index] == null : anEntry.equals(elements[index])) {
-//                found = true;
-//            }
-//        }
-//        return found;
-//    }
+    // @Override
+    // public boolean contains(T anEntry) {
+    // boolean found = false;
+    // for (int index = 0; !found && (index < numberOfEntries); index++) {
+    // if (anEntry == null ? elements[index] == null :
+    // anEntry.equals(elements[index])) {
+    // found = true;
+    // }
+    // }
+    // return found;
+    // }
     @Override
     public boolean contains(T anEntry) {
         // Reuse getPosition to avoid duplicate loop logic
@@ -172,6 +175,30 @@ public class List<T> implements ListInterface<T>, Iterable<T> {
         return -1; // Return -1 to indicate the entry was not found
     }
 
+    @Override
+    public T findFirst(SearchCriteria<T> criteria) {
+        for (T element : this) {
+            // The null check ensures we don't crash if the array contains nulls
+            if (element != null && criteria.isMatch(element)) {
+                return element;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public ListInterface<T> findAll(SearchCriteria<T> criteria) {
+        ListInterface<T> results = new List<>();
+        for (T element : this) {
+            // Safe check: verify the element exists before applying the search rule
+            if (element != null && criteria.isMatch(element)) {
+                results.add(element);
+            }
+        }
+        return results;
+    }
+
+    // Sorting Method
     @Override
     public ListInterface<T> sort(Comparator<T> comparator) {
         // Return a new list to maintain immutability of the original list

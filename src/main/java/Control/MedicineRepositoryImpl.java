@@ -2,6 +2,7 @@ package Control;
 
 import ADT.List;
 import ADT.ListInterface;
+import ADT.SearchCriteria;
 import DAO.MedicineDAO;
 import Entity.Medicine;
 import java.util.Comparator;
@@ -69,63 +70,53 @@ public class MedicineRepositoryImpl implements MedicineRepository {
     }
 
     @Override
-    public Medicine findById(String id) {
+    public Medicine findById(final String id) {
         if (id == null)
             return null;
 
-        // Create a dummy object with the target ID for the ADT to compare against.
-        Medicine dummy = new Medicine(id);
-
-        int position = medicineList.getPosition(dummy);
-
-        // If found (1-based position), return the actual entry from the list
-        if (position != -1) {
-            return medicineList.getEntry(position);
-        }
-        return null;
-    }
-
-    // Not Edited
-    // getAll(SearchRule<T> rule)
-    @Override
-    public ListInterface<Medicine> findByName(String name) {   
-        ListInterface<Medicine> results = new List<>();
-        if (name == null || name.trim().isEmpty())
-            return results;
-
-        String searchLower = name.toLowerCase();
-        for (Medicine m : medicineList) {
-            if (m.getName().toLowerCase().contains(searchLower)) {
-                results.add(m);
+        // Centralized single-search
+        return medicineList.findFirst(new SearchCriteria<Medicine>() {
+            @Override
+            public boolean isMatch(Medicine m) {
+                return m.getMedicineID().equalsIgnoreCase(id);
             }
-        }
-        return results;
+        });
     }
 
-    // Not Edited
+    @Override
+    public ListInterface<Medicine> findByName(String name) {
+        if (name == null || name.trim().isEmpty())
+            return new List<>();
+
+        final String searchLower = name.toLowerCase();
+
+        // Centralized multi-search
+        return medicineList.findAll(new SearchCriteria<Medicine>() {
+            @Override
+            public boolean isMatch(Medicine m) {
+                return m.getName().toLowerCase().contains(searchLower);
+            }
+        });
+    }
+
     @Override
     public ListInterface<Medicine> findOutOfStock() {
-        ListInterface<Medicine> results = new List<>();
-        for (Medicine m : medicineList) {
-            // Updated to match your Entity's getQuantityInStock()
-            if (m.getQuantityInStock() == 0) {
-                results.add(m);
+        return medicineList.findAll(new SearchCriteria<Medicine>() {
+            @Override
+            public boolean isMatch(Medicine m) {
+                return m.getQuantityInStock() == 0;
             }
-        }
-        return results;
+        });
     }
 
-    // Not Edited
     @Override
     public ListInterface<Medicine> findBelowReorderLevel() {
-        ListInterface<Medicine> results = new List<>();
-        for (Medicine m : medicineList) {
-            // Utilizing the newly added reorderLevel logic
-            if (m.getQuantityInStock() < m.getReorderLevel()) {
-                results.add(m);
+        return medicineList.findAll(new SearchCriteria<Medicine>() {
+            @Override
+            public boolean isMatch(Medicine m) {
+                return m.getQuantityInStock() < m.getReorderLevel();
             }
-        }
-        return results;
+        });
     }
 
     // ==========================================

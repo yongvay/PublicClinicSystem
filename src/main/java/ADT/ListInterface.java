@@ -43,7 +43,11 @@ public interface ListInterface<T> extends Iterable<T> {
   // Sorting method
   ListInterface<T> sort(Comparator<T> comparator);
   
+
   // Search method
   // Gets the 1-based position of an entry in the list. Returns -1 if not found.
   int getPosition(T anEntry);
+
+  ListInterface<T> findAll(SearchCriteria<T> criteria);
+  T findFirst(SearchCriteria<T> criteria);
 }

@@ -1,7 +1,6 @@
 package Boundary;
 
 import Control.MedicineRepository;
-import Control.MedicineRepositoryImpl;
 import Entity.Medicine;
 import ADT.ListInterface;
 import java.util.Scanner;

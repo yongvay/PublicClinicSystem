@@ -2,13 +2,14 @@ package Boundary;
 
 import Control.MedicineRepository;
 import Entity.Medicine;
+import Utility.Utilies;
 import ADT.ListInterface;
 import java.util.Scanner;
 
 /**
  * @author Ng Yong Vay
- * Boundary class for the Medicine Subsystem.
- * Handles all user interactions (input/output).
+ *         Boundary class for the Medicine Subsystem.
+ *         Handles all user interactions (input/output).
  */
 public class MedicineUI {
 
@@ -29,7 +30,7 @@ public class MedicineUI {
         do {
             displayMenu();
             System.out.print("Enter your choice: ");
-            
+
             // Basic input validation to prevent crashes
             if (scanner.hasNextInt()) {
                 choice = scanner.nextInt();
@@ -60,16 +61,35 @@ public class MedicineUI {
 
     private void processChoice(int choice) {
         switch (choice) {
-            case 1: addMedicine(); break;
-            case 2: viewAllMedicines(); break;
-            case 3: searchById(); break;
-            case 4: searchByName(); break;
-            case 5: viewLowStockAlerts(); break;
-            case 6: updateMedicine(); break;
-            case 7: deleteMedicine(); break;
-            case 8: viewSortedMedicines(); break;
-            case 0: System.out.println("Exiting Medicine Subsystem..."); break;
-            default: System.out.println("Invalid choice. Please try again.");
+            case 1:
+                addMedicine();
+                break;
+            case 2:
+                viewAllMedicines();
+                break;
+            case 3:
+                searchById();
+                break;
+            case 4:
+                searchByName();
+                break;
+            case 5:
+                viewLowStockAlerts();
+                break;
+            case 6:
+                updateMedicine();
+                break;
+            case 7:
+                deleteMedicine();
+                break;
+            case 8:
+                viewSortedMedicines();
+                break;
+            case 0:
+                System.out.println("Exiting Medicine Subsystem...");
+                break;
+            default:
+                System.out.println("Invalid choice. Please try again.");
         }
     }
 
@@ -78,7 +98,7 @@ public class MedicineUI {
     // ==========================================
     private void addMedicine() {
         System.out.println("\n--- Add New Medicine ---");
-        
+
         // 1. Auto-generate the ID instead of asking the user
         String id = medicineRepo.generateNextMedicineId();
         System.out.println("Auto-generated Medicine ID: " + id);
@@ -86,19 +106,15 @@ public class MedicineUI {
         // 2. Continue asking for the rest of the details
         System.out.print("Enter Name: ");
         String name = scanner.nextLine();
-        
+
         System.out.print("Enter Description: ");
         String desc = scanner.nextLine();
-        
+
         System.out.print("Enter Dosage (e.g., 500mg tablet): ");
         String dosage = scanner.nextLine();
-        
-        System.out.print("Enter Initial Stock Quantity: ");
-        int stock = scanner.nextInt();
-        
-        System.out.print("Enter Reorder Level: ");
-        int reorderLevel = scanner.nextInt();
-        scanner.nextLine(); // Consume newline
+
+        int stock = Utilies.getInt("Enter Initial Stock Quantity: ");
+        int reorderLevel = Utilies.getInt("Enter Reorder Level: ");
 
         // 3. Create and save the medicine
         Medicine newMed = new Medicine(id, name, desc, dosage, stock, reorderLevel);
@@ -116,7 +132,7 @@ public class MedicineUI {
         System.out.print("\nEnter Medicine ID to search: ");
         String id = scanner.nextLine();
         Medicine found = medicineRepo.findById(id);
-        
+
         if (found != null) {
             System.out.println("Medicine Found: \n" + found.toString());
         } else {
@@ -128,7 +144,7 @@ public class MedicineUI {
         System.out.print("\nEnter Medicine Name to search: ");
         String name = scanner.nextLine();
         ListInterface<Medicine> results = medicineRepo.findByName(name);
-        
+
         if (results.isEmpty()) {
             System.out.println("No medicines found matching: " + name);
         } else {
@@ -149,10 +165,10 @@ public class MedicineUI {
     }
 
     private void updateMedicine() {
-        System.out.print("\nEnter Medicine ID to update: ");
-        String id = scanner.nextLine();
+        Utilies.printHeader("Update Medicine Details");
+        String id = Utilies.getString("Enter Medicine ID to update: ");
         Medicine existing = medicineRepo.findById(id);
-        
+
         if (existing == null) {
             System.out.println("Error: Medicine not found!");
             return;
@@ -161,16 +177,17 @@ public class MedicineUI {
         System.out.println("Current Details: " + existing.toString());
         System.out.println("Enter new details (press Enter to keep current value):");
 
-        System.out.print("New Name [" + existing.getName() + "]: ");
-        String name = scanner.nextLine();
-        if (!name.isEmpty()) existing.setName(name);
+        updateIfNotEmpty(Utilies.getString("New Name [" + existing.getName() + "]: "), existing::setName);
 
-        System.out.print("New Stock Quantity [" + existing.getQuantityInStock() + "]: ");
-        String stockStr = scanner.nextLine();
-        if (!stockStr.isEmpty()) existing.setQuantityInStock(Integer.parseInt(stockStr));
+        String newStock = Utilies.getString("New Stock Quantity [" + existing.getQuantityInStock() + "]: ");
+        if (!newStock.isEmpty()) {
+            try {
+                existing.setQuantityInStock(Integer.parseInt(newStock));
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid stock format. Skipping stock update.");
+            }
+        }
 
-        // Note: For a real assignment, you would update all fields similarly.
-        
         if (medicineRepo.update(existing)) {
             System.out.println("Success: Medicine updated successfully!");
         } else {
@@ -178,11 +195,18 @@ public class MedicineUI {
         }
     }
 
+    // A functional interface helper to clean up the "if not empty, set" logic
+    private void updateIfNotEmpty(String input, java.util.function.Consumer<String> setter) {
+        if (!input.isEmpty()) {
+            setter.accept(input);
+        }
+    }
+
     private void deleteMedicine() {
         System.out.print("\nEnter Medicine ID to delete: ");
         String id = scanner.nextLine();
         Medicine target = medicineRepo.findById(id);
-        
+
         if (target != null) {
             System.out.print("Are you sure you want to delete " + target.getName() + "? (Y/N): ");
             String confirm = scanner.nextLine();
@@ -205,11 +229,11 @@ public class MedicineUI {
         System.out.println("1. Sort by Name (A-Z)");
         System.out.println("2. Sort by Stock Quantity (Low to High)");
         System.out.print("Enter choice: ");
-        
+
         if (scanner.hasNextInt()) {
             int choice = scanner.nextInt();
             scanner.nextLine();
-            
+
             ListInterface<Medicine> sortedList = null;
             if (choice == 1) {
                 sortedList = medicineRepo.sortedByName();
@@ -219,7 +243,7 @@ public class MedicineUI {
                 System.out.println("Invalid choice.");
                 return;
             }
-            
+
             displayList(sortedList);
         } else {
             System.out.println("Invalid input.");
@@ -230,7 +254,7 @@ public class MedicineUI {
     // ==========================================
     // UTILITY METHODS
     // ==========================================
-    
+
     /**
      * Helper method to iterate through and print any ListInterface of Medicine.
      * This proves to your tutor that your Iterable implementation works!

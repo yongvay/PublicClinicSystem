@@ -1,0 +1,26 @@
+
+========================================================================================
+                          CLINIC MEDICINE INVENTORY & RESTOCK REPORT                    
+                          Generated At: 31/03/2026 23:32
+========================================================================================
+
+[1] OVERALL INVENTORY SUMMARY
+--------------------------------------------------
+Total Unique Medicine Types  : 2
+Total Physical Units in Stock: 100
+
+[2] STOCK HEALTH ANALYSIS
+--------------------------------------------------
+Healthy Stock (Adequate)     : 2
+Low Stock (Needs Reorder)    : 0
+Out of Stock (CRITICAL)      : 0
+
+[4] COMPLETE INVENTORY LOG (Sorted by Stock Level)
+----------------------------------------------------------------------------------------
+| Med ID   | Medicine Name        | Description               | Stock    | Status   |
+----------------------------------------------------------------------------------------
+| M001     | Panaldo              | Fever                     | 50       | OK       |
+| M002     | Gastric              | To cure gastric           | 50       | OK       |
+========================================================================================
+End of Report.
+

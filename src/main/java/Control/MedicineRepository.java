@@ -32,4 +32,7 @@ public interface MedicineRepository {
   ListInterface<Medicine> sortedByName();
   ListInterface<Medicine> sortedByStock();
   ListInterface<Medicine> lowStockSorted(); //Not used
+
+  // Reporting methods
+  String generateInventoryReport();
 }

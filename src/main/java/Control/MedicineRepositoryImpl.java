@@ -192,4 +192,90 @@ public class MedicineRepositoryImpl implements MedicineRepository {
             }
         });
     }
+
+    @Override
+    public String generateInventoryReport() {
+        ListInterface<Medicine> allMedicines = this.findAll();
+
+        if (allMedicines.isEmpty()) {
+            return "No medicine data available to generate report.\n";
+        }
+
+        // 1. Fetch ADT Filtered Data
+        ListInterface<Medicine> lowStockMeds = this.findBelowReorderLevel();
+        ListInterface<Medicine> outOfStockMeds = this.findOutOfStock();
+
+        // 2. Calculate Aggregates
+        int totalUniqueMedicines = allMedicines.getNumberOfEntries();
+        int totalPhysicalStock = 0;
+
+        for (Medicine m : allMedicines) {
+            totalPhysicalStock += m.getQuantityInStock();
+        }
+
+        int outOfStockCount = outOfStockMeds.getNumberOfEntries();
+        int lowStockCount = lowStockMeds.getNumberOfEntries();
+        int healthyStockCount = totalUniqueMedicines - outOfStockCount - lowStockCount;
+
+        // 3. Build the Report String
+        StringBuilder report = new StringBuilder();
+        String time = java.time.LocalDateTime.now()
+                .format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
+
+        report.append("\n========================================================================================\n");
+        report.append("                          CLINIC MEDICINE INVENTORY & RESTOCK REPORT                    \n");
+        report.append("                          Generated At: ").append(time).append("\n");
+        report.append("========================================================================================\n");
+
+        report.append("\n[1] OVERALL INVENTORY SUMMARY\n");
+        report.append("--------------------------------------------------\n");
+        report.append("Total Unique Medicine Types  : ").append(totalUniqueMedicines).append("\n");
+        report.append("Total Physical Units in Stock: ").append(totalPhysicalStock).append("\n");
+
+        report.append("\n[2] STOCK HEALTH ANALYSIS\n");
+        report.append("--------------------------------------------------\n");
+        report.append("Healthy Stock (Adequate)     : ").append(healthyStockCount).append("\n");
+        report.append("Low Stock (Needs Reorder)    : ").append(lowStockCount).append("\n");
+        report.append("Out of Stock (CRITICAL)      : ").append(outOfStockCount).append("\n");
+
+        if (lowStockCount > 0 || outOfStockCount > 0) {
+            report.append("\n[3] ACTION REQUIRED: CRITICAL RESTOCK LIST\n");
+            report.append("----------------------------------------------------------------------------------------\n");
+            report.append(String.format("| %-8s | %-20s | %-15s | %-8s | %-12s |\n",
+                    "Med ID", "Medicine Name", "Dosage", "Stock", "Reorder Lvl"));
+            report.append("----------------------------------------------------------------------------------------\n");
+
+            for (Medicine m : lowStockMeds) {
+                String statusMarker = (m.getQuantityInStock() == 0) ? "**OUT**" : "LOW";
+                report.append(String.format("| %-8s | %-20s | %-15s | %-3d %-4s | %-12d |\n",
+                        m.getMedicineID(), m.getName(), m.getDosage(), m.getQuantityInStock(), statusMarker,
+                        m.getReorderLevel()));
+            }
+        }
+
+        report.append("\n[4] COMPLETE INVENTORY LOG (Sorted by Stock Level)\n");
+        report.append("----------------------------------------------------------------------------------------\n");
+        report.append(String.format("| %-8s | %-20s | %-25s | %-8s | %-8s |\n",
+                "Med ID", "Medicine Name", "Description", "Stock", "Status"));
+        report.append("----------------------------------------------------------------------------------------\n");
+
+        ListInterface<Medicine> sortedInventory = this.sortedByStock();
+        for (Medicine m : sortedInventory) {
+            String status = (m.getQuantityInStock() == 0) ? "OUT"
+                    : (m.getQuantityInStock() < m.getReorderLevel()) ? "LOW" : "OK";
+
+            report.append(String.format("| %-8s | %-20s | %-25s | %-8d | %-8s |\n",
+                    m.getMedicineID(),
+                    (m.getName().length() > 20 ? m.getName().substring(0, 17) + "..." : m.getName()),
+                    (m.getDescription().length() > 25 ? m.getDescription().substring(0, 22) + "..."
+                            : m.getDescription()),
+                    m.getQuantityInStock(),
+                    status));
+        }
+        report.append("========================================================================================\n");
+        report.append("End of Report.\n");
+
+        return report.toString();
+    }
+
 }

@@ -6,9 +6,9 @@ import java.util.Comparator;
 /**
  * @author Ng Yong Vay Custom List Implementation using an array. Note:
  *         Positional methods use 1-based indexing (1 to numberOfEntries) as per
- *         the
- *         assignment's recommended good practices.
+ *         the assignment's recommended good practices.
  */
+
 public class List<T> implements ListInterface<T> {
 
     private T[] elements;

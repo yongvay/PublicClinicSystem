@@ -5,8 +5,10 @@ import Control.AppointmentRepository;
 import Entity.Doctor;
 import Entity.Appointment;
 import Entity.Medicine;
+import ADT.List;
 import ADT.ListInterface;
-import ADT.List; 
+import ADT.SearchCriteria;
+import Utility.Utilities; 
 import java.util.Scanner;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -17,6 +19,7 @@ import java.io.PrintWriter;
 /**
  * @author Xing Szen
  * Boundary class for the Doctor Subsystem.
+ * Handles all user interactions (input/output).
  */
 public class DoctorUI {
 
@@ -24,26 +27,29 @@ public class DoctorUI {
     private AppointmentRepository appointmentRepo; 
     private Scanner scanner;
 
-    // IMPORTANT: Constructor now requires AppointmentRepository
     public DoctorUI(DoctorRepository doctorRepo, AppointmentRepository appointmentRepo) {
         this.doctorRepo = doctorRepo;
         this.appointmentRepo = appointmentRepo;
         this.scanner = new Scanner(System.in);
     }
 
+    // ==========================================
+    // MAIN START METHOD
+    // ==========================================
     public void start() {
         int choice = -1;
         do {
             displayMenu();
             System.out.print("Enter your choice: ");
             
+            // Basic input validation to prevent crashes
             if (scanner.hasNextInt()) {
                 choice = scanner.nextInt();
-                scanner.nextLine(); 
+                scanner.nextLine(); // Consume the leftover newline character
                 processChoice(choice);
             } else {
                 System.out.println("Invalid input. Please enter a number.");
-                scanner.nextLine(); 
+                scanner.nextLine(); // Clear the bad input
             }
         } while (choice != 0);
     }
@@ -81,14 +87,17 @@ public class DoctorUI {
         }
     }
 
+    // ==========================================
+    // UI HELPER METHODS
+    // ==========================================
     private void addDoctor() {
         System.out.println("\n--- Add New Doctor ---");
         
-        
+        // 1. Auto-generate the ID
         String id = doctorRepo.generateNextDoctorId();
-        System.out.println("Doctor ID: " + id);
+        System.out.println("Auto-generated Doctor ID: " + id);
 
-        
+        // 2. Continue asking for details
         System.out.print("Enter Name: ");
         String name = scanner.nextLine();
         
@@ -106,7 +115,8 @@ public class DoctorUI {
 
     private void viewAllDoctors() {
         System.out.println("\n--- All Registered Doctors ---");
-        displayList(doctorRepo.findAll());
+        ListInterface<Doctor> list = doctorRepo.findAll();
+        displayList(list);
     }
 
     private void searchById() {
@@ -124,7 +134,18 @@ public class DoctorUI {
     private void searchBySpecialization() {
         System.out.print("\nEnter Specialization to search (e.g., Cardiology): ");
         String spec = scanner.nextLine();
-        ListInterface<Doctor> results = doctorRepo.findBySpecialization(spec);
+        final String searchLower = spec.toLowerCase();
+
+        // 1. Fetch ALL doctors from the database
+        ListInterface<Doctor> allDocs = doctorRepo.findAll();
+        
+        // 2. EXPLICITLY implement SearchCriteria in the UI to filter them
+        ListInterface<Doctor> results = allDocs.findAll(new SearchCriteria<Doctor>() {
+            @Override
+            public boolean isMatch(Doctor doctor) {
+                return doctor.getSpecialization().toLowerCase().contains(searchLower);
+            }
+        });
         
         if (results.isEmpty()) {
             System.out.println("No doctors found specializing in: " + spec);
@@ -136,7 +157,18 @@ public class DoctorUI {
 
     private void viewAvailableDoctors() {
         System.out.println("\n--- Currently Available Doctors ---");
-        ListInterface<Doctor> availableDocs = doctorRepo.findAllAvailableDoctors();
+        
+        // 1. Fetch ALL doctors
+        ListInterface<Doctor> allDocs = doctorRepo.findAll();
+        
+        // 2. EXPLICITLY implement SearchCriteria in the UI to filter them
+        ListInterface<Doctor> availableDocs = allDocs.findAll(new SearchCriteria<Doctor>() {
+            @Override
+            public boolean isMatch(Doctor doctor) {
+                return doctor.getStatus() == true;
+            }
+        });
+
         if (availableDocs.isEmpty()) {
             System.out.println("All doctors are currently occupied or unavailable.");
         } else {
@@ -145,8 +177,8 @@ public class DoctorUI {
     }
 
     private void updateDoctor() {
-        System.out.print("\nEnter Doctor ID to update: ");
-        String id = scanner.nextLine();
+        Utilities.printHeader("Update Doctor Details");
+        String id = Utilities.getString("Enter Doctor ID to update: ");
         Doctor existing = doctorRepo.findById(id);
         
         if (existing == null) {
@@ -157,20 +189,12 @@ public class DoctorUI {
         System.out.println("Current Details: " + existing.toString());
         System.out.println("Enter new details (press Enter to keep current value):");
 
-        System.out.print("New Name [" + existing.getName() + "]: ");
-        String name = scanner.nextLine();
-        if (!name.isEmpty()) existing.setName(name);
-
-        System.out.print("New Specialization [" + existing.getSpecialization() + "]: ");
-        String spec = scanner.nextLine();
-        if (!spec.isEmpty()) existing.setSpecialization(spec);
-
-        System.out.print("New Contact Number [" + existing.getContactNum() + "]: ");
-        String contact = scanner.nextLine();
-        if (!contact.isEmpty()) existing.setContactNum(contact);
+        // Using functional interface helper
+        updateIfNotEmpty(Utilities.getString("New Name [" + existing.getName() + "]: "), existing::setName);
+        updateIfNotEmpty(Utilities.getString("New Specialization [" + existing.getSpecialization() + "]: "), existing::setSpecialization);
+        updateIfNotEmpty(Utilities.getString("New Contact Number [" + existing.getContactNum() + "]: "), existing::setContactNum);
         
-        System.out.print("Is Doctor Available? (Y/N) [" + (existing.getStatus() ? "Y" : "N") + "]: ");
-        String statusInput = scanner.nextLine().trim();
+        String statusInput = Utilities.getString("Is Doctor Available? (Y/N) [" + (existing.getStatus() ? "Y" : "N") + "]: ").trim();
         if (statusInput.equalsIgnoreCase("Y")) existing.setStatus(true);
         else if (statusInput.equalsIgnoreCase("N")) existing.setStatus(false);
 
@@ -178,6 +202,13 @@ public class DoctorUI {
             System.out.println("Success: Doctor details updated successfully!");
         } else {
             System.out.println("Failed to update doctor details.");
+        }
+    }
+
+    // A functional interface helper to clean up the "if not empty, set" logic
+    private void updateIfNotEmpty(String input, java.util.function.Consumer<String> setter) {
+        if (!input.isEmpty()) {
+            setter.accept(input);
         }
     }
 
@@ -229,18 +260,22 @@ public class DoctorUI {
         }
     }
 
+    // ==========================================
+    // UTILITY METHODS
+    // ==========================================
     private void displayList(ListInterface<Doctor> list) {
         if (list == null || list.isEmpty()) {
-            System.out.println("No records found.");
+            System.out.println("The list is empty.");
             return;
         }
+        // Using the enhanced for-loop because your List implements Iterable!
         for (Doctor d : list) {
             System.out.println(d.toString());
         }
     }
 
     // ==========================================
-    // REPORT GENERATION (WITH ANALYTICS & EXPORT)
+    // REPORT GENERATION (FULLY ADT OPTIMIZED)
     // ==========================================
     public void generateDoctorReport() {
         ListInterface<Doctor> doctors = doctorRepo.findAll();
@@ -251,88 +286,90 @@ public class DoctorUI {
             return;
         }
 
-        // We use a StringBuilder so we can print to console AND export to a file easily
         StringBuilder report = new StringBuilder();
         String time = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
         
         report.append("\n====================================================================================================================================================================\n");
-        report.append("                                                         DETAILED DOCTOR PERFORMANCE REPORT                                                                 \n");
-        report.append("                                                         Generated At: ").append(time).append("                                                                 \n");
+        report.append("                                                               DETAILED DOCTOR PERFORMANCE REPORT                                                                   \n");
+        report.append("                                                               Generated At: ").append(time).append("                                                                   \n");
         report.append("====================================================================================================================================================================\n");
 
         report.append(String.format("| %-9s | %-18s | %-5s | %-9s | %-10s | %-9s | %-10s | %-18s | %-11s | %-30s |\n",
                 "Doctor ID", "Doctor Name", "Total", "Completed", "Waitlisted", "Scheduled", "Patient ID", "Patient Name", "Appt Status", "Treatment (Meds)"));
         report.append("--------------------------------------------------------------------------------------------------------------------------------------------------------------------\n");
 
-        // Variables for Analytics
         ListInterface<String> specializations = new List<>();
-        ListInterface<Integer> specApptCounts = new List<>();
+        ListInterface<Integer> specApptCounts = new List<>();   
         int maxAppts = -1;
         String inDemandSpec = "N/A";
 
+        // Generate report per doctor
         for (int i = 1; i <= doctors.getNumberOfEntries(); i++) {
-            Doctor doc = doctors.getEntry(i);
+            final Doctor doc = doctors.getEntry(i); 
 
-            int total = 0;
             int completed = 0;
             int waitlisted = 0;
             int scheduled = 0;
 
-            // 1st Pass: Calculate stats
-            for (int j = 1; j <= appointments.getNumberOfEntries(); j++) {
-                Appointment appt = appointments.getEntry(j);
-                if (appt.getDoctor() != null && appt.getDoctor().getDoctorID().equals(doc.getDoctorID())) {
-                    total++;
-                    String status = appt.getStatus();
-                    if (status.equalsIgnoreCase("Completed") || status.equalsIgnoreCase("Admitted")) completed++;
-                    else if (status.equalsIgnoreCase("Waitlisted")) waitlisted++;
-                    else if (status.equalsIgnoreCase("Scheduled")) scheduled++;
+            // ADT OPTIMIZATION 1: Instantly filter appointments for this specific doctor using SearchCriteria!
+            ListInterface<Appointment> docAppts = appointments.findAll(new SearchCriteria<Appointment>() {
+                @Override
+                public boolean isMatch(Appointment a) {
+                    return a.getDoctor() != null && a.getDoctor().getDoctorID().equals(doc.getDoctorID());
                 }
+            });
+
+            int total = docAppts.getNumberOfEntries();
+
+            // Loop through this doctor's specific appointments
+            for (Appointment appt : docAppts) {
+                String status = appt.getStatus();
+                if (status.equalsIgnoreCase("Completed") || status.equalsIgnoreCase("Admitted")) completed++;
+                else if (status.equalsIgnoreCase("Waitlisted")) waitlisted++;
+                else if (status.equalsIgnoreCase("Scheduled")) scheduled++;
             }
 
-            // Analytics: Track Specialization Demand
+            // Safe, case-insensitive manual tracking for parallel lists
             String spec = doc.getSpecialization();
-            boolean specFound = false;
+            int pos = -1;
             for (int s = 1; s <= specializations.getNumberOfEntries(); s++) {
                 if (specializations.getEntry(s).equalsIgnoreCase(spec)) {
-                    specApptCounts.replace(s, specApptCounts.getEntry(s) + total);
-                    specFound = true; break;
+                    pos = s;
+                    break;
                 }
             }
-            if (!specFound) {
+            
+            if (pos != -1) {
+                specApptCounts.replace(pos, specApptCounts.getEntry(pos) + total);
+            } else {
                 specializations.add(spec);
                 specApptCounts.add(total);
             }
 
-           
+            // SUMMARY ROW
             report.append(String.format("| %-9s | %-18s | %-5d | %-9d | %-10d | %-9d | %-10s | %-18s | %-11s | %-30s |\n",
                     doc.getDoctorID(), doc.getName(), total, completed, waitlisted, scheduled, "", "", "", ""));
 
-            // 2nd Pass: Patient details
+            // PATIENT DETAILS
             if (total > 0) {
-                for (int j = 1; j <= appointments.getNumberOfEntries(); j++) {
-                    Appointment appt = appointments.getEntry(j);
-                    if (appt.getDoctor() != null && appt.getDoctor().getDoctorID().equals(doc.getDoctorID())) {
-                        
-                        String medsStr = "None";
-                        ListInterface<Medicine> meds = appt.getPrescribedMedicines();
-                        if (meds != null && !meds.isEmpty()) {
-                            StringBuilder sb = new StringBuilder();
-                            for (int k = 1; k <= meds.getNumberOfEntries(); k++) {
-                                sb.append(meds.getEntry(k).getName()).append(", ");
-                            }
-                            medsStr = sb.substring(0, sb.length() - 2); 
+                for (Appointment appt : docAppts) {
+                    String medsStr = "None";
+                    ListInterface<Medicine> meds = appt.getPrescribedMedicines();
+                    if (meds != null && !meds.isEmpty()) {
+                        StringBuilder sb = new StringBuilder();
+                        for (int k = 1; k <= meds.getNumberOfEntries(); k++) {
+                            sb.append(meds.getEntry(k).getName()).append(", ");
                         }
-
-                        String pName = appt.getPatient().getPatientName();
-                        if (pName.length() > 18) pName = pName.substring(0, 15) + "...";
-                        if (medsStr.length() > 30) medsStr = medsStr.substring(0, 27) + "...";
-
-                        
-                        report.append(String.format("| %-9s | %-18s | %-5s | %-9s | %-10s | %-9s | %-10s | %-18s | %-11s | %-30s |\n",
-                                "", "", "", "", "", "", 
-                                appt.getPatient().getPatientID(), pName, appt.getStatus(), medsStr));
+                        medsStr = sb.substring(0, sb.length() - 2); 
                     }
+
+                    String pName = appt.getPatient().getPatientName();
+                    if (pName.length() > 18) pName = pName.substring(0, 15) + "...";
+                    if (medsStr.length() > 30) medsStr = medsStr.substring(0, 27) + "...";
+
+                    report.append(String.format("| %-9s | %-18s | %-5s | %-9s | %-10s | %-9s | %-10s | %-18s | %-11s | %-30s |\n",
+                            "", "", "", "", "", "", 
+                            appt.getPatient().getPatientID(), pName, appt.getStatus(), medsStr));
                 }
             }
             report.append("--------------------------------------------------------------------------------------------------------------------------------------------------------------------\n");
@@ -350,10 +387,8 @@ public class DoctorUI {
         report.append("Most In-Demand Specialization: ").append(inDemandSpec).append(" (").append(maxAppts).append(" total appointments)\n");
         report.append("End of Report.\n");
 
-        // 1. Output to Console
         System.out.println(report.toString());
 
-        // 2. Prompt for External Export
         System.out.print("\nWould you like to export this report to a .txt file? (Y/N): ");
         String exportChoice = scanner.nextLine().trim();
         

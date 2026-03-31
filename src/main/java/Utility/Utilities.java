@@ -2,7 +2,7 @@ package Utility;
 
 import java.util.Scanner;
 
-public class Utilies {
+public class Utilities {
     private static final Scanner scanner = new Scanner(System.in);
 
     public static String getString(String prompt) {

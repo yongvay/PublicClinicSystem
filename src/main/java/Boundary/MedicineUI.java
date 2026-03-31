@@ -2,7 +2,7 @@ package Boundary;
 
 import Control.MedicineRepository;
 import Entity.Medicine;
-import Utility.Utilies;
+import Utility.Utilities;
 import ADT.ListInterface;
 import java.util.Scanner;
 
@@ -13,7 +13,6 @@ import java.util.Scanner;
  */
 public class MedicineUI {
 
-    // Dependency on the Control layer (Interface, not implementation)
     private MedicineRepository medicineRepo;
     private Scanner scanner;
 
@@ -113,8 +112,8 @@ public class MedicineUI {
         System.out.print("Enter Dosage (e.g., 500mg tablet): ");
         String dosage = scanner.nextLine();
 
-        int stock = Utilies.getInt("Enter Initial Stock Quantity: ");
-        int reorderLevel = Utilies.getInt("Enter Reorder Level: ");
+        int stock = Utilities.getInt("Enter Initial Stock Quantity: ");
+        int reorderLevel = Utilities.getInt("Enter Reorder Level: ");
 
         // 3. Create and save the medicine
         Medicine newMed = new Medicine(id, name, desc, dosage, stock, reorderLevel);
@@ -165,8 +164,8 @@ public class MedicineUI {
     }
 
     private void updateMedicine() {
-        Utilies.printHeader("Update Medicine Details");
-        String id = Utilies.getString("Enter Medicine ID to update: ");
+        Utilities.printHeader("Update Medicine Details");
+        String id = Utilities.getString("Enter Medicine ID to update: ");
         Medicine existing = medicineRepo.findById(id);
 
         if (existing == null) {
@@ -177,9 +176,9 @@ public class MedicineUI {
         System.out.println("Current Details: " + existing.toString());
         System.out.println("Enter new details (press Enter to keep current value):");
 
-        updateIfNotEmpty(Utilies.getString("New Name [" + existing.getName() + "]: "), existing::setName);
+        updateIfNotEmpty(Utilities.getString("New Name [" + existing.getName() + "]: "), existing::setName);
 
-        String newStock = Utilies.getString("New Stock Quantity [" + existing.getQuantityInStock() + "]: ");
+        String newStock = Utilities.getString("New Stock Quantity [" + existing.getQuantityInStock() + "]: ");
         if (!newStock.isEmpty()) {
             try {
                 existing.setQuantityInStock(Integer.parseInt(newStock));
@@ -255,10 +254,6 @@ public class MedicineUI {
     // UTILITY METHODS
     // ==========================================
 
-    /**
-     * Helper method to iterate through and print any ListInterface of Medicine.
-     * This proves to your tutor that your Iterable implementation works!
-     */
     private void displayList(ListInterface<Medicine> list) {
         if (list == null || list.isEmpty()) {
             System.out.println("The list is empty.");

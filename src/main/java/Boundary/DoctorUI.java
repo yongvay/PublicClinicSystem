@@ -9,7 +9,7 @@ import ADT.List;
 import ADT.ListInterface;
 import ADT.SearchCriteria;
 import Utility.Utilities; 
-import java.util.Scanner;
+import java.util.Scanner;   
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.io.FileWriter;
@@ -136,10 +136,9 @@ public class DoctorUI {
         String spec = scanner.nextLine();
         final String searchLower = spec.toLowerCase();
 
-        // 1. Fetch ALL doctors from the database
+        
         ListInterface<Doctor> allDocs = doctorRepo.findAll();
         
-        // 2. EXPLICITLY implement SearchCriteria in the UI to filter them
         ListInterface<Doctor> results = allDocs.findAll(new SearchCriteria<Doctor>() {
             @Override
             public boolean isMatch(Doctor doctor) {
@@ -158,10 +157,8 @@ public class DoctorUI {
     private void viewAvailableDoctors() {
         System.out.println("\n--- Currently Available Doctors ---");
         
-        // 1. Fetch ALL doctors
         ListInterface<Doctor> allDocs = doctorRepo.findAll();
         
-        // 2. EXPLICITLY implement SearchCriteria in the UI to filter them
         ListInterface<Doctor> availableDocs = allDocs.findAll(new SearchCriteria<Doctor>() {
             @Override
             public boolean isMatch(Doctor doctor) {
@@ -289,14 +286,18 @@ public class DoctorUI {
         StringBuilder report = new StringBuilder();
         String time = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
         
-        report.append("\n====================================================================================================================================================================\n");
-        report.append("                                                               DETAILED DOCTOR PERFORMANCE REPORT                                                                   \n");
-        report.append("                                                               Generated At: ").append(time).append("                                                                   \n");
-        report.append("====================================================================================================================================================================\n");
+        String separator = "======================================================================================================================================================================================\n";
+        String line =      "--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n";
 
-        report.append(String.format("| %-9s | %-18s | %-5s | %-9s | %-10s | %-9s | %-10s | %-18s | %-11s | %-30s |\n",
-                "Doctor ID", "Doctor Name", "Total", "Completed", "Waitlisted", "Scheduled", "Patient ID", "Patient Name", "Appt Status", "Treatment (Meds)"));
-        report.append("--------------------------------------------------------------------------------------------------------------------------------------------------------------------\n");
+        report.append("\n").append(separator);
+        report.append("                                                                         DETAILED DOCTOR PERFORMANCE REPORT                                                                           \n");
+        report.append("                                                                         Generated At: ").append(time).append("                                                                           \n");
+        report.append(separator);
+
+        // ADDED SPECIALIZATION COLUMN HERE
+        report.append(String.format("| %-9s | %-18s | %-15s | %-5s | %-9s | %-10s | %-9s | %-10s | %-18s | %-11s | %-30s |\n",
+                "Doctor ID", "Doctor Name", "Specialization", "Total", "Completed", "Waitlisted", "Scheduled", "Patient ID", "Patient Name", "Appt Status", "Treatment (Meds)"));
+        report.append(line);
 
         ListInterface<String> specializations = new List<>();
         ListInterface<Integer> specApptCounts = new List<>();   
@@ -346,9 +347,9 @@ public class DoctorUI {
                 specApptCounts.add(total);
             }
 
-            // SUMMARY ROW
-            report.append(String.format("| %-9s | %-18s | %-5d | %-9d | %-10d | %-9d | %-10s | %-18s | %-11s | %-30s |\n",
-                    doc.getDoctorID(), doc.getName(), total, completed, waitlisted, scheduled, "", "", "", ""));
+            // SUMMARY ROW (ADDED SPECIALIZATION VARIABLE)
+            report.append(String.format("| %-9s | %-18s | %-15s | %-5d | %-9d | %-10d | %-9d | %-10s | %-18s | %-11s | %-30s |\n",
+                    doc.getDoctorID(), doc.getName(), doc.getSpecialization(), total, completed, waitlisted, scheduled, "", "", "", ""));
 
             // PATIENT DETAILS
             if (total > 0) {
@@ -367,12 +368,13 @@ public class DoctorUI {
                     if (pName.length() > 18) pName = pName.substring(0, 15) + "...";
                     if (medsStr.length() > 30) medsStr = medsStr.substring(0, 27) + "...";
 
-                    report.append(String.format("| %-9s | %-18s | %-5s | %-9s | %-10s | %-9s | %-10s | %-18s | %-11s | %-30s |\n",
-                            "", "", "", "", "", "", 
+                    // SHIFTED OVER TO ACCOUNT FOR NEW SPECIALIZATION COLUMN
+                    report.append(String.format("| %-9s | %-18s | %-15s | %-5s | %-9s | %-10s | %-9s | %-10s | %-18s | %-11s | %-30s |\n",
+                            "", "", "", "", "", "", "", 
                             appt.getPatient().getPatientID(), pName, appt.getStatus(), medsStr));
                 }
             }
-            report.append("--------------------------------------------------------------------------------------------------------------------------------------------------------------------\n");
+            report.append(line);
         }
         
         // Calculate Most In-Demand Specialization
@@ -393,12 +395,9 @@ public class DoctorUI {
         String exportChoice = scanner.nextLine().trim();
         
         if (exportChoice.equalsIgnoreCase("Y")) {
-            try (PrintWriter out = new PrintWriter(new FileWriter("DoctorPerformanceReport.txt"))) {
-                out.println(report.toString());
-                System.out.println("Success! Report exported to 'DoctorPerformanceReport.txt' in your project directory.");
-            } catch (IOException e) {
-                System.out.println("Error: Failed to export report. " + e.getMessage());
-            }
+            // CALL THE SHARED UTILITY METHOD HERE
+            Utilities.exportReportToFile(report.toString(), "DoctorPerformanceReport.txt");
         }
     }
+    
 }

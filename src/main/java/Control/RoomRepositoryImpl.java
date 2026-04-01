@@ -35,7 +35,6 @@ public class RoomRepositoryImpl implements RoomRepository {
         for (Room r : roomList) {
             String currentIdStr = r.getRoomNumber();
             if (currentIdStr != null) {
-                // Safely extract only digits
                 String numericPart = currentIdStr.replaceAll("\\D+", ""); 
                 if (!numericPart.isEmpty()) {
                     int currentIdNum = Integer.parseInt(numericPart);
@@ -107,8 +106,7 @@ public class RoomRepositoryImpl implements RoomRepository {
             }
         });
     }
-    
-    // NEW HELPER: Fetch all occupied rooms using ADT SearchCriteria
+
     public ListInterface<Room> findAllOccupiedRooms() {
         return roomList.findAll(new SearchCriteria<Room>() {
             @Override
@@ -159,7 +157,14 @@ public class RoomRepositoryImpl implements RoomRepository {
         return roomList.sort(new Comparator<Room>() {
             @Override
             public int compare(Room r1, Room r2) {
-                return r1.getRoomNumber().compareToIgnoreCase(r2.getRoomNumber());
+                try {
+                    // UPDATED: Safely extract numbers to sort mathematically
+                    int num1 = Integer.parseInt(r1.getRoomNumber().replaceAll("\\D+", ""));
+                    int num2 = Integer.parseInt(r2.getRoomNumber().replaceAll("\\D+", ""));
+                    return Integer.compare(num1, num2);
+                } catch (NumberFormatException e) {
+                    return r1.getRoomNumber().compareToIgnoreCase(r2.getRoomNumber());
+                }
             }
         });
     }
@@ -175,7 +180,7 @@ public class RoomRepositoryImpl implements RoomRepository {
     }
 
     // ==========================================
-    // REPORT GENERATION (Maximized ADT Usage)
+    // REPORT GENERATION
     // ==========================================
     @Override
     public String generateRoomReport(ListInterface<Appointment> allApts) {
@@ -183,16 +188,13 @@ public class RoomRepositoryImpl implements RoomRepository {
             return "No room data available to generate report.\n";
         }
 
-        // 1. Fetch ADT Filtered Data (Just like Medicine Code)
         ListInterface<Room> availableRooms = this.findAllAvailableRooms();
         ListInterface<Room> occupiedRooms = this.findAllOccupiedRooms();
 
-        // 2. Calculate Aggregates using ADT size method
         int totalRooms = roomList.getNumberOfEntries();
         int availableCount = availableRooms.getNumberOfEntries();
         int occupiedCount = occupiedRooms.getNumberOfEntries();
 
-        // 3. Track distribution using your custom ADT lists! (This is a great use of the ADT)
         ListInterface<String> roomTypes = new List<>();
         ListInterface<Integer> typeTotalCounts = new List<>();
         ListInterface<Integer> typeAvailableCounts = new List<>();
@@ -201,15 +203,14 @@ public class RoomRepositoryImpl implements RoomRepository {
             String type = r.getRoomType();
             boolean found = false;
             
-            // Loop through ADT using 1-based indexing
             for (int j = 1; j <= roomTypes.getNumberOfEntries(); j++) {
                 if (roomTypes.getEntry(j).equalsIgnoreCase(type)) {
                     int currentTotal = typeTotalCounts.getEntry(j);
-                    typeTotalCounts.replace(j, currentTotal + 1); // ADT replace method
+                    typeTotalCounts.replace(j, currentTotal + 1); 
                     
                     if (r.isAvailable()) {
                         int currentAvail = typeAvailableCounts.getEntry(j);
-                        typeAvailableCounts.replace(j, currentAvail + 1); // ADT replace method
+                        typeAvailableCounts.replace(j, currentAvail + 1); 
                     }
                     found = true;
                     break;
@@ -217,7 +218,7 @@ public class RoomRepositoryImpl implements RoomRepository {
             }
             
             if (!found) {
-                roomTypes.add(type); // ADT add method
+                roomTypes.add(type); 
                 typeTotalCounts.add(1);
                 typeAvailableCounts.add(r.isAvailable() ? 1 : 0);
             }
@@ -253,10 +254,9 @@ public class RoomRepositoryImpl implements RoomRepository {
 
         report.append("\n[3] OCCUPIED ROOMS DETAILS\n");
         report.append("------------------------------------------------------\n");
-        if (occupiedRooms.isEmpty()) { // ADT isEmpty method
+        if (occupiedRooms.isEmpty()) { 
             report.append("All rooms are currently empty.\n");
         } else {
-            // Iterate ONLY through the pre-filtered occupied rooms
             for (Room r : occupiedRooms) {
                 String occupantName = "Unknown Patient";
                 String status = "";

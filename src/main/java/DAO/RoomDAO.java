@@ -11,7 +11,8 @@ import java.io.*;
 
 public class RoomDAO {
     
-    private static final String FILE_NAME = "src\\main\\java\\Database\\rooms.txt";
+    // UPDATED: Using forward slashes for cross-platform compatibility
+    private static final String FILE_NAME = "src/main/java/Database/rooms.txt";
     private static final String DELIMITER = "\\|"; 
     private static final String SEPARATOR = "|";   
 

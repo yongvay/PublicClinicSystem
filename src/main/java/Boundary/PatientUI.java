@@ -71,7 +71,7 @@ public class PatientUI {
     private LocalDate updateBirthDate(LocalDate currentDate) {
         while (true) {
             String input = inputString(
-                    "New Birth Date (dd/MM/yyyy, Enter to keep): ");
+                    "New Birth Date (dd/MM/yyyy): ");
 
             if (input.isEmpty()) return currentDate;
 
@@ -128,8 +128,23 @@ public class PatientUI {
         // Input with max length validation
         String name = inputWithMaxLength("Patient Name: ", 20, false);
         LocalDate birthDate = addBirthDate();
-        String history = inputWithMaxLength("Medical History: ", 30, false);
-
+        
+        // History input
+        String history;
+        while (true) {
+            System.out.print("Does the patient have medical history? (Yes/No): ");
+            String choice = scanner.nextLine().trim();
+            if (choice.equalsIgnoreCase("Yes")) {
+                history = inputWithMaxLength("Enter History: ", 30, false); // Max 15 for table formatting
+                break;
+            } else if (choice.equalsIgnoreCase("No")) {
+                history = "None";
+                break;
+            } else {
+                System.out.println("Invalid input. Please enter Yes or No.");
+            }
+        }
+        
         // Allergies input
         String allergies;
         while (true) {
@@ -183,32 +198,32 @@ public class PatientUI {
     // UPDATE
     private void updatePatient() {
         System.out.println("\n--- Update Patient ---");
-        System.out.print("\nEnter Patient ID to update: ");
+        System.out.print("<Enter Patient ID to update> ");
         String id = scanner.nextLine().trim();
         Patient existing = patientRepo.findById(id);
 
         if (existing == null) {
-            System.out.println("Patient not found. Failed to update.");
+            System.out.println("\nPatient not found. Failed to update.");
             return;
         }
 
-        System.out.println("Current Details: " + existing.toString());
-        System.out.println("Enter new details (press Enter to keep current value):");
+        System.out.println("\nCurrent Details: " + existing.toString());
+        System.out.println("Enter new details <press Enter to keep current value>\n");
 
         // Update Name
-        String name = inputWithMaxLength("New Name (press Enter to keep current): ", 20, true);
+        String name = inputWithMaxLength("New Name: ", 20, true);
         if (!name.isEmpty()) existing.setPatientName(name);
 
         // Update BirthDate
         existing.setBirthDate(updateBirthDate(existing.getBirthDate()));
 
         // Update Medical History
-        String history = inputWithMaxLength("New Medical History (press Enter to keep current): ", 30, true
+        String history = inputWithMaxLength("New Medical History: ", 30, true
         );
         if (!history.isEmpty()) existing.setMedicalHistory(history);
 
         // Update Allergies
-        String allergies = inputWithMaxLength("New Allergies (press Enter to keep current): ", 15, true);
+        String allergies = inputWithMaxLength("New Allergies: ", 15, true);
         if (!allergies.isEmpty()) existing.setAllergies(allergies);
 
         patientRepo.update(existing);

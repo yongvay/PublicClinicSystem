@@ -72,15 +72,19 @@ public class RoomUI {
         }
     }
 
-    // ... (addRoom, viewAllRooms, searchByRoomNumber, searchByRoomType, viewAvailableRooms, deleteRoom remain mostly unchanged) ...
-
     private void addRoom() {
         System.out.println("\n--- Add New Room ---");
         String roomNumber = roomRepo.generateNextRoomId();
         System.out.println("Auto-generated Room Number: " + roomNumber);
 
-        System.out.print("Enter Room Type (e.g., Consult, Treatment, Observation): ");
-        String roomType = scanner.nextLine();
+        // UPDATED: Validation loop to prevent blank room types
+        String roomType = "";
+        while (roomType.trim().isEmpty()) {
+            roomType = Utilities.getString("Enter Room Type (e.g., Consult, Treatment, Observation): ");
+            if (roomType.trim().isEmpty()) {
+                System.out.println("Error: Room Type cannot be empty. Please try again.");
+            }
+        }
         
         Room newRoom = new Room(roomNumber, roomType, true);
         
@@ -97,8 +101,7 @@ public class RoomUI {
     }
 
     private void searchByRoomNumber() {
-        System.out.print("\nEnter Room Number to search: ");
-        String roomNumber = scanner.nextLine();
+        String roomNumber = Utilities.getString("\nEnter Room Number to search: ");
         Room found = roomRepo.findById(roomNumber);
         
         if (found != null) {
@@ -109,8 +112,7 @@ public class RoomUI {
     }
 
     private void searchByRoomType() {
-        System.out.print("\nEnter Room Type to search (e.g., Treatment): ");
-        String type = scanner.nextLine();
+        String type = Utilities.getString("\nEnter Room Type to search (e.g., Treatment): ");
         ListInterface<Room> results = roomRepo.findByType(type);
         
         if (results.isEmpty()) {
@@ -145,7 +147,7 @@ public class RoomUI {
         System.out.println("Enter new details (press Enter to keep current value):");
 
         String type = Utilities.getString("New Room Type [" + existing.getRoomType() + "]: ");
-        if (!type.isEmpty()) existing.setRoomType(type);
+        updateIfNotEmpty(type, existing::setRoomType);
 
         String statusInput = Utilities.getString("Is Room Available? (Y/N) [" + (existing.isAvailable() ? "Y" : "N") + "]: ").trim();
         if (statusInput.equalsIgnoreCase("Y")) existing.setAvailable(true);
@@ -159,13 +161,17 @@ public class RoomUI {
     }
 
     private void deleteRoom() {
-        System.out.print("\nEnter Room Number to delete: ");
-        String roomNumber = scanner.nextLine();
+        String roomNumber = Utilities.getString("\nEnter Room Number to delete: ");
         Room target = roomRepo.findById(roomNumber);
         
         if (target != null) {
-            System.out.print("Are you sure you want to delete Room " + target.getRoomNumber() + "? (Y/N): ");
-            String confirm = scanner.nextLine();
+            // UPDATED: Prevent deletion of occupied rooms to protect data integrity
+            if (!target.isAvailable()) {
+                System.out.println("Error: Cannot delete Room " + target.getRoomNumber() + " because it is currently occupied by a patient.");
+                return;
+            }
+
+            String confirm = Utilities.getString("Are you sure you want to delete Room " + target.getRoomNumber() + "? (Y/N): ");
             if (confirm.equalsIgnoreCase("Y")) {
                 if (roomRepo.delete(target)) {
                     System.out.println("Success: Room deleted.");
@@ -218,7 +224,6 @@ public class RoomUI {
     }
 
     public void generateRoomReport() {
-        // Now, we just call the encapsulated string builder in the Repository, just like MedicineUI
         String reportText = roomRepo.generateRoomReport(appointmentRepo.getAllAppointments());
         System.out.println(reportText);
 
@@ -229,6 +234,13 @@ public class RoomUI {
             if (exportChoice.equalsIgnoreCase("Y")) {
                 Utilities.exportReportToFile(reportText, "RoomReport.txt");
             }
+        }
+    }
+
+    // Helper method to enable functional interface updates
+    private void updateIfNotEmpty(String input, java.util.function.Consumer<String> setter) {
+        if (input != null && !input.trim().isEmpty()) {
+            setter.accept(input.trim());
         }
     }
 }

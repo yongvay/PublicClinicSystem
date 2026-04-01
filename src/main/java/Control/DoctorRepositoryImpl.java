@@ -136,18 +136,18 @@ public class DoctorRepositoryImpl implements DoctorRepository {
             return false;
         }
 
-        for (int i = 1; i <= doctorList.getNumberOfEntries(); i++) {
-            Doctor current = doctorList.getEntry(i);
-            if (current.getDoctorID().equalsIgnoreCase(updatedDoctor.getDoctorID())) {
-                boolean success = doctorList.replace(i, updatedDoctor);
-                if (success) {
-                    doctorDAO.saveToFile(doctorList); 
-                }
-                return success;
+        int position = doctorList.getPosition(updatedDoctor);
+
+        if (position != -1) {
+            boolean success = doctorList.replace(position, updatedDoctor);
+            if (success) {
+                doctorDAO.saveToFile(doctorList); 
             }
+            return success;
         }
         return false;
     }
+    
 
     @Override
     public boolean delete(Doctor doctor) {

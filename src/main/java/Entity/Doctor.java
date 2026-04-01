@@ -18,28 +18,22 @@ public class Doctor {
         this.contactNum = contactNum;
         this.isAvailable = isAvailable;
     }
-
-    // ==========================================
+    
     // GETTERS
-    // ==========================================
     public String getDoctorID() { return doctorID; }
     public String getName() { return name; }
     public String getSpecialization() { return specialization; }
     public String getContactNum() { return contactNum; }
     public boolean getStatus() { return isAvailable; }
 
-    // ==========================================
     // SETTERS
-    // ==========================================
     public void setDoctorID(String doctorID) { this.doctorID = doctorID; }
     public void setName(String name) { this.name = name; }
     public void setSpecialization(String specialization) { this.specialization = specialization; }
     public void setContactNum(String contactNum) { this.contactNum = contactNum; }
     public void setStatus(boolean status) { this.isAvailable = status; }
 
-    // ==========================================
     // OVERRIDDEN METHODS
-    // ==========================================
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;

@@ -7,14 +7,13 @@ import java.io.*;
 
 /**
  * @author Xing Szen
- * Data Access Object for persisting Doctor records to a text file.
  */
 public class DoctorDAO {
     
     
     private static final String FILE_NAME = "src\\main\\java\\Database\\doctors.txt";
-    private static final String DELIMITER = "\\|"; // Regex for splitting
-    private static final String SEPARATOR = "|";   // String for joining
+    private static final String DELIMITER = "\\|"; 
+    private static final String SEPARATOR = "|";   
 
    
     public void saveToFile(ListInterface<Doctor> doctorList) {

@@ -11,8 +11,6 @@ import java.util.Scanner;
 
 /**
  * @author Xing Szen
- * Boundary class for the Doctor Subsystem.
- * Handles all user interactions (input/output).
  */
 public class DoctorUI {
 
@@ -26,23 +24,20 @@ public class DoctorUI {
         this.scanner = new Scanner(System.in);
     }
 
-    // ==========================================
-    // MAIN START METHOD
-    // ==========================================
     public void start() {
         int choice = -1;
         do {
             displayMenu();
             System.out.print("Enter your choice: ");
             
-            // Basic input validation to prevent crashes
+            
             if (scanner.hasNextInt()) {
                 choice = scanner.nextInt();
-                scanner.nextLine(); // Consume the leftover newline character
+                scanner.nextLine(); 
                 processChoice(choice);
             } else {
                 System.out.println("Invalid input. Please enter a number.");
-                scanner.nextLine(); // Clear the bad input
+                scanner.nextLine(); 
             }
         } while (choice != 0);
     }
@@ -80,9 +75,7 @@ public class DoctorUI {
         }
     }
 
-    // ==========================================
-    // UI HELPER METHODS
-    // ==========================================
+   
     private void addDoctor() {
         System.out.println("\n--- Add New Doctor ---");
         
@@ -90,7 +83,6 @@ public class DoctorUI {
         String id = doctorRepo.generateNextDoctorId();
         System.out.println("Auto-generated Doctor ID: " + id);
 
-        // 2. Continue asking for details
         System.out.print("Enter Name: ");
         String name = scanner.nextLine();
         
@@ -100,7 +92,6 @@ public class DoctorUI {
         System.out.print("Enter Contact Number: ");
         String contact = scanner.nextLine();
 
-        // New doctors are available by default
         Doctor newDoc = new Doctor(id, name, spec, contact, true);
         doctorRepo.create(newDoc);
         System.out.println("Success: Doctor added successfully!");
@@ -179,7 +170,6 @@ public class DoctorUI {
         System.out.println("Current Details: " + existing.toString());
         System.out.println("Enter new details (press Enter to keep current value):");
 
-        // Using functional interface helper
         updateIfNotEmpty(Utilities.getString("New Name [" + existing.getName() + "]: "), existing::setName);
         updateIfNotEmpty(Utilities.getString("New Specialization [" + existing.getSpecialization() + "]: "), existing::setSpecialization);
         updateIfNotEmpty(Utilities.getString("New Contact Number [" + existing.getContactNum() + "]: "), existing::setContactNum);
@@ -195,7 +185,7 @@ public class DoctorUI {
         }
     }
 
-    // A functional interface helper to clean up the "if not empty, set" logic
+    // clean up logic
     private void updateIfNotEmpty(String input, java.util.function.Consumer<String> setter) {
         if (!input.isEmpty()) {
             setter.accept(input);
@@ -250,23 +240,19 @@ public class DoctorUI {
         }
     }
 
-    // ==========================================
-    // UTILITY METHODS
-    // ==========================================
     private void displayList(ListInterface<Doctor> list) {
         if (list == null || list.isEmpty()) {
             System.out.println("The list is empty.");
             return;
         }
-        // Using the enhanced for-loop because your List implements Iterable!
         for (Doctor d : list) {
             System.out.println(d.toString());
         }
     }
 
-    // ==========================================
-    // REPORT GENERATION (FULLY ADT OPTIMIZED)
-    // ==========================================
+   
+    // REPORT GENERATION 
+ 
     public void generateDoctorReport() {
         ListInterface<Appointment> appointments = appointmentRepo.getAllAppointments();
 
@@ -278,7 +264,7 @@ public class DoctorUI {
             String exportChoice = scanner.nextLine().trim();
             
             if (exportChoice.equalsIgnoreCase("Y")) {
-                // CALL THE SHARED UTILITY METHOD HERE
+               
                 Utilities.exportReportToFile(reportText, "DoctorPerformanceReport.txt");
             }
         }

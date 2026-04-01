@@ -40,7 +40,7 @@ public class DoctorRepositoryImpl implements DoctorRepository {
                         maxId = currentIdNum;
                     }
                 } catch (NumberFormatException e) {
-                    // Ignore bad formatting
+                    
                 }
             }
         }
@@ -65,13 +65,13 @@ public class DoctorRepositoryImpl implements DoctorRepository {
     }
 
     
-    // SearchCriteria
+   
     
    @Override
     public Doctor findById(final String id) {
         if (id == null) return null;
         
-        // Explicitly implementing SearchCriteria
+        
         return doctorList.findFirst(new SearchCriteria<Doctor>() {
             @Override
             public boolean isMatch(Doctor doctor) {
@@ -126,9 +126,6 @@ public class DoctorRepositoryImpl implements DoctorRepository {
         return found != null;
     }
 
-    // ==========================================
-    // REST OF YOUR CODE REMAINS THE SAME
-    // ==========================================
 
     @Override
     public boolean update(Doctor updatedDoctor) {
@@ -199,7 +196,7 @@ public class DoctorRepositoryImpl implements DoctorRepository {
         report.append("                                                                         Generated At: ").append(time).append("                                                                           \n");
         report.append(separator);
 
-        // ADDED SPECIALIZATION COLUMN HERE
+        
         report.append(String.format("| %-9s | %-18s | %-15s | %-5s | %-9s | %-10s | %-9s | %-10s | %-18s | %-11s | %-30s |\n",
                 "Doctor ID", "Doctor Name", "Specialization", "Total", "Completed", "Waitlisted", "Scheduled", "Patient ID", "Patient Name", "Appt Status", "Treatment (Meds)"));
         report.append(line);
@@ -209,7 +206,7 @@ public class DoctorRepositoryImpl implements DoctorRepository {
         int maxAppts = -1;
         String inDemandSpec = "N/A";
 
-        // Generate report per doctor
+        
         for (int i = 1; i <= doctorList.getNumberOfEntries(); i++) {
             final Doctor doc = doctorList.getEntry(i); 
 
@@ -217,7 +214,6 @@ public class DoctorRepositoryImpl implements DoctorRepository {
             int waitlisted = 0;
             int scheduled = 0;
 
-            // ADT OPTIMIZATION 1: Instantly filter appointments for this specific doctor using SearchCriteria!
             ListInterface<Appointment> docAppts = appointments.findAll(new SearchCriteria<Appointment>() {
                 @Override
                 public boolean isMatch(Appointment a) {
@@ -227,7 +223,6 @@ public class DoctorRepositoryImpl implements DoctorRepository {
 
             int total = docAppts.getNumberOfEntries();
 
-            // Loop through this doctor's specific appointments
             for (Appointment appt : docAppts) {
                 String status = appt.getStatus();
                 if (status.equalsIgnoreCase("Completed") || status.equalsIgnoreCase("Admitted")) completed++;
@@ -235,7 +230,6 @@ public class DoctorRepositoryImpl implements DoctorRepository {
                 else if (status.equalsIgnoreCase("Scheduled")) scheduled++;
             }
 
-            // Safe, case-insensitive manual tracking for parallel lists
             String spec = doc.getSpecialization();
             int pos = -1;
             for (int s = 1; s <= specializations.getNumberOfEntries(); s++) {
@@ -251,12 +245,10 @@ public class DoctorRepositoryImpl implements DoctorRepository {
                 specializations.add(spec);
                 specApptCounts.add(total);
             }
-
-            // SUMMARY ROW (ADDED SPECIALIZATION VARIABLE)
+            
             report.append(String.format("| %-9s | %-18s | %-15s | %-5d | %-9d | %-10d | %-9d | %-10s | %-18s | %-11s | %-30s |\n",
                     doc.getDoctorID(), doc.getName(), doc.getSpecialization(), total, completed, waitlisted, scheduled, "", "", "", ""));
 
-            // PATIENT DETAILS
             if (total > 0) {
                 for (Appointment appt : docAppts) {
                     String medsStr = "None";
@@ -273,7 +265,6 @@ public class DoctorRepositoryImpl implements DoctorRepository {
                     if (pName.length() > 18) pName = pName.substring(0, 15) + "...";
                     if (medsStr.length() > 30) medsStr = medsStr.substring(0, 27) + "...";
 
-                    // SHIFTED OVER TO ACCOUNT FOR NEW SPECIALIZATION COLUMN
                     report.append(String.format("| %-9s | %-18s | %-15s | %-5s | %-9s | %-10s | %-9s | %-10s | %-18s | %-11s | %-30s |\n",
                             "", "", "", "", "", "", "", 
                             appt.getPatient().getPatientID(), pName, appt.getStatus(), medsStr));

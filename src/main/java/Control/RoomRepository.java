@@ -1,11 +1,8 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package Control;
 
 import ADT.ListInterface;
 import Entity.Room;
+import Entity.Appointment;
 
 /**
  * @author Ng Zhi Xuan
@@ -29,4 +26,11 @@ public interface RoomRepository {
 
     // Delete 
     boolean delete(Room room);
+    
+    // Sorting methods
+    ListInterface<Room> sortedByRoomNumber();
+    ListInterface<Room> sortedByType();
+    
+    // Reporting method
+    String generateRoomReport(ListInterface<Appointment> allApts);
 }

@@ -35,18 +35,13 @@ public class RoomRepositoryImpl implements RoomRepository {
         for (Room r : roomList) {
             String currentIdStr = r.getRoomNumber();
             if (currentIdStr != null) {
-                try {
-                    int currentIdNum;
-                    if (currentIdStr.toUpperCase().startsWith("R")) {
-                        currentIdNum = Integer.parseInt(currentIdStr.substring(1));
-                    } else {
-                        currentIdNum = Integer.parseInt(currentIdStr);
-                    }
+                // Safely extract only digits
+                String numericPart = currentIdStr.replaceAll("\\D+", ""); 
+                if (!numericPart.isEmpty()) {
+                    int currentIdNum = Integer.parseInt(numericPart);
                     if (currentIdNum > maxId) {
                         maxId = currentIdNum;
                     }
-                } catch (NumberFormatException e) {
-                    // Ignore badly formatted numbers
                 }
             }
         }
@@ -112,6 +107,16 @@ public class RoomRepositoryImpl implements RoomRepository {
             }
         });
     }
+    
+    // NEW HELPER: Fetch all occupied rooms using ADT SearchCriteria
+    public ListInterface<Room> findAllOccupiedRooms() {
+        return roomList.findAll(new SearchCriteria<Room>() {
+            @Override
+            public boolean isMatch(Room r) {
+                return !r.isAvailable();
+            }
+        });
+    }
 
     // ==========================================
     // UPDATE (Using getPosition)
@@ -170,7 +175,7 @@ public class RoomRepositoryImpl implements RoomRepository {
     }
 
     // ==========================================
-    // REPORT GENERATION
+    // REPORT GENERATION (Maximized ADT Usage)
     // ==========================================
     @Override
     public String generateRoomReport(ListInterface<Appointment> allApts) {
@@ -178,32 +183,33 @@ public class RoomRepositoryImpl implements RoomRepository {
             return "No room data available to generate report.\n";
         }
 
-        int totalRooms = roomList.getNumberOfEntries();
-        int availableCount = 0;
-        int occupiedCount = 0;
+        // 1. Fetch ADT Filtered Data (Just like Medicine Code)
+        ListInterface<Room> availableRooms = this.findAllAvailableRooms();
+        ListInterface<Room> occupiedRooms = this.findAllOccupiedRooms();
 
+        // 2. Calculate Aggregates using ADT size method
+        int totalRooms = roomList.getNumberOfEntries();
+        int availableCount = availableRooms.getNumberOfEntries();
+        int occupiedCount = occupiedRooms.getNumberOfEntries();
+
+        // 3. Track distribution using your custom ADT lists! (This is a great use of the ADT)
         ListInterface<String> roomTypes = new List<>();
         ListInterface<Integer> typeTotalCounts = new List<>();
         ListInterface<Integer> typeAvailableCounts = new List<>();
 
         for (Room r : roomList) {
-            if (r.isAvailable()) {
-                availableCount++;
-            } else {
-                occupiedCount++;
-            }
-
             String type = r.getRoomType();
             boolean found = false;
             
+            // Loop through ADT using 1-based indexing
             for (int j = 1; j <= roomTypes.getNumberOfEntries(); j++) {
                 if (roomTypes.getEntry(j).equalsIgnoreCase(type)) {
                     int currentTotal = typeTotalCounts.getEntry(j);
-                    typeTotalCounts.replace(j, currentTotal + 1);
+                    typeTotalCounts.replace(j, currentTotal + 1); // ADT replace method
                     
                     if (r.isAvailable()) {
                         int currentAvail = typeAvailableCounts.getEntry(j);
-                        typeAvailableCounts.replace(j, currentAvail + 1);
+                        typeAvailableCounts.replace(j, currentAvail + 1); // ADT replace method
                     }
                     found = true;
                     break;
@@ -211,7 +217,7 @@ public class RoomRepositoryImpl implements RoomRepository {
             }
             
             if (!found) {
-                roomTypes.add(type);
+                roomTypes.add(type); // ADT add method
                 typeTotalCounts.add(1);
                 typeAvailableCounts.add(r.isAvailable() ? 1 : 0);
             }
@@ -247,25 +253,24 @@ public class RoomRepositoryImpl implements RoomRepository {
 
         report.append("\n[3] OCCUPIED ROOMS DETAILS\n");
         report.append("------------------------------------------------------\n");
-        if (occupiedCount == 0) {
+        if (occupiedRooms.isEmpty()) { // ADT isEmpty method
             report.append("All rooms are currently empty.\n");
         } else {
-            for (Room r : roomList) {
-                if (!r.isAvailable()) {
-                    String occupantName = "Unknown Patient";
-                    String status = "";
-                    
-                    for (Appointment apt : allApts) {
-                        if (apt.getRoom() != null && apt.getRoom().getRoomNumber().equals(r.getRoomNumber())) {
-                            if (apt.getStatus().equalsIgnoreCase("Scheduled") || apt.getStatus().equalsIgnoreCase("Admitted")) {
-                                occupantName = apt.getPatient().getPatientName();
-                                status = apt.getStatus();
-                                break;
-                            }
+            // Iterate ONLY through the pre-filtered occupied rooms
+            for (Room r : occupiedRooms) {
+                String occupantName = "Unknown Patient";
+                String status = "";
+                
+                for (Appointment apt : allApts) {
+                    if (apt.getRoom() != null && apt.getRoom().getRoomNumber().equals(r.getRoomNumber())) {
+                        if (apt.getStatus().equalsIgnoreCase("Scheduled") || apt.getStatus().equalsIgnoreCase("Admitted")) {
+                            occupantName = apt.getPatient().getPatientName();
+                            status = apt.getStatus();
+                            break;
                         }
                     }
-                    report.append(String.format("Room %-4s (%-12s) - Occupied by: %s [%s]\n", r.getRoomNumber(), r.getRoomType(), occupantName, status));
                 }
+                report.append(String.format("Room %-4s (%-12s) - Occupied by: %s [%s]\n", r.getRoomNumber(), r.getRoomType(), occupantName, status));
             }
         }
         report.append("======================================================\n");

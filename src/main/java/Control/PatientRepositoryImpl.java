@@ -2,7 +2,6 @@ package Control;
 
 import ADT.List;
 import ADT.ListInterface;
-import ADT.SearchCriteria;
 import DAO.PatientDAO;
 import Entity.Patient;
 
@@ -58,72 +57,6 @@ public class PatientRepositoryImpl implements PatientRepository {
         return patientList;
     }
 
-    // SEARCH BY ID
-    @Override
-    public Patient findById(String id) {
-        return patientList.findFirst(new SearchCriteria<Patient>() {
-            @Override
-            public boolean isMatch(Patient p) {
-                return p.getPatientID() != null &&
-                       p.getPatientID().equalsIgnoreCase(id);
-            }
-        });
-    }
-
-    // SEARCH BY NAME 
-    @Override
-    public ListInterface<Patient> findByName(String name) {
-        return patientList.findAll(new SearchCriteria<Patient>() {
-            @Override
-            public boolean isMatch(Patient p) {
-                return p.getPatientName() != null &&
-                       p.getPatientName().toLowerCase()
-                       .contains(name.toLowerCase());
-            }
-        });
-    }
-
-    // SEARCH: WITH ALLERGY
-    @Override
-    public ListInterface<Patient> findPatientsWithAllergy() {
-        return patientList.findAll((Patient p) -> p.getAllergies() != null &&
-                !"None".equalsIgnoreCase(p.getAllergies()));
-    }
-
-    // SORTING 
-    @Override
-    public ListInterface<Patient> getPatientsSortedByName() {
-        ListInterface<Patient> copy = new List<>();
-        for (Patient p : patientList) {
-            copy.add(p);
-        }
-
-        return copy.sort((p1, p2) ->
-                p1.getPatientName().compareToIgnoreCase(p2.getPatientName()));
-    }
-
-    @Override
-    public ListInterface<Patient> getPatientsSortedByAgeAsc() {
-        ListInterface<Patient> copy = new List<>();
-        for (Patient p : patientList) {
-            copy.add(p);
-        }
-
-        return copy.sort((p1, p2) ->
-                Integer.compare(p1.getAge(), p2.getAge()));
-    }
-
-    @Override
-    public ListInterface<Patient> getPatientsSortedByAgeDesc() {
-        ListInterface<Patient> copy = new List<>();
-        for (Patient p : patientList) {
-            copy.add(p);
-        }
-
-        return copy.sort((p1, p2) ->
-                Integer.compare(p2.getAge(), p1.getAge()));
-    }
-
     // UPDATE
     @Override
     public boolean update(Patient updatedPatient) {
@@ -135,7 +68,6 @@ public class PatientRepositoryImpl implements PatientRepository {
             if (success) {
                 patientDAO.saveToFile(patientList);
             }
-
             return success;
         }
 
@@ -153,6 +85,59 @@ public class PatientRepositoryImpl implements PatientRepository {
 
         return success;
     }
+    
+    // SEARCH 
+    @Override
+    public Patient findById(String id) {
+        return patientList.findFirst((Patient p) -> 
+                p.getPatientID() != null &&
+                p.getPatientID().equalsIgnoreCase(id)
+        );
+    }
+    
+    @Override
+    public ListInterface<Patient> findByName(String name) {
+        return patientList.findAll(p ->
+            p.getPatientName() != null &&
+            p.getPatientName().toLowerCase()
+            .contains(name.toLowerCase())
+        );
+    }
+
+    @Override
+    public ListInterface<Patient> findPatientsWithAllergy() {
+        return patientList.findAll((Patient p) -> 
+                p.getAllergies() != null &&
+                !"None".equalsIgnoreCase(p.getAllergies()));
+    }
+    
+    // SORTING 
+    @Override
+    public ListInterface<Patient> getPatientsSortedByName() {
+        ListInterface<Patient> copy = new List<>();
+        for (Patient p : patientList) {
+            copy.add(p);
+        }
+
+        return copy.sort((p1, p2) -> 
+                p1.getPatientName().compareToIgnoreCase(p2.getPatientName()));
+    }
+
+    @Override
+    public ListInterface<Patient> getPatientsSortedByAgeAsc() {
+        ListInterface<Patient> copy = new List<>(patientList);
+        
+        return copy.sort((p1, p2) ->
+                Integer.compare(p1.getAge(), p2.getAge()));
+    }
+
+    @Override
+    public ListInterface<Patient> getPatientsSortedByAgeDesc() {
+        ListInterface<Patient> copy = new List<>(patientList);
+
+        return copy.sort((p1, p2) ->
+                Integer.compare(p2.getAge(), p1.getAge()));
+    }
 
     // REPORT GENERATION
     @Override
@@ -169,10 +154,7 @@ public class PatientRepositoryImpl implements PatientRepository {
         int minAge = Integer.MAX_VALUE;
         int maxAge = Integer.MIN_VALUE;
 
-        int child = 0;
-        int teen = 0;
-        int adult = 0;
-        int senior = 0;
+        int child = 0,teen = 0, adult = 0, senior = 0;
 
         for (Patient p : list) {
             int age = p.getAge();
@@ -188,7 +170,7 @@ public class PatientRepositoryImpl implements PatientRepository {
             else if (age <= 40) adult++;
             else senior++;
         }
-        double avgAge = (double) totalAge / total;
+        int avgAge = totalAge / total;
 
         // Safe sorting
         ListInterface<Patient> sortedAsc = getPatientsSortedByAgeAsc();
@@ -206,18 +188,21 @@ public class PatientRepositoryImpl implements PatientRepository {
         report.append("============================================================\n\n");
 
         report.append("[1] SUMMARY\n");
+        report.append("----------------------\n");
         report.append("Total Patients : ").append(total).append("\n");
-        report.append("Average Age    : ").append(String.format("%.2f", avgAge)).append("\n");
+        report.append("Average Age    : ").append(String.format("%d", avgAge)).append("\n");
         report.append("Youngest       : ").append(minAge).append("\n");
         report.append("Oldest         : ").append(maxAge).append("\n\n");
 
         report.append("[2] AGE GROUP\n");
+        report.append("----------------------\n");       
         report.append("Child (0-12)   : ").append(child).append("\n");
         report.append("Teen (13-18)   : ").append(teen).append("\n");
         report.append("Adult (19-40)  : ").append(adult).append("\n");
         report.append("Senior (41+)   : ").append(senior).append("\n\n");
 
         report.append("[3] TOP 5 OLDEST\n");
+        report.append("----------------------\n"); 
         for (int i = 1; i <= Math.min(5, sortedDesc.getNumberOfEntries()); i++) {
             Patient p = sortedDesc.getEntry(i);
             report.append(p.getPatientID())
@@ -229,6 +214,7 @@ public class PatientRepositoryImpl implements PatientRepository {
         }
         
         report.append("\n[4] TOP 5 YOUNGEST\n");
+        report.append("----------------------\n"); 
         for (int i = 1; i <= Math.min(5, sortedAsc.getNumberOfEntries()); i++) {
             Patient p = sortedAsc.getEntry(i);
             report.append(p.getPatientID())
@@ -240,6 +226,7 @@ public class PatientRepositoryImpl implements PatientRepository {
         }
         
         report.append("\n[5] PATIENT LIST (A-Z)\n");
+        report.append("----------------------\n"); 
         for (Patient p : sortedName) {
             report.append(p.getPatientID())
                   .append(" - ")

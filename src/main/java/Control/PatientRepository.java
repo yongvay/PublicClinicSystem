@@ -8,28 +8,28 @@ import Entity.Patient;
  */
 public interface PatientRepository {
 
-    //Auto Generate Patient ID
+    //Auto Generate Patient ID to Create Patient
     String generatePatientID();
-    
-    // Create
     void create(Patient patient);
 
     // Read
     ListInterface<Patient> findAll();
-    
-    // Search
-    Patient findById(String id);
-    ListInterface<Patient> findByName(String name);
-    ListInterface<Patient> findPatientsWithAllergy();
-    ListInterface<Patient> getPatientsSortedByName();
-    ListInterface<Patient> getPatientsSortedByAgeAsc();
-    ListInterface<Patient> getPatientsSortedByAgeDesc();
     
     // Update
     boolean update(Patient patient);
 
     // Delete
     boolean delete(Patient patient);
+    
+    // Search
+    Patient findById(String id);
+    ListInterface<Patient> findByName(String name);
+    ListInterface<Patient> findPatientsWithAllergy();
+    
+    // Sorting
+    ListInterface<Patient> getPatientsSortedByName();
+    ListInterface<Patient> getPatientsSortedByAgeAsc();
+    ListInterface<Patient> getPatientsSortedByAgeDesc();
     
     // Generate Report
     String generatePatientReport();

@@ -5,7 +5,11 @@ import ADT.SearchCriteria;
 import ADT.ListInterface;
 import DAO.DoctorDAO; 
 import Entity.Doctor;
+import Entity.Appointment;
+import Entity.Medicine;
 import java.util.Comparator;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 /**
  * @author Xing Szen
@@ -176,5 +180,120 @@ public class DoctorRepositoryImpl implements DoctorRepository {
                 return d1.getSpecialization().compareToIgnoreCase(d2.getSpecialization());
             }
         });
+    }
+
+    @Override
+    public String generateDoctorReport(ListInterface<Appointment> appointments) {
+        if (doctorList.isEmpty()) {
+            return "No doctor data available to generate report.\n";
+        }
+
+        StringBuilder report = new StringBuilder();
+        String time = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
+        
+        String separator = "======================================================================================================================================================================================\n";
+        String line =      "--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n";
+
+        report.append("\n").append(separator);
+        report.append("                                                                         DETAILED DOCTOR PERFORMANCE REPORT                                                                           \n");
+        report.append("                                                                         Generated At: ").append(time).append("                                                                           \n");
+        report.append(separator);
+
+        // ADDED SPECIALIZATION COLUMN HERE
+        report.append(String.format("| %-9s | %-18s | %-15s | %-5s | %-9s | %-10s | %-9s | %-10s | %-18s | %-11s | %-30s |\n",
+                "Doctor ID", "Doctor Name", "Specialization", "Total", "Completed", "Waitlisted", "Scheduled", "Patient ID", "Patient Name", "Appt Status", "Treatment (Meds)"));
+        report.append(line);
+
+        ListInterface<String> specializations = new List<>();
+        ListInterface<Integer> specApptCounts = new List<>();   
+        int maxAppts = -1;
+        String inDemandSpec = "N/A";
+
+        // Generate report per doctor
+        for (int i = 1; i <= doctorList.getNumberOfEntries(); i++) {
+            final Doctor doc = doctorList.getEntry(i); 
+
+            int completed = 0;
+            int waitlisted = 0;
+            int scheduled = 0;
+
+            // ADT OPTIMIZATION 1: Instantly filter appointments for this specific doctor using SearchCriteria!
+            ListInterface<Appointment> docAppts = appointments.findAll(new SearchCriteria<Appointment>() {
+                @Override
+                public boolean isMatch(Appointment a) {
+                    return a.getDoctor() != null && a.getDoctor().getDoctorID().equals(doc.getDoctorID());
+                }
+            });
+
+            int total = docAppts.getNumberOfEntries();
+
+            // Loop through this doctor's specific appointments
+            for (Appointment appt : docAppts) {
+                String status = appt.getStatus();
+                if (status.equalsIgnoreCase("Completed") || status.equalsIgnoreCase("Admitted")) completed++;
+                else if (status.equalsIgnoreCase("Waitlisted")) waitlisted++;
+                else if (status.equalsIgnoreCase("Scheduled")) scheduled++;
+            }
+
+            // Safe, case-insensitive manual tracking for parallel lists
+            String spec = doc.getSpecialization();
+            int pos = -1;
+            for (int s = 1; s <= specializations.getNumberOfEntries(); s++) {
+                if (specializations.getEntry(s).equalsIgnoreCase(spec)) {
+                    pos = s;
+                    break;
+                }
+            }
+            
+            if (pos != -1) {
+                specApptCounts.replace(pos, specApptCounts.getEntry(pos) + total);
+            } else {
+                specializations.add(spec);
+                specApptCounts.add(total);
+            }
+
+            // SUMMARY ROW (ADDED SPECIALIZATION VARIABLE)
+            report.append(String.format("| %-9s | %-18s | %-15s | %-5d | %-9d | %-10d | %-9d | %-10s | %-18s | %-11s | %-30s |\n",
+                    doc.getDoctorID(), doc.getName(), doc.getSpecialization(), total, completed, waitlisted, scheduled, "", "", "", ""));
+
+            // PATIENT DETAILS
+            if (total > 0) {
+                for (Appointment appt : docAppts) {
+                    String medsStr = "None";
+                    ListInterface<Medicine> meds = appt.getPrescribedMedicines();
+                    if (meds != null && !meds.isEmpty()) {
+                        StringBuilder sb = new StringBuilder();
+                        for (int k = 1; k <= meds.getNumberOfEntries(); k++) {
+                            sb.append(meds.getEntry(k).getName()).append(", ");
+                        }
+                        medsStr = sb.substring(0, sb.length() - 2); 
+                    }
+
+                    String pName = appt.getPatient().getPatientName();
+                    if (pName.length() > 18) pName = pName.substring(0, 15) + "...";
+                    if (medsStr.length() > 30) medsStr = medsStr.substring(0, 27) + "...";
+
+                    // SHIFTED OVER TO ACCOUNT FOR NEW SPECIALIZATION COLUMN
+                    report.append(String.format("| %-9s | %-18s | %-15s | %-5s | %-9s | %-10s | %-9s | %-10s | %-18s | %-11s | %-30s |\n",
+                            "", "", "", "", "", "", "", 
+                            appt.getPatient().getPatientID(), pName, appt.getStatus(), medsStr));
+                }
+            }
+            report.append(line);
+        }
+        
+        // Calculate Most In-Demand Specialization
+        for (int s = 1; s <= specializations.getNumberOfEntries(); s++) {
+            if (specApptCounts.getEntry(s) > maxAppts) {
+                maxAppts = specApptCounts.getEntry(s);
+                inDemandSpec = specializations.getEntry(s);
+            }
+        }
+
+        report.append("\n[ADVANCED ANALYTICS] Resource Utilization\n");
+        report.append("Most In-Demand Specialization: ").append(inDemandSpec).append(" (").append(maxAppts).append(" total appointments)\n");
+        report.append("End of Report.\n");
+
+        return report.toString();
     }
 }

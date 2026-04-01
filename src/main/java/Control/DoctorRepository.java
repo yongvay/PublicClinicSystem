@@ -2,6 +2,7 @@ package Control;
 
 import ADT.ListInterface;
 import Entity.Doctor;
+import Entity.Appointment;
 
 /**
  * @author Xing Szen
@@ -37,4 +38,7 @@ public interface DoctorRepository {
   
     // Logic to check specialization against the collection of doctors
     boolean specializationExists(String specialization);
+
+    // Reporting method
+    String generateDoctorReport(ListInterface<Appointment> allApts);
 }

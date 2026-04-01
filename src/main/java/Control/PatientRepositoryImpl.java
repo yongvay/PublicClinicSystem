@@ -4,6 +4,7 @@ import ADT.List;
 import ADT.ListInterface;
 import DAO.PatientDAO;
 import Entity.Patient;
+import Utility.Utilities;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -236,7 +237,7 @@ public class PatientRepositoryImpl implements PatientRepository {
                   .append(")\n");
         }
         report.append("\n============================================================\n");
-
+        Utilities.exportReportToFile(report.toString(), "PatientReport.txt");
         return report.toString();
     }
 }

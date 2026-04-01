@@ -1,12 +1,10 @@
 package Boundary;
 
 import ADT.ListInterface;
-import Utility.Utilities;
 import Control.PatientRepository;
 import Entity.Patient;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Scanner;
@@ -95,11 +93,11 @@ public class PatientUI {
             switch (choice) {
                 case 1 -> addPatient();
                 case 2 -> viewAllPatients();
-                case 3 -> searchById();
-                case 4 -> searchByName();
-                case 5 -> searchPatientsWithAllergy();
-                case 6 -> updatePatient();
-                case 7 -> deletePatient();
+                case 3 -> updatePatient();
+                case 4 -> deletePatient();
+                case 5 -> searchById();
+                case 6 -> searchByName();
+                case 7 -> searchPatientsWithAllergy();
                 case 8 -> generateReport();
                 case 0 -> System.out.println("Exiting...");
                 default -> System.out.println("Invalid choice.");
@@ -112,12 +110,12 @@ public class PatientUI {
         System.out.println("\n========== PATIENT MENU ==========");
         System.out.println("1 Add Patient");
         System.out.println("2 View All Patients");
-        System.out.println("3 Search by ID");
-        System.out.println("4 Search by Name");
-        System.out.println("5 Patients with Allergy");
-        System.out.println("6 Update Patient");
-        System.out.println("7 Delete Patient");
-        System.out.println("8 Generate Report");
+        System.out.println("3 Update Patient");
+        System.out.println("4 Delete Patient");
+        System.out.println("5 Search by ID");
+        System.out.println("6 Search by Name");
+        System.out.println("7 Search Patient with Allergy");
+        System.out.println("8 Generate Patient Report");
         System.out.println("0 Exit");
         System.out.println("=================================");
     }
@@ -219,7 +217,7 @@ public class PatientUI {
 
     // DELETE
     private void deletePatient() {
-
+        System.out.println("\n--- Delete Patient ---");
         String id = inputString("Enter ID: ");
         Patient p = patientRepo.findById(id);
 
@@ -247,15 +245,8 @@ public class PatientUI {
     
     // REPORT
     private void generateReport() {
-        
         String report = patientRepo.generatePatientReport();
         System.out.println(report);
-
-        LocalDateTime now = LocalDateTime.now();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy_HH-mm");
-
-        String fileName = "PatientReport_" + now.format(formatter) + ".txt";
-        Utilities.exportReportToFile(report, fileName);
-        System.out.println("Report exported: " + fileName);
+        System.out.println("Report updated: PatientReport.txt");
     }
 }

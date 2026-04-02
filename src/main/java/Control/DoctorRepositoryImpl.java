@@ -16,22 +16,23 @@ import java.time.format.DateTimeFormatter;
  */
 public class DoctorRepositoryImpl implements DoctorRepository {
 
-    private ListInterface<Doctor> doctorList;
+    private ListInterface<Doctor> doctorList; 
     private DoctorDAO doctorDAO; 
 
     public DoctorRepositoryImpl() {
         this.doctorDAO = new DoctorDAO(); 
-        this.doctorList = doctorDAO.loadFromFile();
+        this.doctorList = doctorDAO.loadFromFile(); 
         
         if (this.doctorList == null) {
-            this.doctorList = new List<>();
+            this.doctorList = new List<>(); 
         }
     }
     
+    //Auto Generate DoctorId
     @Override
     public String generateNextDoctorId() {
         int maxId = 0;
-        for (Doctor d : doctorList) {
+        for (Doctor d : doctorList) { 
             String currentIdStr = d.getDoctorID();
             if (currentIdStr != null && currentIdStr.startsWith("D")) {
                 try {
@@ -51,7 +52,7 @@ public class DoctorRepositoryImpl implements DoctorRepository {
     public boolean create(Doctor doctor) {
         if (doctor != null) {
             if (findById(doctor.getDoctorID()) == null) {
-                doctorList.add(doctor);
+                doctorList.add(doctor); 
                 doctorDAO.saveToFile(doctorList);
                 return true; 
             }
@@ -61,18 +62,14 @@ public class DoctorRepositoryImpl implements DoctorRepository {
 
     @Override
     public ListInterface<Doctor> findAll() {
-        return doctorList;
+        return doctorList; 
     }
-
-    
-   
     
    @Override
     public Doctor findById(final String id) {
         if (id == null) return null;
         
-        
-        return doctorList.findFirst(new SearchCriteria<Doctor>() {
+        return doctorList.findFirst(new SearchCriteria<Doctor>() { 
             @Override
             public boolean isMatch(Doctor doctor) {
                 return doctor.getDoctorID().equalsIgnoreCase(id);
@@ -82,7 +79,7 @@ public class DoctorRepositoryImpl implements DoctorRepository {
 
     @Override
     public Doctor findFirstAvailableDoctor() {
-        return doctorList.findFirst(new SearchCriteria<Doctor>() {
+        return doctorList.findFirst(new SearchCriteria<Doctor>() { 
             @Override
             public boolean isMatch(Doctor doctor) {
                 return doctor.getStatus();
@@ -93,11 +90,11 @@ public class DoctorRepositoryImpl implements DoctorRepository {
     @Override
     public ListInterface<Doctor> findBySpecialization(String specialization) {
         if (specialization == null || specialization.trim().isEmpty()) {
-            return new List<>();
+            return new List<>(); 
         }
         final String searchLower = specialization.toLowerCase();
         
-        return doctorList.findAll(new SearchCriteria<Doctor>() {
+        return doctorList.findAll(new SearchCriteria<Doctor>() { 
             @Override
             public boolean isMatch(Doctor doctor) {
                 return doctor.getSpecialization().toLowerCase().contains(searchLower);
@@ -107,7 +104,7 @@ public class DoctorRepositoryImpl implements DoctorRepository {
 
     @Override
     public ListInterface<Doctor> findAllAvailableDoctors() {
-        return doctorList.findAll(new SearchCriteria<Doctor>() {
+        return doctorList.findAll(new SearchCriteria<Doctor>() { 
             @Override
             public boolean isMatch(Doctor doctor) {
                 return doctor.getStatus();
@@ -117,7 +114,7 @@ public class DoctorRepositoryImpl implements DoctorRepository {
 
     @Override
     public boolean specializationExists(final String specialization) {
-        Doctor found = doctorList.findFirst(new SearchCriteria<Doctor>() {
+        Doctor found = doctorList.findFirst(new SearchCriteria<Doctor>() { 
             @Override
             public boolean isMatch(Doctor doctor) {
                 return doctor.getSpecialization().equalsIgnoreCase(specialization);
@@ -126,14 +123,13 @@ public class DoctorRepositoryImpl implements DoctorRepository {
         return found != null;
     }
 
-
     @Override
     public boolean update(Doctor updatedDoctor) {
         if (updatedDoctor == null) {
             return false;
         }
 
-        int position = doctorList.getPosition(updatedDoctor);
+        int position = doctorList.getPosition(updatedDoctor); 
 
         if (position != -1) {
             boolean success = doctorList.replace(position, updatedDoctor);
@@ -144,7 +140,6 @@ public class DoctorRepositoryImpl implements DoctorRepository {
         }
         return false;
     }
-    
 
     @Override
     public boolean delete(Doctor doctor) {
@@ -161,7 +156,7 @@ public class DoctorRepositoryImpl implements DoctorRepository {
 
     @Override
     public ListInterface<Doctor> findAllSortedByName() {
-        return doctorList.sort(new Comparator<Doctor>() {
+        return doctorList.sort(new Comparator<Doctor>() { 
             @Override
             public int compare(Doctor d1, Doctor d2) {
                 return d1.getName().compareToIgnoreCase(d2.getName());
@@ -196,34 +191,32 @@ public class DoctorRepositoryImpl implements DoctorRepository {
         report.append("                                                                         Generated At: ").append(time).append("                                                                           \n");
         report.append(separator);
 
-        
         report.append(String.format("| %-9s | %-18s | %-15s | %-5s | %-9s | %-10s | %-9s | %-10s | %-18s | %-11s | %-30s |\n",
                 "Doctor ID", "Doctor Name", "Specialization", "Total", "Completed", "Waitlisted", "Scheduled", "Patient ID", "Patient Name", "Appt Status", "Treatment (Meds)"));
         report.append(line);
 
-        ListInterface<String> specializations = new List<>();
-        ListInterface<Integer> specApptCounts = new List<>();   
+        ListInterface<String> specializations = new List<>(); 
+        ListInterface<Integer> specApptCounts = new List<>(); 
         int maxAppts = -1;
         String inDemandSpec = "N/A";
 
-        
-        for (int i = 1; i <= doctorList.getNumberOfEntries(); i++) {
+        for (int i = 1; i <= doctorList.getNumberOfEntries(); i++) { 
             final Doctor doc = doctorList.getEntry(i); 
 
             int completed = 0;
             int waitlisted = 0;
             int scheduled = 0;
 
-            ListInterface<Appointment> docAppts = appointments.findAll(new SearchCriteria<Appointment>() {
+            ListInterface<Appointment> docAppts = appointments.findAll(new SearchCriteria<Appointment>() { 
                 @Override
                 public boolean isMatch(Appointment a) {
                     return a.getDoctor() != null && a.getDoctor().getDoctorID().equals(doc.getDoctorID());
                 }
             });
 
-            int total = docAppts.getNumberOfEntries();
+            int total = docAppts.getNumberOfEntries(); 
 
-            for (Appointment appt : docAppts) {
+            for (Appointment appt : docAppts) { 
                 String status = appt.getStatus();
                 if (status.equalsIgnoreCase("Completed") || status.equalsIgnoreCase("Admitted")) completed++;
                 else if (status.equalsIgnoreCase("Waitlisted")) waitlisted++;
@@ -232,31 +225,31 @@ public class DoctorRepositoryImpl implements DoctorRepository {
 
             String spec = doc.getSpecialization();
             int pos = -1;
-            for (int s = 1; s <= specializations.getNumberOfEntries(); s++) {
-                if (specializations.getEntry(s).equalsIgnoreCase(spec)) {
+            for (int s = 1; s <= specializations.getNumberOfEntries(); s++) { 
+                if (specializations.getEntry(s).equalsIgnoreCase(spec)) { 
                     pos = s;
                     break;
                 }
             }
             
             if (pos != -1) {
-                specApptCounts.replace(pos, specApptCounts.getEntry(pos) + total);
+                specApptCounts.replace(pos, specApptCounts.getEntry(pos) + total); 
             } else {
-                specializations.add(spec);
-                specApptCounts.add(total);
+                specializations.add(spec); 
+                specApptCounts.add(total); 
             }
-            
+
             report.append(String.format("| %-9s | %-18s | %-15s | %-5d | %-9d | %-10d | %-9d | %-10s | %-18s | %-11s | %-30s |\n",
                     doc.getDoctorID(), doc.getName(), doc.getSpecialization(), total, completed, waitlisted, scheduled, "", "", "", ""));
 
             if (total > 0) {
-                for (Appointment appt : docAppts) {
+                for (Appointment appt : docAppts) { 
                     String medsStr = "None";
-                    ListInterface<Medicine> meds = appt.getPrescribedMedicines();
-                    if (meds != null && !meds.isEmpty()) {
+                    ListInterface<Medicine> meds = appt.getPrescribedMedicines(); 
+                    if (meds != null && !meds.isEmpty()) { 
                         StringBuilder sb = new StringBuilder();
-                        for (int k = 1; k <= meds.getNumberOfEntries(); k++) {
-                            sb.append(meds.getEntry(k).getName()).append(", ");
+                        for (int k = 1; k <= meds.getNumberOfEntries(); k++) { 
+                            sb.append(meds.getEntry(k).getName()).append(", "); 
                         }
                         medsStr = sb.substring(0, sb.length() - 2); 
                     }
@@ -273,10 +266,9 @@ public class DoctorRepositoryImpl implements DoctorRepository {
             report.append(line);
         }
         
-        // Calculate Most In-Demand Specialization
-        for (int s = 1; s <= specializations.getNumberOfEntries(); s++) {
-            if (specApptCounts.getEntry(s) > maxAppts) {
-                maxAppts = specApptCounts.getEntry(s);
+        for (int s = 1; s <= specializations.getNumberOfEntries(); s++) { 
+            if (specApptCounts.getEntry(s) > maxAppts) { 
+                maxAppts = specApptCounts.getEntry(s); 
                 inDemandSpec = specializations.getEntry(s);
             }
         }

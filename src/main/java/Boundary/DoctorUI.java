@@ -116,25 +116,42 @@ public class DoctorUI {
     }
 
     private void searchBySpecialization() {
-        System.out.print("\nEnter Specialization to search (e.g., Cardiology): ");
-        String spec = scanner.nextLine();
-        final String searchLower = spec.toLowerCase();
+        System.out.println("\n--- Search Doctor by Specialization ---");
+        
+        ListInterface<String> specializations = doctorRepo.getAllUniqueSpecializations();
+        
+        if (specializations.isEmpty()) {
+            System.out.println("No specializations available in the system currently.");
+            return;
+        }
+        System.out.println("Available Specializations:");
+        for (int i = 1; i <= specializations.getNumberOfEntries(); i++) {
+            System.out.println(i + ". " + specializations.getEntry(i));
+        }
 
+        System.out.print("\nSelect a specialization (1-" + specializations.getNumberOfEntries() + "): ");
         
-        ListInterface<Doctor> allDocs = doctorRepo.findAll();
-        
-        ListInterface<Doctor> results = allDocs.findAll(new SearchCriteria<Doctor>() {
-            @Override
-            public boolean isMatch(Doctor doctor) {
-                return doctor.getSpecialization().toLowerCase().contains(searchLower);
+        if (scanner.hasNextInt()) {
+            int choice = scanner.nextInt();
+            scanner.nextLine(); 
+            
+            if (choice >= 1 && choice <= specializations.getNumberOfEntries()) {
+                String selectedSpec = specializations.getEntry(choice);
+                
+                ListInterface<Doctor> results = doctorRepo.findBySpecialization(selectedSpec);
+                
+                if (results.isEmpty()) {
+                    System.out.println("No doctors found specializing in: " + selectedSpec);
+                } else {
+                    System.out.println("\n--- Search Results (" + selectedSpec + ") ---");
+                    displayList(results);
+                }
+            } else {
+                System.out.println("Invalid selection. Please choose a number from the list.");
             }
-        });
-        
-        if (results.isEmpty()) {
-            System.out.println("No doctors found specializing in: " + spec);
         } else {
-            System.out.println("Search Results:");
-            displayList(results);
+            System.out.println("Invalid input. Please enter a valid number.");
+            scanner.nextLine();
         }
     }
 

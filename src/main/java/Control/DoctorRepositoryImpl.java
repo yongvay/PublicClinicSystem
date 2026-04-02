@@ -101,6 +101,30 @@ public class DoctorRepositoryImpl implements DoctorRepository {
             }
         });
     }
+    
+    @Override
+    public ListInterface<String> getAllUniqueSpecializations() {
+        ListInterface<String> uniqueSpecs = new List<>(); 
+        
+        for (Doctor doc : doctorList) { 
+            String spec = doc.getSpecialization();
+            boolean exists = false;
+            
+           
+            for (int i = 1; i <= uniqueSpecs.getNumberOfEntries(); i++) { 
+                if (uniqueSpecs.getEntry(i).equalsIgnoreCase(spec)) { 
+                    exists = true;
+                    break;
+                }
+            }
+            
+            
+            if (!exists && spec != null && !spec.trim().isEmpty()) {
+                uniqueSpecs.add(spec); 
+            }
+        }
+        return uniqueSpecs;
+    }
 
     @Override
     public ListInterface<Doctor> findAllAvailableDoctors() {

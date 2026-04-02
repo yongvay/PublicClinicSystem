@@ -41,4 +41,6 @@ public interface DoctorRepository {
 
     // Reporting method
     String generateDoctorReport(ListInterface<Appointment> allApts);
+    
+    ListInterface<String> getAllUniqueSpecializations();
 }

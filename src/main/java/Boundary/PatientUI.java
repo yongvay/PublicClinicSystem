@@ -3,6 +3,7 @@ package Boundary;
 import ADT.ListInterface;
 import Control.PatientRepository;
 import Entity.Patient;
+import Utility.Utilities;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -262,6 +263,14 @@ public class PatientUI {
     private void generateReport() {
         String report = patientRepo.generatePatientReport();
         System.out.println(report);
-        System.out.println("Report updated: PatientReport.txt");
-    }
+
+        if (!report.equals("No medicine data available to generate report.\n")) {
+            System.out.print("\nWould you like to export this report to a .txt file? (Y/N): ");
+            String exportChoice = scanner.nextLine().trim();
+
+            if (exportChoice.equalsIgnoreCase("Y")) {
+                Utilities.exportReportToFile(report, "PatientReport.txt");
+            }
+        }
+    }    
 }

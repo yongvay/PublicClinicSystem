@@ -4,7 +4,6 @@ import ADT.List;
 import ADT.ListInterface;
 import DAO.PatientDAO;
 import Entity.Patient;
-import Utility.Utilities;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 /**
@@ -12,8 +11,8 @@ import java.time.format.DateTimeFormatter;
  */
 public class PatientRepositoryImpl implements PatientRepository {
 
-    private ListInterface<Patient> patientList;
-    private PatientDAO patientDAO;
+    private final ListInterface<Patient> patientList;
+    private final PatientDAO patientDAO;
 
     public PatientRepositoryImpl() {
         patientDAO = new PatientDAO();

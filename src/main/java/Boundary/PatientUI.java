@@ -4,7 +4,6 @@ import ADT.ListInterface;
 import Control.PatientRepository;
 import Entity.Patient;
 import Utility.Utilities;
-
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -14,9 +13,9 @@ import java.util.Scanner;
  */
 public class PatientUI {
 
-    private PatientRepository patientRepo;
-    private Scanner scanner;
-    private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    private final PatientRepository patientRepo;
+    private final Scanner scanner;
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     public PatientUI(PatientRepository patientRepo) {
         this.patientRepo = patientRepo;
@@ -235,15 +234,22 @@ public class PatientUI {
     private void deletePatient() {
         System.out.println("\n--- Delete Patient ---");
         String id = inputString("Enter ID: ");
-        Patient p = patientRepo.findById(id);
+        Patient existing = patientRepo.findById(id);
 
-        if (p == null) {
-            System.out.println("Patient not found.");
+        if (existing == null) {
+            System.out.println("\nPatient not found. Failed to update.");
             return;
         }
 
-        patientRepo.delete(p);
-        System.out.println("Deleted successfully.");
+        System.out.println("\nCurrent Details: " + existing.toString());
+        
+        System.out.print("\nEnter 'Y' to confirm deletion? (Y/N): ");
+        String exportChoice = scanner.nextLine().trim();
+
+        if (exportChoice.equalsIgnoreCase("Y")) {
+            patientRepo.delete(existing);
+            System.out.println("Deleted successfully.");            
+        }
     }
 
     // DISPLAY

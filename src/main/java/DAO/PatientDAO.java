@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package DAO;
 
 import ADT.List;
@@ -11,7 +7,6 @@ import java.io.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 /**
- *
  * @author Tam Wan Jin
  */
 public class PatientDAO {
@@ -20,7 +15,7 @@ public class PatientDAO {
     private static final String DELIMITER = "\\|";
     private static final String SEPARATOR = "|";
 
-    private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
     
 // SAVE FILE
     public void saveToFile(ListInterface<Patient> patientList) {

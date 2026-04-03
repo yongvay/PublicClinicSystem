@@ -98,7 +98,8 @@ public class PatientUI {
                 case 5 -> searchById();
                 case 6 -> searchByName();
                 case 7 -> searchPatientsWithAllergy();
-                case 8 -> generateReport();
+                case 8 -> printAllPatientsSortedByName();
+                case 9 -> generateReport();               
                 case 0 -> System.out.println("Exiting...");
                 default -> System.out.println("Invalid choice.");
             }
@@ -115,7 +116,8 @@ public class PatientUI {
         System.out.println("5 Search by ID");
         System.out.println("6 Search by Name");
         System.out.println("7 Search Patient with Allergy");
-        System.out.println("8 Generate Patient Report");
+        System.out.println("8 View Patient List (A-Z)");
+        System.out.println("9 Generate Patient Report");        
         System.out.println("0 Exit");
         System.out.println("=================================");
     }
@@ -278,5 +280,20 @@ public class PatientUI {
                 Utilities.exportReportToFile(report, "PatientReport.txt");
             }
         }
-    }    
+    } 
+    
+    public void printAllPatientsSortedByName() {
+
+        ListInterface<Patient> sortedList = patientRepo.getPatientsSortedByName();
+
+        if (sortedList.isEmpty()) {
+            System.out.println("No patient records found.");
+            return;
+        }
+
+        System.out.println("\n===== PATIENT LIST (A-Z) =====");
+        for (Patient p : sortedList) {
+            System.out.println(p); 
+        }
+    }   
 }

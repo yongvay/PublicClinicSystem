@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package Entity;
 
 import java.time.LocalDate;
@@ -84,14 +80,5 @@ public class Patient {
                 medicalHistory,
                 allergies
         );
-    }
-    
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj == null || getClass() != obj.getClass()) return false;
-
-        Patient other = (Patient) obj;
-        return this.patientID.equalsIgnoreCase(other.patientID);
     }
 }

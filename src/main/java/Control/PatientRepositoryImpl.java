@@ -173,8 +173,7 @@ public class PatientRepositoryImpl implements PatientRepository {
 
         // Safe sorting
         ListInterface<Patient> sortedAsc = getPatientsSortedByAgeAsc();
-        ListInterface<Patient> sortedDesc = getPatientsSortedByAgeDesc();
-        ListInterface<Patient> sortedName = getPatientsSortedByName();
+        ListInterface<Patient> sortedDesc = getPatientsSortedByAgeDesc();        
 
         LocalDateTime now = LocalDateTime.now();
         String time = now.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
@@ -216,17 +215,6 @@ public class PatientRepositoryImpl implements PatientRepository {
         report.append("----------------------\n"); 
         for (int i = 1; i <= Math.min(5, sortedAsc.getNumberOfEntries()); i++) {
             Patient p = sortedAsc.getEntry(i);
-            report.append(p.getPatientID())
-                  .append(" - ")
-                  .append(p.getPatientName())
-                  .append(" (")
-                  .append(p.getAge())
-                  .append(")\n");
-        }
-        
-        report.append("\n[5] PATIENT LIST (A-Z)\n");
-        report.append("----------------------\n"); 
-        for (Patient p : sortedName) {
             report.append(p.getPatientID())
                   .append(" - ")
                   .append(p.getPatientName())

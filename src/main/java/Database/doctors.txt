@@ -1,4 +1,4 @@
-D001|Dr. Alan Smith|Family Medicine|012-1111111|true
+D001|Dr. Alan Smith|Family Medicine|012-1111111|false
 D002|Dr. Brenda Lee|Pediatrics|012-2222222|true
 D003|Dr. Charles Xavier|Internal Medicine|012-3333333|false
 D004|Dr. Diana Prince|General Practice|012-4444444|true

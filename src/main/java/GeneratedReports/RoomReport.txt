@@ -1,0 +1,26 @@
+
+======================================================
+                   CLINIC ROOM REPORT                 
+======================================================
+Generated At: 06/04/2026 23:27
+Total Rooms: 9
+
+[1] OVERALL UTILIZATION
+------------------------------------------------------
+Available Rooms: 7
+Occupied Rooms: 2
+Current Occupancy Rate: 22.22%
+
+[2] DISTRIBUTION BY ROOM TYPE
+------------------------------------------------------
+Consult         :  3 Total (  2 Available,  1 Occupied )
+Treatment       :  3 Total (  3 Available,  0 Occupied )
+Observation     :  3 Total (  2 Available,  1 Occupied )
+
+[3] OCCUPIED ROOMS DETAILS
+------------------------------------------------------
+Room 102  (Consult     ) - Occupied by: Jake Peralta [Scheduled]
+Room 107  (Observation ) - Occupied by: David Rose [Admitted]
+======================================================
+End of Report.
+

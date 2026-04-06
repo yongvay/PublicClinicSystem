@@ -1,8 +1,11 @@
-D001|Dr. Ahmad|General Practice|012-3456789|true
-D002|Dr. Sarah|Cardiology|019-8765432|true
-D004|Dr. Priya|Orthopedics|017-9988776|true
-D005|Dr. Lee|Cardiology|013-5544332|true
-D006|Dr. Lam|Radiology|010-2283973|true
-D003|Dr. Chan|Orthopedics|010-2059239|true
-D007|Dr.  NG|Fever|010-2059239|true
-D008|Dr.  Strange|Time Stone|0102059898|true
+D001|Dr. Alan Smith|Family Medicine|012-1111111|true
+D002|Dr. Brenda Lee|Pediatrics|012-2222222|true
+D003|Dr. Charles Xavier|Internal Medicine|012-3333333|false
+D004|Dr. Diana Prince|General Practice|012-4444444|true
+D005|Dr. Evan Wright|Dermatology|012-5555555|true
+D006|Dr. Fiona Gallagher|General Practice|012-6666666|true
+D007|Dr. George Miller|Internal Medicine|012-7777777|true
+D008|Dr. Hannah Abbott|Pediatrics|012-8888888|true
+D010|Dr. Jane Doe|General Practice|012-6611289|true
+D011|Dr.  Lionel  Messi|Dermatology|010-2059239|true
+D012|Dr.  Ronaldo|Time Stone|010-2059239|false

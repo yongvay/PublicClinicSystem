@@ -1,2 +1,10 @@
-M001|Panaldo|Fever|500|50|10
-M002|Gastric |To cure gastric|100|50|10
+M001|Paracetamol|Pain relief and fever reducer|500mg|500|100
+M002|Amoxicillin Syrup|Pediatric antibiotic for bacterial infections|250mg/5ml|150|30
+M003|Metformin|Internal Medicine type 2 diabetes management|850mg|600|150
+M004|Hydrocortisone Cream|Dermatology topical steroid for eczema|1% Cream|80|20
+M005|Amlodipine|Internal Medicine blood pressure control|10mg|400|100
+M006|Loratadine Syrup|Pediatric antihistamine for allergies|5mg/5ml|120|30
+M007|Ibuprofen|General practice anti-inflammatory|400mg|450|100
+M008|Isotretinoin|Dermatology treatment for severe cystic acne|20mg|90|25
+M009|Salbutamol Inhaler|Family Medicine asthma reliever|100mcg|150|40
+M010|Omeprazole|General practice gastric and acid reflux|20mg|300|80

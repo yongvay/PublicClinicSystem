@@ -1,4 +1,4 @@
-101|Consult|true
+101|Consult|false
 102|Consult|true
 103|Consult|true
 104|Treatment|true

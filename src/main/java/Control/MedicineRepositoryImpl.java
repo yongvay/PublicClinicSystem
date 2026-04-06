@@ -12,7 +12,6 @@ import java.util.Comparator;
  */
 public class MedicineRepositoryImpl implements MedicineRepository {
 
-    // Coding to an Interface (CLO2 best practice)
     private ListInterface<Medicine> medicineList;
     private MedicineDAO medicineDAO; // Instantiate the DAO
 
@@ -277,5 +276,4 @@ public class MedicineRepositoryImpl implements MedicineRepository {
 
         return report.toString();
     }
-
 }

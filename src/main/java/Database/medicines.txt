@@ -1,2 +1,6 @@
-M001|Panaldo|Fever|500|50|10
-M002|Gastric |To cure gastric|100|50|10
+M001|Panaldo|Pain Killer|10000mg|100|20
+M002|Amoxil|Antibiotic|250mg|50|10
+M003|CoughSyrup|Relieves cough|100ml|15|20
+M004|VitaminC|Immunity booster|1000mg|200|50
+M005|GastricPill|Relieves stomach acid|100mg|5|15
+M006|Ibuprofen|Anti-inflammatory|200mg|0|10

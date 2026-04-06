@@ -180,8 +180,17 @@ public class MedicineUI {
         System.out.println("Current Details: " + existing.toString());
         System.out.println("Enter new details (press Enter to keep current value):");
 
+        // 1. Update Name
         updateIfNotEmpty(Utilities.getString("New Name [" + existing.getName() + "]: "), existing::setName);
 
+        // 2. Update Description
+        updateIfNotEmpty(Utilities.getString("New Description [" + existing.getDescription() + "]: "),
+                existing::setDescription);
+
+        // 3. Update Dosage
+        updateIfNotEmpty(Utilities.getString("New Dosage [" + existing.getDosage() + "]: "), existing::setDosage);
+
+        // 4. Update Stock Quantity
         String newStock = Utilities.getString("New Stock Quantity [" + existing.getQuantityInStock() + "]: ");
         if (!newStock.isEmpty()) {
             try {
@@ -191,6 +200,17 @@ public class MedicineUI {
             }
         }
 
+        // 5. Update Reorder Level
+        String newReorder = Utilities.getString("New Reorder Level [" + existing.getReorderLevel() + "]: ");
+        if (!newReorder.isEmpty()) {
+            try {
+                existing.setReorderLevel(Integer.parseInt(newReorder));
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid reorder level format. Skipping reorder level update.");
+            }
+        }
+
+        // Save the updates
         if (medicineRepo.update(existing)) {
             System.out.println("Success: Medicine updated successfully!");
         } else {

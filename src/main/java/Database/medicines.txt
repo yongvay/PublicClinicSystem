@@ -1,10 +1,6 @@
-M001|Paracetamol|Pain relief and fever reducer|500mg|500|100
-M002|Amoxicillin Syrup|Pediatric antibiotic for bacterial infections|250mg/5ml|150|30
-M003|Metformin|Internal Medicine type 2 diabetes management|850mg|600|150
-M004|Hydrocortisone Cream|Dermatology topical steroid for eczema|1% Cream|80|20
-M005|Amlodipine|Internal Medicine blood pressure control|10mg|400|100
-M006|Loratadine Syrup|Pediatric antihistamine for allergies|5mg/5ml|120|30
-M007|Ibuprofen|General practice anti-inflammatory|400mg|450|100
-M008|Isotretinoin|Dermatology treatment for severe cystic acne|20mg|90|25
-M009|Salbutamol Inhaler|Family Medicine asthma reliever|100mcg|150|40
-M010|Omeprazole|General practice gastric and acid reflux|20mg|300|80
+M001|Panaldo|Pain Killer|10000mg|100|20|2026-01-25
+M002|Amoxil|Antibiotic|250mg|50|10|2026-05-6
+M003|CoughSyrup|Relieves cough|100ml|15|20|2026-05-03
+M004|VitaminC|Immunity booster|1000mg|200|50|2026-06-23
+M005|GastricPill|Relieves stomach acid|100mg|5|15|2026-08-20
+M006|Ibuprofen|Anti-inflammatory|200mg|0|10|2026-05-23

@@ -107,7 +107,8 @@ public class RoomRepositoryImpl implements RoomRepository {
         });
     }
 
-    public ListInterface<Room> findAllOccupiedRooms() {
+    // UPDATED: Changed to private to match ECB architecture boundaries
+    private ListInterface<Room> findAllOccupiedRooms() {
         return roomList.findAll(new SearchCriteria<Room>() {
             @Override
             public boolean isMatch(Room r) {
@@ -158,7 +159,6 @@ public class RoomRepositoryImpl implements RoomRepository {
             @Override
             public int compare(Room r1, Room r2) {
                 try {
-                    // UPDATED: Safely extract numbers to sort mathematically
                     int num1 = Integer.parseInt(r1.getRoomNumber().replaceAll("\\D+", ""));
                     int num2 = Integer.parseInt(r2.getRoomNumber().replaceAll("\\D+", ""));
                     return Integer.compare(num1, num2);

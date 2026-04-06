@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package DAO;
 
 import ADT.List;
@@ -11,13 +7,22 @@ import java.io.*;
 
 public class RoomDAO {
     
-    // UPDATED: Using forward slashes for cross-platform compatibility
-    private static final String FILE_NAME = "src/main/java/Database/rooms.txt";
     private static final String DELIMITER = "\\|"; 
     private static final String SEPARATOR = "|";   
 
+    // UPDATED: Helper method to safely resolve file paths regardless of run environment
+    private String getFilePath() {
+        File file = new File("src/main/java/Database/rooms.txt");
+        if (file.exists() || file.getParentFile().exists()) {
+            return "src/main/java/Database/rooms.txt";
+        }
+        // Fallback for execution outside NetBeans
+        return "rooms.txt"; 
+    }
+
     public void saveToFile(ListInterface<Room> roomList) {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_NAME))) {
+        String filePath = getFilePath();
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
             for (Room r : roomList) {
                 String line = r.getRoomNumber() + SEPARATOR +
                               r.getRoomType() + SEPARATOR +
@@ -32,7 +37,8 @@ public class RoomDAO {
 
     public ListInterface<Room> loadFromFile() {
         ListInterface<Room> loadedList = new List<>();
-        File file = new File(FILE_NAME);
+        String filePath = getFilePath();
+        File file = new File(filePath);
         
         if (!file.exists()) {
             return loadedList;

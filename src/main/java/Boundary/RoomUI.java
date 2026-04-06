@@ -77,7 +77,6 @@ public class RoomUI {
         String roomNumber = roomRepo.generateNextRoomId();
         System.out.println("Auto-generated Room Number: " + roomNumber);
 
-        // UPDATED: Validation loop to prevent blank room types
         String roomType = "";
         while (roomType.trim().isEmpty()) {
             roomType = Utilities.getString("Enter Room Type (e.g., Consult, Treatment, Observation): ");
@@ -146,12 +145,25 @@ public class RoomUI {
         System.out.println("Current Details: " + existing.toString());
         System.out.println("Enter new details (press Enter to keep current value):");
 
-        String type = Utilities.getString("New Room Type [" + existing.getRoomType() + "]: ");
+        // UPDATED: Input validation to prevent saving whitespace-only strings
+        String type;
+        while (true) {
+            type = Utilities.getString("New Room Type [" + existing.getRoomType() + "]: ");
+            if (type.isEmpty() || !type.trim().isEmpty()) {
+                break; // Proceed if user skips (presses enter) or provides valid text
+            }
+            System.out.println("Error: Room Type cannot be blank spaces. Please enter a valid type or press Enter to skip.");
+        }
         updateIfNotEmpty(type, existing::setRoomType);
 
-        String statusInput = Utilities.getString("Is Room Available? (Y/N) [" + (existing.isAvailable() ? "Y" : "N") + "]: ").trim();
-        if (statusInput.equalsIgnoreCase("Y")) existing.setAvailable(true);
-        else if (statusInput.equalsIgnoreCase("N")) existing.setAvailable(false);
+        // UPDATED: Data consistency lock to prevent users from making an occupied room "available"
+        if (!existing.isAvailable()) {
+            System.out.println("Status: This room is currently occupied. Status cannot be manually changed. Please process patient discharge in the Appointment System to free the room.");
+        } else {
+            String statusInput = Utilities.getString("Is Room Available? (Y/N) [" + (existing.isAvailable() ? "Y" : "N") + "]: ").trim();
+            if (statusInput.equalsIgnoreCase("Y")) existing.setAvailable(true);
+            else if (statusInput.equalsIgnoreCase("N")) existing.setAvailable(false);
+        }
 
         if (roomRepo.update(existing)) {
             System.out.println("Success: Room details updated successfully!");
@@ -165,7 +177,6 @@ public class RoomUI {
         Room target = roomRepo.findById(roomNumber);
         
         if (target != null) {
-            // UPDATED: Prevent deletion of occupied rooms to protect data integrity
             if (!target.isAvailable()) {
                 System.out.println("Error: Cannot delete Room " + target.getRoomNumber() + " because it is currently occupied by a patient.");
                 return;
@@ -237,7 +248,6 @@ public class RoomUI {
         }
     }
 
-    // Helper method to enable functional interface updates
     private void updateIfNotEmpty(String input, java.util.function.Consumer<String> setter) {
         if (input != null && !input.trim().isEmpty()) {
             setter.accept(input.trim());

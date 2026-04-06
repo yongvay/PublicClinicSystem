@@ -34,4 +34,5 @@ public interface MedicineRepository {
 
   // Reporting methods
   String generateInventoryReport();
+  String generateExpiryHtmlReport();
 }

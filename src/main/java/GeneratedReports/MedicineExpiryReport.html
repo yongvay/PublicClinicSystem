@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Medicine Expiry Report</title>
+<style>
+body { font-family: 'Segoe UI', sans-serif; padding: 20px; background: #f8f9fa; }
+h1 { color: #2c3e50; text-align: center; }
+table { width: 100%; border-collapse: collapse; background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+th { background-color: #34495e; color: white; }
+.expired { background-color: #ffeaea; color: #c0392b; font-weight: bold; }
+.expiring-soon { background-color: #fff3cd; color: #d35400; font-weight: bold; }
+.safe { color: #27ae60; }
+</style>
+</head>
+<body>
+<h1>⚠️ Clinic Medicine Expiry & Shelf-Life Report</h1>
+<table>
+<tr><th>Med ID</th><th>Medicine Name</th><th>Stock</th><th>Expiry Date</th><th>Status / Days Left</th></tr>
+<tr class="expired"><td>M001</td><td>Panaldo</td><td>100</td><td>25 Jan 2026</td><td>EXPIRED (72 days ago)</td></tr>
+<tr class="expiring-soon"><td>M003</td><td>CoughSyrup</td><td>15</td><td>03 May 2026</td><td>EXPIRING SOON (26 days left)</td></tr>
+<tr class="expiring-soon"><td>M006</td><td>Ibuprofen</td><td>0</td><td>23 May 2026</td><td>EXPIRING SOON (46 days left)</td></tr>
+<tr class="expiring-soon"><td>M004</td><td>VitaminC</td><td>200</td><td>23 Jun 2026</td><td>EXPIRING SOON (77 days left)</td></tr>
+<tr class="safe"><td>M005</td><td>GastricPill</td><td>5</td><td>20 Aug 2026</td><td>SAFE</td></tr>
+</table>
+</body>
+</html>

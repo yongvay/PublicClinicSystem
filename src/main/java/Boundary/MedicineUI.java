@@ -5,6 +5,8 @@ import Entity.Medicine;
 import Utility.Utilities;
 import ADT.ListInterface;
 import java.util.Scanner;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 
 /**
  * @author Ng Yong Vay
@@ -55,6 +57,7 @@ public class MedicineUI {
         System.out.println("7. Delete Medicine");
         System.out.println("8. View Sorted Medicines (By Name/Stock)");
         System.out.println("9. Generate Medicine Inventory Report");
+        System.out.println("10. Generate Medicine Expiry Report (HTML)");
         System.out.println("0. Exit to Main Menu");
         System.out.println("==========================================");
     }
@@ -88,6 +91,9 @@ public class MedicineUI {
             case 9:
                 generateMedicineReport();
                 break;
+            case 10:
+                generateExpiryReport();
+                break;
             case 0:
                 System.out.println("Exiting Medicine Subsystem...");
                 break;
@@ -119,8 +125,37 @@ public class MedicineUI {
         int stock = Utilities.getInt("Enter Initial Stock Quantity: ");
         int reorderLevel = Utilities.getInt("Enter Reorder Level: ");
 
-        // 3. Create and save the medicine
-        Medicine newMed = new Medicine(id, name, desc, dosage, stock, reorderLevel);
+        LocalDate expiryDate = null;
+        boolean validDate = false;
+
+        while (!validDate) {
+            System.out.print("Enter Expiry Date (YYYY-MM-DD): ");
+            String dateInput = scanner.nextLine().trim();
+
+            try {
+                // This attempts to convert the string into a real Date object
+                expiryDate = LocalDate.parse(dateInput);
+
+                if (expiryDate.isBefore(LocalDate.now())) {
+                    System.out.println(
+                            "⚠️ Warning: The date entered has already passed. You are adding EXPIRED medicine!");
+                    System.out.print("Are you sure you want to proceed? (Y/N): ");
+                    String confirm = scanner.nextLine().trim();
+                    if (!confirm.equalsIgnoreCase("Y")) {
+                        continue; // Restarts the while loop to ask for the date again
+                    }
+                }
+
+                validDate = true; // Breaks the loop if parsing was successful
+
+            } catch (DateTimeParseException e) {
+                // Catches the error so the program doesn't crash
+                System.out.println("❌ Invalid format! Please use exactly YYYY-MM-DD (e.g., 2026-10-15).");
+            }
+        }
+        
+        Medicine newMed = new Medicine(id, name, desc, dosage, stock, reorderLevel, expiryDate);
+
         medicineRepo.create(newMed);
         System.out.println("Success: Medicine added successfully!");
     }
@@ -210,6 +245,44 @@ public class MedicineUI {
             }
         }
 
+        System.out.println("Current Expiry Date: " + existing.getExpiryDate());
+    
+    boolean validDate = false;
+    while (!validDate) {
+        System.out.print("Enter New Expiry Date (YYYY-MM-DD) or press [Enter] to keep current: ");
+        String dateInput = scanner.nextLine().trim();
+
+        // 1. The "Skip" Check
+        if (dateInput.isEmpty()) {
+            System.out.println("No changes made to Expiry Date.");
+            validDate = true; // Break the loop, leave the existing date intact
+        } 
+        // 2. The "Update" Check
+        else {
+            try {
+                LocalDate newExpiryDate = LocalDate.parse(dateInput); 
+                
+                // Optional Business Logic Warning
+                if (newExpiryDate.isBefore(LocalDate.now())) {
+                    System.out.println("⚠️ Warning: You are changing this to an EXPIRED date!");
+                    System.out.print("Proceed anyway? (Y/N): ");
+                    String confirm = scanner.nextLine().trim();
+                    if (!confirm.equalsIgnoreCase("Y")) {
+                        continue; // Restarts the loop
+                    }
+                }
+
+                // 3. Apply the update using the Setter
+                existing.setExpiryDate(newExpiryDate);
+                System.out.println("✅ Expiry Date updated to: " + newExpiryDate);
+                validDate = true; 
+                
+            } catch (DateTimeParseException e) {
+                System.out.println("❌ Invalid format! Please use exactly YYYY-MM-DD (e.g., 2026-10-15).");
+            }
+        }
+    }
+
         // Save the updates
         if (medicineRepo.update(existing)) {
             System.out.println("Success: Medicine updated successfully!");
@@ -287,6 +360,22 @@ public class MedicineUI {
                 Utilities.exportReportToFile(reportText, "MedicineInventoryReport.txt");
             }
         }
+    }
+
+    private void generateExpiryReport() {
+        String htmlContent = medicineRepo.generateExpiryHtmlReport();
+
+        if (htmlContent.equals("<h1>No Data Available</h1>")) {
+            System.out.println("No medicine data available.");
+            return;
+        }
+
+        // Export the file using your existing Utility class
+        Utilities.exportReportToFile(htmlContent, "MedicineExpiryReport.html");
+
+        System.out.println("\nSUCCESS: Medicine Expiry Report has been generated!");
+        System.out.println(
+                "Please locate 'MedicineExpiryReport.html' in your project folder and open it in Google Chrome/Edge.");
     }
 
     // ==========================================

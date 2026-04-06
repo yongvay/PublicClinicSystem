@@ -6,6 +6,9 @@ import ADT.SearchCriteria;
 import DAO.MedicineDAO;
 import Entity.Medicine;
 import java.util.Comparator;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 
 /**
  * @author Ng Yong Vay
@@ -280,5 +283,80 @@ public class MedicineRepositoryImpl implements MedicineRepository {
         report.append("End of Report.\n");
 
         return report.toString();
+    }
+
+    @Override
+    public String generateExpiryHtmlReport() {
+        ListInterface<Medicine> allMedicines = findAll();
+        if (allMedicines.isEmpty()) return "<h1>No Data Available</h1>";
+
+        // --- DSA Application: Insertion Sort by Expiry Date ---
+        // Extract the items to a temporary array to sort them chronologically 
+        // (Earliest expiry date first).
+        int n = allMedicines.getNumberOfEntries();
+        Medicine[] sortedMeds = new Medicine[n];
+        for (int i = 1; i <= n; i++) {
+            sortedMeds[i - 1] = allMedicines.getEntry(i);
+        }
+
+        for (int i = 1; i < n; i++) {
+            Medicine key = sortedMeds[i];
+            int j = i - 1;
+            // Compare dates: if key's date is BEFORE the previous item's date, swap
+            while (j >= 0 && sortedMeds[j].getExpiryDate().isAfter(key.getExpiryDate())) {
+                sortedMeds[j + 1] = sortedMeds[j];
+                j = j - 1;
+            }
+            sortedMeds[j + 1] = key;
+        }
+
+        // --- HTML Generation ---
+        StringBuilder html = new StringBuilder();
+        LocalDate today = LocalDate.now();
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd MMM yyyy");
+
+        html.append("<!DOCTYPE html>\n<html>\n<head>\n<meta charset=\"UTF-8\">\n<title>Medicine Expiry Report</title>\n");
+        html.append("<style>\n");
+        html.append("body { font-family: 'Segoe UI', sans-serif; padding: 20px; background: #f8f9fa; }\n");
+        html.append("h1 { color: #2c3e50; text-align: center; }\n");
+        html.append("table { width: 100%; border-collapse: collapse; background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }\n");
+        html.append("th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }\n");
+        html.append("th { background-color: #34495e; color: white; }\n");
+        html.append(".expired { background-color: #ffeaea; color: #c0392b; font-weight: bold; }\n");
+        html.append(".expiring-soon { background-color: #fff3cd; color: #d35400; font-weight: bold; }\n");
+        html.append(".safe { color: #27ae60; }\n");
+        html.append("</style>\n</head>\n<body>\n");
+
+        html.append("<h1>⚠️ Clinic Medicine Expiry & Shelf-Life Report</h1>\n");
+        html.append("<table>\n<tr><th>Med ID</th><th>Medicine Name</th><th>Stock</th><th>Expiry Date</th><th>Status / Days Left</th></tr>\n");
+
+        for (Medicine m : sortedMeds) {
+            long daysUntilExpiry = ChronoUnit.DAYS.between(today, m.getExpiryDate());
+            
+            String rowClass = "";
+            String statusText;
+
+            if (daysUntilExpiry < 0) {
+                rowClass = "expired";
+                statusText = "EXPIRED (" + Math.abs(daysUntilExpiry) + " days ago)";
+            } else if (daysUntilExpiry <= 90) { // Flag items expiring within 3个月 (90 days)
+                rowClass = "expiring-soon";
+                statusText = "EXPIRING SOON (" + daysUntilExpiry + " days left)";
+            } else {
+                rowClass = "safe";
+                statusText = "SAFE";
+            }
+
+            html.append("<tr class=\"").append(rowClass).append("\">")
+                .append("<td>").append(m.getMedicineID()).append("</td>")
+                .append("<td>").append(m.getName()).append("</td>")
+                .append("<td>").append(m.getQuantityInStock()).append("</td>")
+                .append("<td>").append(m.getExpiryDate().format(dtf)).append("</td>")
+                .append("<td>").append(statusText).append("</td>")
+                .append("</tr>\n");
+        }
+
+        html.append("</table>\n</body>\n</html>");
+        return html.toString();
     }
 }

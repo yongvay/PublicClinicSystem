@@ -1,4 +1,5 @@
 package Entity;
+import java.time.LocalDate;
 
 /**
  *
@@ -12,6 +13,7 @@ public class Medicine {
     private String dosage;  // e.g., "tablet", "mg", "ml", "capsule"
     private int quantityInStock;
     private int reorderLevel; // e.g., if stock drops below 10, trigger a reorder alert
+    private LocalDate expiryDate;
 
     // For search dummy only
     // This allows creating "dummy" objects for searching using only an ID.
@@ -20,13 +22,14 @@ public class Medicine {
     }
     
     // Constructor
-    public Medicine(String medicineID, String name, String description, String dosage, int quantityInStock, int reorderLevel) {
+    public Medicine(String medicineID, String name, String description, String dosage, int quantityInStock, int reorderLevel, LocalDate expiryDate) {
         this.medicineID = medicineID;
         this.name = name;
         this.description = description;
         this.dosage = dosage;
         this.quantityInStock = quantityInStock;
         this.reorderLevel = reorderLevel;
+        this.expiryDate = expiryDate;
     }
 
     // ==========================================
@@ -56,6 +59,10 @@ public class Medicine {
         return reorderLevel; 
     }
 
+    public LocalDate getExpiryDate() { 
+        return expiryDate; 
+    }
+    
     // ==========================================
     // SETTERS
     // ==========================================
@@ -81,6 +88,10 @@ public class Medicine {
     
     public void setReorderLevel(int reorderLevel) { 
         this.reorderLevel = reorderLevel; 
+    }
+
+    public void setExpiryDate(LocalDate expiryDate) {
+        this.expiryDate = expiryDate;
     }
 
     // ==========================================

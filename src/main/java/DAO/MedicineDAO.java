@@ -4,6 +4,7 @@ import ADT.List;
 import ADT.ListInterface;
 import Entity.Medicine;
 import java.io.*;
+import java.time.LocalDate;
 
 /**
  * @author Ng Yong Vay
@@ -24,13 +25,14 @@ public class MedicineDAO {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_NAME))) {
 
             for (Medicine m : medicineList) {
-                // Construct a single delimited string line
+                // Construct a single delimited string line (Added expiry date at the end)
                 String line = m.getMedicineID() + SEPARATOR +
                         m.getName() + SEPARATOR +
                         m.getDescription() + SEPARATOR +
                         m.getDosage() + SEPARATOR +
                         m.getQuantityInStock() + SEPARATOR +
-                        m.getReorderLevel();
+                        m.getReorderLevel() + SEPARATOR +
+                        m.getExpiryDate().toString();
 
                 writer.write(line);
                 writer.newLine(); // Move to the next line
@@ -55,26 +57,32 @@ public class MedicineDAO {
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             String line;
             while ((line = reader.readLine()) != null) {
+                if (line.trim().isEmpty())
+                    continue; // Skip empty lines
+
                 String[] parts = line.split(DELIMITER);
 
-                // Ensure the line has exactly 6 parts before parsing to avoid out-of-bounds
-                // errors
-                if (parts.length == 6) {
-                    Medicine m = new Medicine(
-                        parts[0], // ID
-                        parts[1], // Name
-                        parts[2], // Description
-                        parts[3], // Dosage
-                        Integer.parseInt(parts[4]), // Stock
-                        Integer.parseInt(parts[5]) // Reorder Level
-                    );
-                    loadedList.add(m);
+                // Ensure the line has exactly 7 parts before parsing (Updated from 6)
+                if (parts.length == 7) {
+                    try {
+                        Medicine m = new Medicine(
+                                parts[0], // ID
+                                parts[1], // Name
+                                parts[2], // Description
+                                parts[3], // Dosage
+                                Integer.parseInt(parts[4].trim()), // Stock
+                                Integer.parseInt(parts[5].trim()), // Reorder Level
+                                LocalDate.parse(parts[6].trim()) // Expiry Date parsed from ISO format
+                        );
+                        loadedList.add(m);
+                    } catch (NumberFormatException | java.time.format.DateTimeParseException e) {
+                        System.err.println("Data format error in line: " + line + " -> " + e.getMessage());
+                    }
                 }
             }
-        } catch (IOException | NumberFormatException e) {
+        } catch (IOException | NumberFormatException | java.time.format.DateTimeParseException e) {
             System.err.println("Critical Error: File corruption or read failure -> " + e.getMessage());
         }
-
         return loadedList;
     }
 }

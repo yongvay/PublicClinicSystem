@@ -3,7 +3,7 @@ package Boundary;
 import ADT.ListInterface;
 import Control.PatientRepository;
 import Entity.Patient;
-
+import Utility.Utilities;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -13,48 +13,65 @@ import java.util.Scanner;
  */
 public class PatientUI {
 
-    private PatientRepository patientRepo;
-    private Scanner scanner;
-    private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    private final PatientRepository patientRepo;
+    private final Scanner scanner;
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     public PatientUI(PatientRepository patientRepo) {
         this.patientRepo = patientRepo;
         this.scanner = new Scanner(System.in);
     }
 
-    // INPUT HELPERS
+    // SAFE INPUT (avoid crash)
+    private int inputInt(String prompt) {
+        while (true) {
+            System.out.print(prompt);
+            String input = scanner.nextLine().trim();
+
+            if (input.isEmpty()) {
+                System.out.println("Input cannot be empty.");
+                continue;
+            }
+
+            try {
+                return Integer.parseInt(input);
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid number.");
+            }
+        }
+    }
+
     private String inputString(String prompt) {
         System.out.print(prompt);
         return scanner.nextLine().trim();
     }
-    
-    private String inputWithMaxLength(String prompt, int maxLength, boolean allowEmpty) {
-       while (true) {
-           System.out.print(prompt);
-           String input = scanner.nextLine().trim();
-           if (!allowEmpty && input.isEmpty()) {
-               System.out.println("Input cannot be empty. Please enter again.");
-           } else if (input.length() > maxLength) {
-               System.out.printf("Input too long! Maximum %d characters allowed.\n", maxLength);
-           } else {
-               return input;
-           }
-       }
-   }   
 
+    private String inputWithMaxLength(String prompt, int maxLength, boolean allowEmpty) {
+        while (true) {
+            System.out.print(prompt);
+            String input = scanner.nextLine().trim();
+
+            if (!allowEmpty && input.isEmpty()) {
+                System.out.println("Cannot be empty.");
+            } else if (input.length() > maxLength) {
+                System.out.println("Too long (max " + maxLength + ")");
+            } else {
+                return input;
+            }
+        }
+    }
+
+    // DATE VALIDATION
     private LocalDate getValidBirthDate(String input) {
         try {
             LocalDate date = LocalDate.parse(input, formatter);
-
             if (date.isAfter(LocalDate.now())) {
-                System.out.println("Birth date cannot be in the future.");
+                System.out.println("Cannot be future date.");
                 return null;
             }
-
             return date;
-
         } catch (DateTimeParseException e) {
-            System.out.println("Invalid format (dd/MM/yyyy).");
+            System.out.println("Format must be dd/MM/yyyy");
             return null;
         }
     }
@@ -63,32 +80,88 @@ public class PatientUI {
         while (true) {
             String input = inputString("Birth Date (dd/MM/yyyy): ");
             LocalDate date = getValidBirthDate(input);
-
             if (date != null) return date;
         }
     }
 
     private LocalDate updateBirthDate(LocalDate currentDate) {
         while (true) {
-            String input = inputString(
-                    "New Birth Date (dd/MM/yyyy): ");
-
+            String input = inputString("New Birth Date (Enter to skip): ");
             if (input.isEmpty()) return currentDate;
-
             LocalDate date = getValidBirthDate(input);
             if (date != null) return date;
         }
     }
 
-    // MAIN MENU
+    // TABLE FORMAT 
+    private String limit(String text, int max) {
+        if (text == null) return "";
+        if (text.length() <= max) return text;
+        return text.substring(0, max - 3) + "...";
+    }
+    
+    // DISPLAY
+    private void displayList(ListInterface<Patient> list) {
+        if (list == null || list.isEmpty()) {
+            System.out.println("No records found.");
+            return;
+        }
+
+        System.out.println("=================================================================================================");
+        System.out.printf("%-6s | %-15s | %-4s | %-30s | %-30s\n",
+                "ID", "Name", "Age", "Medical History", "Allergies");
+        System.out.println("=================================================================================================");
+
+        for (Patient p : list) {
+
+            String history = limit(p.formatList(p.getMedicalHistory()), 30);
+            String allergy = limit(p.formatList(p.getAllergies()), 30);
+
+            System.out.printf("%-6s | %-15s | %-4d | %-30s | %-30s\n",
+                    p.getPatientID(),
+                    limit(p.getPatientName(), 15),
+                    p.getAge(),
+                    history,
+                    allergy
+            );
+        }
+
+        System.out.println("=================================================================================================");
+    }   
+    
+    // DISPLAY SINGLE PATIENT
+    private void displaySinglePatient(Patient p) {
+        if (p == null) {
+            System.out.println("Patient not found.");
+            return;
+        }
+
+        System.out.println("\nCurrent Patient Data:");
+        System.out.println("=================================================================================================");
+        System.out.printf("%-6s | %-15s | %-4s | %-30s | %-30s\n",
+                "ID", "Name", "Age", "Medical History", "Allergies");
+        System.out.println("=================================================================================================");
+
+        String history = limit(p.formatList(p.getMedicalHistory()), 30);
+        String allergy = limit(p.formatList(p.getAllergies()), 30);
+
+        System.out.printf("%-6s | %-15s | %-4d | %-30s | %-30s\n",
+                p.getPatientID(),
+                limit(p.getPatientName(), 15),
+                p.getAge(),
+                history,
+                allergy
+        );
+
+        System.out.println("=================================================================================================");
+    }    
+
+    // PATIENT MENU
     public void start() {
-
         int choice;
-
         do {
             displayMenu();
-            System.out.print("Enter choice: ");
-            choice = Integer.parseInt(scanner.nextLine());
+            choice = inputInt("Enter choice: ");
 
             switch (choice) {
                 case 1 -> addPatient();
@@ -98,7 +171,8 @@ public class PatientUI {
                 case 5 -> searchById();
                 case 6 -> searchByName();
                 case 7 -> searchPatientsWithAllergy();
-                case 8 -> generateReport();
+                case 8 -> printAllPatientsSortedByName();
+                case 9 -> generateReport();
                 case 0 -> System.out.println("Exiting...");
                 default -> System.out.println("Invalid choice.");
             }
@@ -115,153 +189,197 @@ public class PatientUI {
         System.out.println("5 Search by ID");
         System.out.println("6 Search by Name");
         System.out.println("7 Search Patient with Allergy");
-        System.out.println("8 Generate Patient Report");
+        System.out.println("8 View Patient List (A-Z)");
+        System.out.println("9 Generate Patient Report");
         System.out.println("0 Exit");
-        System.out.println("=================================");
     }
 
     // CREATE
-    public void addPatient() {
-        System.out.println("\n--- Add New Patient ---");
+    private void addPatient() {
+        System.out.println("\n--- Add Patient ---");
+
         String id = patientRepo.generatePatientID();
-
-        // Input with max length validation
-        String name = inputWithMaxLength("Patient Name: ", 20, false);
+  
+        String name = inputWithMaxLength("Name: ", 20, false);
+        name = Utilities.capitalizeWords(name); 
+        
         LocalDate birthDate = addBirthDate();
-        
-        // History input
-        String history;
-        while (true) {
-            System.out.print("Does the patient have medical history? (Yes/No): ");
-            String choice = scanner.nextLine().trim();
-            if (choice.equalsIgnoreCase("Yes")) {
-                history = inputWithMaxLength("Enter History: ", 30, false); // Max 15 for table formatting
-                break;
-            } else if (choice.equalsIgnoreCase("No")) {
-                history = "None";
-                break;
-            } else {
-                System.out.println("Invalid input. Please enter Yes or No.");
-            }
-        }
-        
-        // Allergies input
-        String allergies;
-        while (true) {
-            System.out.print("Does the patient have allergies? (Yes/No): ");
-            String choice = scanner.nextLine().trim();
-            if (choice.equalsIgnoreCase("Yes")) {
-                allergies = inputWithMaxLength("Enter allergy: ", 15, false); // Max 15 for table formatting
-                break;
-            } else if (choice.equalsIgnoreCase("No")) {
-                allergies = "None";
-                break;
-            } else {
-                System.out.println("Invalid input. Please enter Yes or No.");
+
+        var history = new ADT.List<String>();
+        System.out.print("Has medical history? (Y/N): ");
+        if (scanner.nextLine().equalsIgnoreCase("Y")) {
+            while (true) {
+                String h = inputWithMaxLength("Enter 'done' to stop: ", 30, true);
+                if (h.equalsIgnoreCase("done")) break;
+                if (!h.isEmpty()) {
+                    h = Utilities.capitalizeWords(h);
+                    history.add(h);
+                }
             }
         }
 
-        Patient p = new Patient(id, name, birthDate, history, allergies);
-        patientRepo.create(p);
-        System.out.println("Patient added successfully.");
+        var allergy = new ADT.List<String>();
+        System.out.print("Has allergy? (Y/N): ");
+        if (scanner.nextLine().equalsIgnoreCase("Y")) {
+            while (true) {
+                String a = inputWithMaxLength("Enter 'done' to stop: ", 15, true);
+                if (a.equalsIgnoreCase("done")) break;
+                if (!a.isEmpty()) {
+                    a = Utilities.capitalizeWords(a);
+                    allergy.add(a);
+                }
+            }
+        }
+
+        patientRepo.create(new Patient(id, name, birthDate, history, allergy));
+        System.out.println("Patient added.");
     }
 
-    // READ
+    // UPDATE LIST
+    private void managePatientList(String type, String id) {
+        while (true) {
+            Patient p = patientRepo.findById(id);
+
+            System.out.println("\n--- " + type + " ---");
+            System.out.println(
+                    type.equals("Medical History")
+                            ? p.formatList(p.getMedicalHistory())
+                            : p.formatList(p.getAllergies())
+            );
+
+            System.out.println("Choice <1. Add  2. Update  3. Remove  4. Exit>");
+            int choice = inputInt("Choose: ");
+
+            if (choice == 4) break;
+
+            boolean changed = false; // to determine display or not
+
+            switch (choice) {
+                case 1 -> {
+                    String item = inputWithMaxLength("New: ", 30, false);
+                    item = Utilities.capitalizeWords(item);
+                    boolean ok = type.equals("Medical History")
+                            ? patientRepo.addPatientMedicalHistory(id, item)
+                            : patientRepo.addPatientAllergy(id, item);
+                    System.out.println(ok ? "Added" : "Failed");
+                    changed = ok;
+                }
+                case 2 -> {
+                    String oldItem = inputString("Old data: ");
+                    String newItem = inputWithMaxLength("New data: ", 30, false);
+                    newItem = Utilities.capitalizeWords(newItem);
+                    boolean ok = type.equals("Medical History")
+                            ? patientRepo.updatePatientMedicalHistory(id, oldItem, newItem)
+                            : patientRepo.updatePatientAllergy(id, oldItem, newItem);
+                    System.out.println(ok ? "Updated" : "Not found");
+                    changed = ok;
+                }
+                case 3 -> {
+                    String item = inputString("Remove: ");
+                    boolean ok = type.equals("Medical History")
+                            ? patientRepo.removePatientMedicalHistory(id, item)
+                            : patientRepo.removePatientAllergy(id, item);
+                    System.out.println(ok ? "Removed" : "Not found");
+                    changed = ok;
+                }
+                default -> System.out.println("Invalid.");
+            }
+
+            if (changed) {
+                displaySinglePatient(p);
+            }
+        }
+    }
+
+    // READ and SEARCH
     private void viewAllPatients() {
-        System.out.println("\n--- List of All Patient ---");
         displayList(patientRepo.findAll());
     }
 
-    // SEARCH
     private void searchById() {
-        System.out.println("\n--- Search Patient by ID ---");
-        String id = inputString("Enter ID: ");
+        String id = inputString("ID: ");
         Patient p = patientRepo.findById(id);
 
-        if (p == null)
-            System.out.println("Patient not found.");
-        else
-            System.out.println(p);
+        if (p == null) {
+            System.out.println("Not found.");
+        } else {
+            displayList(new ADT.List<>(java.util.List.of(p)));
+        }
     }
 
     private void searchByName() {
-        System.out.println("\n--- Search Patient by Name---");
-        String name = inputString("Enter name: "); 
-        displayList(patientRepo.findByName(name));
+        displayList(patientRepo.findByName(inputString("Name: ")));
     }
 
     private void searchPatientsWithAllergy() {
-        System.out.println("\n--- CAUTION: Patient with Allergy ---");
         displayList(patientRepo.findPatientsWithAllergy());
     }
 
-    // UPDATE
+    // UPDATE 
     private void updatePatient() {
-        System.out.println("\n--- Update Patient ---");
-        System.out.print("<Enter Patient ID to update> ");
-        String id = scanner.nextLine().trim();
-        Patient existing = patientRepo.findById(id);
+        String id = inputString("Patient ID: ");
+        Patient p = patientRepo.findById(id);
 
-        if (existing == null) {
-            System.out.println("\nPatient not found. Failed to update.");
+        if (p == null) {
+            System.out.println("Not found.");
             return;
         }
 
-        System.out.println("\nCurrent Details: " + existing.toString());
-        System.out.println("Enter new details <press Enter to keep current value>\n");
+        System.out.println("\nBefore Update:");
+        displaySinglePatient(p);
 
-        // Update Name
-        String name = inputWithMaxLength("New Name: ", 20, true);
-        if (!name.isEmpty()) existing.setPatientName(name);
+        String name = inputWithMaxLength("New name: ", 20, true);
+        
+        if (!name.isEmpty()) {
+            name = Utilities.capitalizeWords(name);
+            p.setPatientName(name);
+        }
 
-        // Update BirthDate
-        existing.setBirthDate(updateBirthDate(existing.getBirthDate()));
+        p.setBirthDate(updateBirthDate(p.getBirthDate()));
 
-        // Update Medical History
-        String history = inputWithMaxLength("New Medical History: ", 30, true
-        );
-        if (!history.isEmpty()) existing.setMedicalHistory(history);
+        managePatientList("Medical History", id);
+        managePatientList("Allergies", id);
 
-        // Update Allergies
-        String allergies = inputWithMaxLength("New Allergies: ", 15, true);
-        if (!allergies.isEmpty()) existing.setAllergies(allergies);
+        patientRepo.update(p);
 
-        patientRepo.update(existing);
-        System.out.println("Patient updated successfully.");
+        System.out.println("\nAfter Update:");
+        displaySinglePatient(p); 
     }
 
     // DELETE
     private void deletePatient() {
-        System.out.println("\n--- Delete Patient ---");
-        String id = inputString("Enter ID: ");
+        String id = inputString("ID: ");
         Patient p = patientRepo.findById(id);
 
         if (p == null) {
-            System.out.println("Patient not found.");
+            System.out.println("Not found.");
             return;
         }
 
-        patientRepo.delete(p);
-        System.out.println("Deleted successfully.");
+        displaySinglePatient(p);
+
+        System.out.print("Confirm delete (Y/N): ");
+        if (scanner.nextLine().equalsIgnoreCase("Y")) {
+            patientRepo.delete(p);
+            System.out.println("Deleted.");
+        } else {
+            System.out.println("Cancelled.");
+        }
     }
-
-    // DISPLAY
-    private void displayList(ListInterface<Patient> list) {
-
-        if (list == null || list.isEmpty()) {
-            System.out.println("No records found.");
-            return;
-        }
-
-        for (Patient p : list) {
-            System.out.println(p);
-        }
+    
+    // PRINT SORTED PATIENT 
+    private void printAllPatientsSortedByName() {
+        displayList(patientRepo.getPatientsSortedByName());
     }
     
     // REPORT
     private void generateReport() {
         String report = patientRepo.generatePatientReport();
         System.out.println(report);
-        System.out.println("Report updated: PatientReport.txt");
+
+        System.out.print("Export? (Y/N): ");
+        if (scanner.nextLine().equalsIgnoreCase("Y")) {
+            Utilities.exportReportToFile(report, "PatientReport.txt");
+        }
     }
 }

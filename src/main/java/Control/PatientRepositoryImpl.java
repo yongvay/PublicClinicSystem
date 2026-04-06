@@ -4,8 +4,7 @@ import ADT.List;
 import ADT.ListInterface;
 import DAO.PatientDAO;
 import Entity.Patient;
-import Utility.Utilities;
-
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 /**
@@ -13,13 +12,14 @@ import java.time.format.DateTimeFormatter;
  */
 public class PatientRepositoryImpl implements PatientRepository {
 
-    private ListInterface<Patient> patientList;
-    private PatientDAO patientDAO;
+    private final ListInterface<Patient> patientList;
+    private final PatientDAO patientDAO;
 
     public PatientRepositoryImpl() {
         patientDAO = new PatientDAO();
         patientList = patientDAO.loadFromFile();
     }
+    
     
     // AUTO ID GENERATION
     @Override
@@ -51,7 +51,9 @@ public class PatientRepositoryImpl implements PatientRepository {
             patientDAO.saveToFile(patientList);
         }
     }
+    
 
+    
     // READ
     @Override
     public ListInterface<Patient> findAll() {
@@ -74,7 +76,54 @@ public class PatientRepositoryImpl implements PatientRepository {
 
         return false;
     }
+    
+    @Override
+    public boolean updatePatientAllergy(String patientId, String oldA, String newA) {
 
+        Patient p = findById(patientId);
+
+        if (p != null && newA != null && !newA.trim().isEmpty()) {
+
+            ListInterface<String> list = p.getAllergies();
+
+            int pos = list.getPosition(oldA);
+
+            if (pos != -1) {
+                boolean success = list.replace(pos, newA);
+
+                if (success) {
+                    patientDAO.saveToFile(patientList);
+                }
+
+                return success;
+            }
+        }
+        return false;
+    }    
+
+    @Override
+    public boolean updatePatientMedicalHistory(String patientId, String oldH, String newH) {
+
+        Patient p = findById(patientId);
+
+        if (p != null && newH != null && !newH.trim().isEmpty()) {
+
+            ListInterface<String> list = p.getMedicalHistory();
+
+            int pos = list.getPosition(oldH);
+
+            if (pos != -1) {
+                boolean success = list.replace(pos, newH);
+
+                if (success) {
+                    patientDAO.saveToFile(patientList);
+                }
+
+                return success;
+            }
+        }
+        return false;
+    }
     // DELETE
     @Override
     public boolean delete(Patient patient) {
@@ -87,6 +136,38 @@ public class PatientRepositoryImpl implements PatientRepository {
         return success;
     }
     
+
+    @Override
+    public boolean removePatientAllergy(String patientId, String allergy) {
+        Patient p = findById(patientId);
+
+        if (p != null) {
+            ListInterface<String> list = p.getAllergies();
+            boolean success = list.remove(allergy);
+
+            if (success) {
+                patientDAO.saveToFile(patientList);
+            }
+            return success;
+        }
+        return false;
+    }
+    
+    @Override
+    public boolean removePatientMedicalHistory(String patientId, String history) {
+        Patient p = findById(patientId);
+
+        if (p != null) {
+            ListInterface<String> list = p.getMedicalHistory();
+            boolean success = list.remove(history);
+
+            if (success) {
+                patientDAO.saveToFile(patientList);
+            }
+            return success;
+        }
+        return false;
+    }    
     // SEARCH 
     @Override
     public Patient findById(String id) {
@@ -107,10 +188,18 @@ public class PatientRepositoryImpl implements PatientRepository {
 
     @Override
     public ListInterface<Patient> findPatientsWithAllergy() {
-        return patientList.findAll((Patient p) -> 
-                p.getAllergies() != null &&
-                !"None".equalsIgnoreCase(p.getAllergies()));
+        return patientList.findAll((Patient p) ->
+            p.getAllergies() != null &&
+            !p.getAllergies().isEmpty()
+        );
     }
+    
+    public ListInterface<Patient> findPatientsWithMedicalHistory() {
+        return patientList.findAll((Patient p) ->
+            p.getMedicalHistory() != null &&
+            !p.getMedicalHistory().isEmpty()
+        );
+    }  
     
     // SORTING 
     @Override
@@ -175,8 +264,7 @@ public class PatientRepositoryImpl implements PatientRepository {
 
         // Safe sorting
         ListInterface<Patient> sortedAsc = getPatientsSortedByAgeAsc();
-        ListInterface<Patient> sortedDesc = getPatientsSortedByAgeDesc();
-        ListInterface<Patient> sortedName = getPatientsSortedByName();
+        ListInterface<Patient> sortedDesc = getPatientsSortedByAgeDesc();        
 
         LocalDateTime now = LocalDateTime.now();
         String time = now.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
@@ -192,8 +280,8 @@ public class PatientRepositoryImpl implements PatientRepository {
         report.append("----------------------\n");
         report.append("Total Patients : ").append(total).append("\n");
         report.append("Average Age    : ").append(String.format("%d", avgAge)).append("\n");
-        report.append("Youngest       : ").append(minAge).append("\n");
-        report.append("Oldest         : ").append(maxAge).append("\n\n");
+        report.append("Youngest Age   : ").append(minAge).append("\n");
+        report.append("Oldest Age     : ").append(maxAge).append("\n\n");
 
         report.append("[2] AGE GROUP\n");
         report.append("----------------------\n");       
@@ -225,19 +313,41 @@ public class PatientRepositoryImpl implements PatientRepository {
                   .append(p.getAge())
                   .append(")\n");
         }
-        
-        report.append("\n[5] PATIENT LIST (A-Z)\n");
-        report.append("----------------------\n"); 
-        for (Patient p : sortedName) {
-            report.append(p.getPatientID())
-                  .append(" - ")
-                  .append(p.getPatientName())
-                  .append(" (")
-                  .append(p.getAge())
-                  .append(")\n");
-        }
         report.append("\n============================================================\n");
-        Utilities.exportReportToFile(report.toString(), "PatientReport.txt");
+        
         return report.toString();
+    }
+
+    @Override
+    public boolean addPatientAllergy(String patientId, String allergy) {
+        Patient p = findById(patientId);
+        if (p != null && allergy != null && !allergy.trim().isEmpty()) {
+            p.getAllergies().add(allergy);   // ⭐ 操作 List
+            patientDAO.saveToFile(patientList);
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean addPatientMedicalHistory(String patientId, String history) {
+        Patient p = findById(patientId);
+        if (p != null && history != null && !history.trim().isEmpty()) {
+            p.getMedicalHistory().add(history);
+            patientDAO.saveToFile(patientList);
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public Patient registerPatient(String name, LocalDate birthDate,
+                                   ListInterface<String> history,
+                                   ListInterface<String> allergy) {
+
+        String id = generatePatientID();
+        Patient p = new Patient(id, name, birthDate, history, allergy);
+        create(p);
+        return p;
     }
 }

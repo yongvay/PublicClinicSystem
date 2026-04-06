@@ -10,9 +10,11 @@ import Entity.Appointment;
 import Entity.Patient;
 import Entity.Medicine;
 import Entity.Doctor; 
+import Utility.Utilities;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Scanner;
 
 /**
@@ -20,7 +22,7 @@ import java.util.Scanner;
  */
 public class AppointmentUI {
 
-    private AppointmentRepository appointmentRepo;
+    private final AppointmentRepository appointmentRepo;
     private final PatientRepository patientRepo; 
     private final DoctorRepository doctorRepo;   
     private final MedicineRepository medicineRepo; 
@@ -86,58 +88,125 @@ public class AppointmentUI {
         return prescribedMeds;
     }
 
-   private void bookAppointment(Scanner scanner) {
+    // TABLE DISPLAY 
+    private String limit(String text, int max) {
+        if (text == null) return "";
+        if (text.length() <= max) return text;
+        return text.substring(0, max - 3) + "...";
+    }
+
+    private void displaySinglePatient(Patient p) {
+        if (p == null) {
+            System.out.println("Patient not found.");
+            return;
+        }
+
+        System.out.println("\nCurrent Patient Data:");
+        System.out.println("=================================================================================================");
+        System.out.printf("%-6s | %-15s | %-4s | %-30s | %-30s\n",
+                "ID", "Name", "Age", "Medical History", "Allergies");
+        System.out.println("=================================================================================================");
+
+        String history = limit(p.formatList(p.getMedicalHistory()), 30);
+        String allergy = limit(p.formatList(p.getAllergies()), 30);
+
+        System.out.printf("%-6s | %-15s | %-4d | %-30s | %-30s\n",
+                p.getPatientID(),
+                limit(p.getPatientName(), 15),
+                p.getAge(),
+                history,
+                allergy
+        );
+
+        System.out.println("=================================================================================================");
+    }     
+    
+    private Patient handleQuickRegistration(Scanner scanner) {
+        System.out.println("\n--- Quick Patient Registration ---");
+        System.out.print("Enter Patient Name: ");
+        String name = Utilities.capitalizeWords(scanner.nextLine().trim());
+      
+        if (name.isEmpty()) {
+            System.out.println("Patient name cannot be empty!");
+            System.out.print("Proceed with new registration? (Y/N): ");
+            if (!scanner.nextLine().equalsIgnoreCase("Y")) {
+                System.out.println("Registration cancelled.");
+                return null;
+            }            
+        }
+
+        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        LocalDate birthDate = null;
+
+        while (true) {
+            System.out.print("Enter Birth Date (dd/MM/yyyy): ");
+            String dateStr = scanner.nextLine().trim();
+
+            try {
+                birthDate = LocalDate.parse(dateStr, fmt);
+
+                if (birthDate.isAfter(LocalDate.now())) {
+                    System.out.println("Error: Birth date cannot be in the future.");
+                    continue;
+                }
+
+                int age = LocalDate.now().getYear() - birthDate.getYear();
+                if (age < 0 || age > 120) {
+                    System.out.println("Error: Age must be between 0 and 120.");
+                    continue;
+                }
+
+                break; // if valid, exit loop
+
+            } catch (DateTimeParseException e) {
+                System.out.println("Error: Invalid date format. Please use dd/MM/yyyy.");
+            }
+        }
+        ListInterface<String> historyList = new List<>();
+        ListInterface<String> allergyList = new List<>();
+
+        Patient patient = patientRepo.registerPatient(name, birthDate, historyList, allergyList);
+
+        System.out.println("Success! New Patient ID: " + patient.getPatientID());
+       
+        displaySinglePatient(patient);
+
+        return patient;
+    }
+
+    private Patient handleExistingPatient(Scanner scanner) {
+        System.out.print("\nEnter Patient ID: ");
+        String patientId = scanner.nextLine().trim();
+        Patient patient = patientRepo.findById(patientId);
+        if (patient == null) {
+            System.out.println("Error: Patient ID [" + patientId + "] does not exist.");
+            return null;
+        }
+        System.out.println("Patient Found: " + patient.getPatientName());
+        
+        displaySinglePatient(patient);
+        return patient;
+    }
+
+    private void bookAppointment(Scanner scanner) {
         System.out.println("\n--- Booking Options ---");
         System.out.println("1. Register New Patient & Book");
         System.out.println("2. Book for Existing Patient");
         System.out.print("Choice: ");
-        String ptChoice = scanner.nextLine();
+        String ptChoice = scanner.nextLine().trim();
 
-        Patient patient = null;
-
-        if (ptChoice.equals("1")) {
-            System.out.println("\n--- Quick Patient Registration ---");
-            String newId = patientRepo.generatePatientID(); 
-            
-            System.out.print("Enter Patient Name: ");
-            String name = scanner.nextLine();
-            
-            System.out.print("Enter Birth Date (dd/MM/yyyy): ");
-            String dateStr = scanner.nextLine();
-            DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-            
-            LocalDate birthDate;
-            try {
-                birthDate = LocalDate.parse(dateStr, fmt);
-            } catch (Exception e) {
-                System.out.println("Invalid date format! Returning to menu.");
+        Patient patient;
+        switch (ptChoice) {
+            case "1" -> patient = handleQuickRegistration(scanner);
+            case "2" -> patient = handleExistingPatient(scanner);
+            default -> {
+                System.out.println("Invalid choice. Returning to menu.");
                 return;
             }
-            
-            System.out.print("Enter Medical History: ");
-            String history = scanner.nextLine();
-            
-            System.out.print("Enter Allergies (or type 'None'): ");
-            String allergies = scanner.nextLine();
-            
-            patient = new Patient(newId, name, birthDate, history, allergies);
-            patientRepo.create(patient);
-            
-            System.out.println("Success! New Patient registered with ID: " + newId);
+        }
 
-        } else if (ptChoice.equals("2")) {
-            System.out.print("\nEnter Patient ID: ");
-            String patientId = scanner.nextLine();
-            patient = patientRepo.findById(patientId);
-            
-            if (patient == null) {
-                System.out.println("Error: Patient ID [" + patientId + "] does not exist.");
-                return;
-            }
-            System.out.println("Patient Found: " + patient.getPatientName());
-            
-        } else {
-            System.out.println("Invalid choice. Returning to menu.");
+        if (patient == null) {
+            System.out.println("Booking cancelled.");
             return;
         }
 
@@ -163,7 +232,6 @@ public class AppointmentUI {
             }
         }
 
-      
         System.out.println("\n==========================================");
         System.out.println("         AVAILABLE SPECIALIZATIONS        ");
         System.out.println("==========================================");
@@ -173,7 +241,7 @@ public class AppointmentUI {
         System.out.println("==========================================");
 
         System.out.print("Select Specialization (Enter number): ");
-        int specChoice = -1;
+        int specChoice;
         if (scanner.hasNextInt()) {
             specChoice = scanner.nextInt();
             scanner.nextLine(); 
@@ -226,7 +294,7 @@ public class AppointmentUI {
             return;
         }
 
-        String targetRoomType = scanner.nextLine();
+        String targetRoomType = Utilities.capitalizeWords(scanner.nextLine());
         ListInterface<Medicine> meds = selectMedicines(scanner); 
         
         String resultMessage = "";
@@ -267,7 +335,3 @@ public class AppointmentUI {
         }
     }
 }
-
-
-
-

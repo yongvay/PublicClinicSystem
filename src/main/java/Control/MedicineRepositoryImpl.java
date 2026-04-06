@@ -12,7 +12,6 @@ import java.util.Comparator;
  */
 public class MedicineRepositoryImpl implements MedicineRepository {
 
-    // Coding to an Interface (CLO2 best practice)
     private ListInterface<Medicine> medicineList;
     private MedicineDAO medicineDAO; // Instantiate the DAO
 
@@ -241,14 +240,19 @@ public class MedicineRepositoryImpl implements MedicineRepository {
         if (lowStockCount > 0 || outOfStockCount > 0) {
             report.append("\n[3] ACTION REQUIRED: CRITICAL RESTOCK LIST\n");
             report.append("----------------------------------------------------------------------------------------\n");
-            report.append(String.format("| %-8s | %-20s | %-15s | %-8s | %-12s |\n",
-                    "Med ID", "Medicine Name", "Dosage", "Stock", "Reorder Lvl"));
+            report.append(String.format("| %-8s | %-20s | %-15s | %-12s | %-12s |\n",
+                    "Med ID", "Medicine Name", "Dosage", "Stock Status", "Reorder Lvl"));
             report.append("----------------------------------------------------------------------------------------\n");
 
             for (Medicine m : lowStockMeds) {
-                String statusMarker = (m.getQuantityInStock() == 0) ? "**OUT**" : "LOW";
-                report.append(String.format("| %-8s | %-20s | %-15s | %-3d %-4s | %-12d |\n",
-                        m.getMedicineID(), m.getName(), m.getDosage(), m.getQuantityInStock(), statusMarker,
+                String statusMarker = (m.getQuantityInStock() == 0) ? "OUT" : "LOW";
+                
+                // Add left-justification padding (%-3d) specifically to the stock integer 
+                // so the status text always starts at the exact same character position.
+                String stockDisplay = String.format("%-3d %s", m.getQuantityInStock(), statusMarker); 
+                
+                report.append(String.format("| %-8s | %-20s | %-15s | %-12s | %-12d |\n",
+                        m.getMedicineID(), m.getName(), m.getDosage(), stockDisplay,
                         m.getReorderLevel()));
             }
         }
@@ -277,5 +281,4 @@ public class MedicineRepositoryImpl implements MedicineRepository {
 
         return report.toString();
     }
-
 }

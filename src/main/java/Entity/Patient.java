@@ -1,30 +1,25 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package Entity;
 
+import ADT.ListInterface;
 import java.time.LocalDate;
 import java.time.Period;
-import java.time.format.DateTimeFormatter;
 /**
- *
  * @author Tam Wan Jin
  */
 public class Patient {    
     private final String patientID;
     private String patientName;
     private LocalDate birthDate;
-    private String medicalHistory;
-    private String allergies;
+    private ListInterface<String> medicalHistory;
+    private ListInterface<String> allergies;
     
     //Constructor
-        public Patient(String patientID, String patientName, LocalDate birthDate,String medicalHistory, String allergies) {
+        public Patient(String patientID, String patientName, LocalDate birthDate,ListInterface<String> historyList, ListInterface<String> allergyList) {
         this.patientID = patientID;
         this.patientName = patientName;
         this.birthDate = birthDate;
-        this.medicalHistory = medicalHistory;
-        this.allergies = allergies;
+        this.medicalHistory = historyList;
+        this.allergies = allergyList;
     }
     
     //Getters
@@ -41,11 +36,11 @@ public class Patient {
         return Period.between(birthDate, LocalDate.now()).getYears();
     }
 
-    public String getMedicalHistory() { 
+    public ListInterface<String> getMedicalHistory() { 
         return medicalHistory;
     }
 
-    public String getAllergies() { 
+    public ListInterface<String> getAllergies() { 
         return allergies;
     }     
     
@@ -58,40 +53,41 @@ public class Patient {
         this.birthDate = birthDate; 
     }
     
-    public void setMedicalHistory(String medicalHistory) { 
+    public void setMedicalHistory(ListInterface<String> medicalHistory) { 
         this.medicalHistory = medicalHistory; 
     }
 
-    public void setAllergies(String allergies) { 
+    public void setAllergies(ListInterface<String> allergies) { 
         this.allergies = allergies; 
     }
     
     public Patient(String patientID) {
-    this.patientID = patientID;
+        this.patientID = patientID;
     }
     
-    //Overriden Methods
+    public String formatList(ListInterface<String> list) {
+        if (list == null || list.isEmpty()) {
+            return "None";
+        }
+
+        StringBuilder sb = new StringBuilder();
+
+        for (int i = 1; i <= list.getNumberOfEntries(); i++) {
+            sb.append(i)
+              .append(". ")
+              .append(list.getEntry(i));
+
+            if (i < list.getNumberOfEntries()) {
+                sb.append(" | ");
+            }
+        }
+
+        return sb.toString();
+    }   
     @Override
     public String toString() {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-
-        return String.format(
-                "ID: %-6s | Name: %-20s | Birth Date: %-12s | Age: %-4d | History: %-30s | Allergies: %-15s",
-                patientID,
-                patientName,
-                birthDate.format(formatter),
-                getAge(),
-                medicalHistory,
-                allergies
-        );
-    }
-    
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj == null || getClass() != obj.getClass()) return false;
-
-        Patient other = (Patient) obj;
-        return this.patientID.equalsIgnoreCase(other.patientID);
+        return "ID: " + patientID + ", Name: " + patientName + ", DOB: " + birthDate + 
+               "\nMedical History:\n" + formatList(medicalHistory) +
+               "\nAllergies:\n" + formatList(allergies);
     }
 }

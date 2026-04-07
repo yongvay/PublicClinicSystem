@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Specialization Analytics Dashboard</title>
+<style>
+body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f4f7f6; color: #333; margin: 40px; }
+.container { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); max-width: 900px; margin: auto; }
+h1, h3 { text-align: center; color: #2c3e50; }
+.dashboard-grid { display: flex; justify-content: space-between; flex-wrap: wrap; margin-top: 30px; }
+.chart-section { width: 45%; padding: 20px; background: #fafafa; border-radius: 8px; border: 1px solid #eee; }
+.pie-chart { width: 250px; height: 250px; border-radius: 50%; margin: 20px auto; background: conic-gradient(#FF6384 0.0% 9.090909090909092%, #36A2EB 9.090909090909092% 27.272727272727273%, #FFCE56 27.272727272727273% 45.45454545454545%, #4BC0C0 45.45454545454545% 72.72727272727272%, #9966FF 72.72727272727272% 90.9090909090909%, #FF9F40 90.9090909090909% 100.0%); }
+.legend-item { display: flex; align-items: center; margin-bottom: 8px; font-size: 14px; }
+.legend-color { width: 16px; height: 16px; border-radius: 4px; margin-right: 10px; }
+.bar-row { display: flex; align-items: center; margin-bottom: 15px; }
+.bar-label { width: 120px; font-size: 14px; font-weight: bold; text-align: right; margin-right: 15px; }
+.bar-container { flex-grow: 1; background-color: #e0e0e0; border-radius: 5px; height: 25px; overflow: hidden; }
+.bar-fill { height: 100%; background-color: #3498db; display: flex; align-items: center; padding-left: 10px; color: white; font-weight: bold; font-size: 12px; }
+</style>
+</head>
+<body>
+<div class="container">
+<h1>Clinic Specialization Dashboard</h1>
+<p style="text-align:center;">Report Generated At: <strong>07/04/2026 08:05</strong></p>
+<hr style="border: 1px solid #eee; margin: 20px 0;">
+<div class="dashboard-grid">
+  <div class="chart-section">
+    <h3>Distribution of Doctors</h3>
+    <div class="pie-chart"></div>
+    <div style="margin-top: 20px;"><div class='legend-item'><div class='legend-color' style='background-color:#FF6384;'></div><span>Family Medicine (1 doctors)</span></div>
+<div class='legend-item'><div class='legend-color' style='background-color:#36A2EB;'></div><span>Pediatrics (2 doctors)</span></div>
+<div class='legend-item'><div class='legend-color' style='background-color:#FFCE56;'></div><span>Internal Medicine (2 doctors)</span></div>
+<div class='legend-item'><div class='legend-color' style='background-color:#4BC0C0;'></div><span>General Practice (3 doctors)</span></div>
+<div class='legend-item'><div class='legend-color' style='background-color:#9966FF;'></div><span>Dermatology (2 doctors)</span></div>
+<div class='legend-item'><div class='legend-color' style='background-color:#FF9F40;'></div><span>Time Stone (1 doctors)</span></div>
+</div>
+  </div>
+  <div class="chart-section">
+    <h3>Total Appointments Handled</h3>
+    <div style="margin-top: 30px;">
+      <div class="bar-row">
+        <div class="bar-label">Family Medicine</div>
+        <div class="bar-container">
+          <div class="bar-fill" style="width: 100%;">2</div>
+        </div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label">Pediatrics</div>
+        <div class="bar-container">
+          <div class="bar-fill" style="width: 0%;">0</div>
+        </div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label">Internal Medicine</div>
+        <div class="bar-container">
+          <div class="bar-fill" style="width: 50%;">1</div>
+        </div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label">General Practice</div>
+        <div class="bar-container">
+          <div class="bar-fill" style="width: 0%;">0</div>
+        </div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label">Dermatology</div>
+        <div class="bar-container">
+          <div class="bar-fill" style="width: 100%;">2</div>
+        </div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label">Time Stone</div>
+        <div class="bar-container">
+          <div class="bar-fill" style="width: 0%;">0</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+</body>
+</html>

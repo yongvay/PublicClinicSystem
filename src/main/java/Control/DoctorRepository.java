@@ -43,4 +43,7 @@ public interface DoctorRepository {
     String generateDoctorReport(ListInterface<Appointment> allApts);
     
     ListInterface<String> getAllUniqueSpecializations();
+    
+    //Visual Dashboard Report
+    String generateDoctorDashboardHTML(ListInterface<Appointment> appointments);
 }

@@ -55,6 +55,7 @@ public class DoctorUI {
         System.out.println("7. Remove Doctor");
         System.out.println("8. View Sorted Doctors (By Name/Specialization)");
         System.out.println("9. View Doctor Report");
+        System.out.println("10.Visualize Dashboard Report");
         System.out.println("0. Exit to Main Menu");
         System.out.println("==========================================");
     }
@@ -69,7 +70,8 @@ public class DoctorUI {
             case 6: updateDoctor(); break;
             case 7: deleteDoctor(); break;
             case 8: viewSortedDoctors(); break;
-            case 9: generateDoctorReport(); break; 
+            case 9: generateDoctorReport(); break;
+            case 10:exportDoctorSpecilizationReport(); break; 
             case 0: System.out.println("Exiting Doctor Subsystem..."); break;
             default: System.out.println("Invalid choice. Please try again.");
         }
@@ -284,6 +286,28 @@ public class DoctorUI {
                
                 Utilities.exportReportToFile(reportText, "DoctorPerformanceReport.txt");
             }
+        }
+    }
+    public void exportDoctorSpecilizationReport() {
+        System.out.println("\n--- Generating Specialization Analytics Report ---");
+        
+        ListInterface<Appointment> appointments = appointmentRepo.getAllAppointments();
+        String htmlContent = doctorRepo.generateDoctorDashboardHTML(appointments);
+
+        if (htmlContent.contains("No doctor data available")) {
+            System.out.println("Error: No doctor data available to generate report.");
+            return;
+        }
+
+        System.out.print("Are you sure you want to export this visual report? (Y/N): ");
+        String exportChoice = scanner.nextLine().trim();
+        
+        if (exportChoice.equalsIgnoreCase("Y")) {
+            Utilities.exportReportToFile(htmlContent, "SpecializationReport.html");
+            System.out.println("\nSuccess! The visual dashboard has been generated.");
+            System.out.println("Go to your 'GeneratedReports' folder and double-click 'SpecializationReport.html' to see the charts in your browser!");
+        } else {
+            System.out.println("Export cancelled.");
         }
     }
 }

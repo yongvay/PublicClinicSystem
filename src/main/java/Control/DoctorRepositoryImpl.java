@@ -395,7 +395,7 @@ public class DoctorRepositoryImpl implements DoctorRepository {
         html.append("</style>\n</head>\n<body>\n");
 
         html.append("<div class=\"container\">\n");
-        html.append("<h1>Clinic Specialization Dashboard</h1>\n");
+        html.append("<h1>Clinic Specialization Report</h1>\n");
         html.append("<p style=\"text-align:center;\">Report Generated At: <strong>").append(time).append("</strong></p>\n");
         html.append("<hr style=\"border: 1px solid #eee; margin: 20px 0;\">\n");
 

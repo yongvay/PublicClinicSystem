@@ -7,6 +7,7 @@ import Entity.Patient;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+
 /**
  * @author Tam Wan Jin
  */
@@ -52,7 +53,38 @@ public class PatientRepositoryImpl implements PatientRepository {
         }
     }
     
+    @Override
+    public boolean addPatientMedicalHistory(String patientId, String history) {
+        Patient p = findById(patientId);
+        if (p != null && history != null && !history.trim().isEmpty()) {
+            p.getMedicalHistory().add(history);
+            patientDAO.saveToFile(patientList);
+            return true;
+        }
+        return false;
+    }
 
+    @Override
+    public Patient registerPatient(String name, LocalDate birthDate,
+                                   ListInterface<String> history,
+                                   ListInterface<String> allergy) {
+
+        String id = generatePatientID();
+        Patient p = new Patient(id, name, birthDate, history, allergy);
+        create(p);
+        return p;
+    }    
+
+    @Override
+    public boolean addPatientAllergy(String patientId, String allergy) {
+        Patient p = findById(patientId);
+        if (p != null && allergy != null && !allergy.trim().isEmpty()) {
+            p.getAllergies().add(allergy);   // ⭐ 操作 List
+            patientDAO.saveToFile(patientList);
+            return true;
+        }
+        return false;
+    }
     
     // READ
     @Override
@@ -73,7 +105,6 @@ public class PatientRepositoryImpl implements PatientRepository {
             }
             return success;
         }
-
         return false;
     }
     
@@ -94,7 +125,6 @@ public class PatientRepositoryImpl implements PatientRepository {
                 if (success) {
                     patientDAO.saveToFile(patientList);
                 }
-
                 return success;
             }
         }
@@ -118,7 +148,6 @@ public class PatientRepositoryImpl implements PatientRepository {
                 if (success) {
                     patientDAO.saveToFile(patientList);
                 }
-
                 return success;
             }
         }
@@ -132,7 +161,6 @@ public class PatientRepositoryImpl implements PatientRepository {
         if (success) {
             patientDAO.saveToFile(patientList);
         }
-
         return success;
     }
     
@@ -316,38 +344,5 @@ public class PatientRepositoryImpl implements PatientRepository {
         report.append("\n============================================================\n");
         
         return report.toString();
-    }
-
-    @Override
-    public boolean addPatientAllergy(String patientId, String allergy) {
-        Patient p = findById(patientId);
-        if (p != null && allergy != null && !allergy.trim().isEmpty()) {
-            p.getAllergies().add(allergy);   // ⭐ 操作 List
-            patientDAO.saveToFile(patientList);
-            return true;
-        }
-        return false;
-    }
-
-    @Override
-    public boolean addPatientMedicalHistory(String patientId, String history) {
-        Patient p = findById(patientId);
-        if (p != null && history != null && !history.trim().isEmpty()) {
-            p.getMedicalHistory().add(history);
-            patientDAO.saveToFile(patientList);
-            return true;
-        }
-        return false;
-    }
-
-    @Override
-    public Patient registerPatient(String name, LocalDate birthDate,
-                                   ListInterface<String> history,
-                                   ListInterface<String> allergy) {
-
-        String id = generatePatientID();
-        Patient p = new Patient(id, name, birthDate, history, allergy);
-        create(p);
-        return p;
     }
 }

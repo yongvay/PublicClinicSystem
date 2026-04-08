@@ -14,6 +14,7 @@ public interface PatientRepository {
     void create(Patient patient);
     boolean addPatientMedicalHistory(String id, String newH);
     boolean addPatientAllergy(String id, String newA);
+    Patient registerPatient(String name, LocalDate birthDate, ListInterface<String> history, ListInterface<String> allergy); 
    
     // Read
     ListInterface<Patient> findAll();
@@ -40,7 +41,4 @@ public interface PatientRepository {
     
     // Generate Report
     String generatePatientReport();
-    
-    Patient registerPatient(String name, LocalDate birthDate,ListInterface<String> history,
-                            ListInterface<String> allergy);    
 }

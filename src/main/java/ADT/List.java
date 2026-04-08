@@ -98,17 +98,6 @@ public class List<T> implements ListInterface<T> {
         return result;
     }
 
-    // @Override
-    // public boolean remove(T anEntry) {
-    // for (int index = 0; index < numberOfEntries; index++) {
-    // if (anEntry == null ? elements[index] == null :
-    // anEntry.equals(elements[index])) {
-    // remove(index + 1); // Pass 1-based index to the other remove method
-    // return true;
-    // }
-    // }
-    // return false;
-    // }
     @Override
     public boolean remove(T anEntry) {
         // Reuse getPosition to find the 1-based index
@@ -147,17 +136,6 @@ public class List<T> implements ListInterface<T> {
         return result;
     }
 
-    // @Override
-    // public boolean contains(T anEntry) {
-    // boolean found = false;
-    // for (int index = 0; !found && (index < numberOfEntries); index++) {
-    // if (anEntry == null ? elements[index] == null :
-    // anEntry.equals(elements[index])) {
-    // found = true;
-    // }
-    // }
-    // return found;
-    // }
     @Override
     public boolean contains(T anEntry) {
         // Reuse getPosition to avoid duplicate loop logic

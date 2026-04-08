@@ -11,17 +11,17 @@ import Entity.Medicine;
 import java.time.LocalDate;
 
 /**
- * @author Ng Yong Vay
+ * @author All Members
  */
 public class AppointmentRepositoryImpl implements AppointmentRepository {
 
     private ListInterface<Appointment> appointmentList;
 
-    private PatientRepository patientRepo;
-    private DoctorRepository doctorRepo;
-    private RoomRepository roomRepo;
-    private MedicineRepository medicineRepo; 
-    private AppointmentDAO appointmentDAO;
+    private final PatientRepository patientRepo;
+    private final DoctorRepository doctorRepo;
+    private final RoomRepository roomRepo;
+    private final MedicineRepository medicineRepo; 
+    private final AppointmentDAO appointmentDAO;
 
     public AppointmentRepositoryImpl(PatientRepository patientRepo, DoctorRepository doctorRepo, RoomRepository roomRepo, MedicineRepository medicineRepo) {
         this.patientRepo = patientRepo;

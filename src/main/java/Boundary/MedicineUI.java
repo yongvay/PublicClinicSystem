@@ -57,7 +57,7 @@ public class MedicineUI {
         System.out.println("7. Delete Medicine");
         System.out.println("8. View Sorted Medicines (By Name/Stock)");
         System.out.println("9. Generate Medicine Inventory Report");
-        System.out.println("10. Generate Medicine Expiry Report (HTML)");
+        System.out.println("10. Generate Medicine Expiry Report");
         System.out.println("0. Exit to Main Menu");
         System.out.println("==========================================");
     }
@@ -153,7 +153,7 @@ public class MedicineUI {
                 System.out.println("❌ Invalid format! Please use exactly YYYY-MM-DD (e.g., 2026-10-15).");
             }
         }
-        
+
         Medicine newMed = new Medicine(id, name, desc, dosage, stock, reorderLevel, expiryDate);
 
         medicineRepo.create(newMed);
@@ -246,42 +246,42 @@ public class MedicineUI {
         }
 
         System.out.println("Current Expiry Date: " + existing.getExpiryDate());
-    
-    boolean validDate = false;
-    while (!validDate) {
-        System.out.print("Enter New Expiry Date (YYYY-MM-DD) or press [Enter] to keep current: ");
-        String dateInput = scanner.nextLine().trim();
 
-        // 1. The "Skip" Check
-        if (dateInput.isEmpty()) {
-            System.out.println("No changes made to Expiry Date.");
-            validDate = true; // Break the loop, leave the existing date intact
-        } 
-        // 2. The "Update" Check
-        else {
-            try {
-                LocalDate newExpiryDate = LocalDate.parse(dateInput); 
-                
-                // Optional Business Logic Warning
-                if (newExpiryDate.isBefore(LocalDate.now())) {
-                    System.out.println("⚠️ Warning: You are changing this to an EXPIRED date!");
-                    System.out.print("Proceed anyway? (Y/N): ");
-                    String confirm = scanner.nextLine().trim();
-                    if (!confirm.equalsIgnoreCase("Y")) {
-                        continue; // Restarts the loop
+        boolean validDate = false;
+        while (!validDate) {
+            System.out.print("Enter New Expiry Date (YYYY-MM-DD) or press [Enter] to keep current: ");
+            String dateInput = scanner.nextLine().trim();
+
+            // 1. The "Skip" Check
+            if (dateInput.isEmpty()) {
+                System.out.println("No changes made to Expiry Date.");
+                validDate = true; // Break the loop, leave the existing date intact
+            }
+            // 2. The "Update" Check
+            else {
+                try {
+                    LocalDate newExpiryDate = LocalDate.parse(dateInput);
+
+                    // Optional Business Logic Warning
+                    if (newExpiryDate.isBefore(LocalDate.now())) {
+                        System.out.println("⚠️ Warning: You are changing this to an EXPIRED date!");
+                        System.out.print("Proceed anyway? (Y/N): ");
+                        String confirm = scanner.nextLine().trim();
+                        if (!confirm.equalsIgnoreCase("Y")) {
+                            continue; // Restarts the loop
+                        }
                     }
-                }
 
-                // 3. Apply the update using the Setter
-                existing.setExpiryDate(newExpiryDate);
-                System.out.println("✅ Expiry Date updated to: " + newExpiryDate);
-                validDate = true; 
-                
-            } catch (DateTimeParseException e) {
-                System.out.println("❌ Invalid format! Please use exactly YYYY-MM-DD (e.g., 2026-10-15).");
+                    // 3. Apply the update using the Setter
+                    existing.setExpiryDate(newExpiryDate);
+                    System.out.println("✅ Expiry Date updated to: " + newExpiryDate);
+                    validDate = true;
+
+                } catch (DateTimeParseException e) {
+                    System.out.println("❌ Invalid format! Please use exactly YYYY-MM-DD (e.g., 2026-10-15).");
+                }
             }
         }
-    }
 
         // Save the updates
         if (medicineRepo.update(existing)) {
@@ -348,36 +348,45 @@ public class MedicineUI {
     }
 
     private void generateMedicineReport() {
-        String reportText = medicineRepo.generateInventoryReport();
-        System.out.println(reportText);
+        // 1. Output Text Version to Console First
+        String textReport = medicineRepo.generateInventoryTextReport();
+        System.out.println(textReport);
 
-        if (!reportText.equals("No medicine data available to generate report.\n")) {
-            System.out.print("\nWould you like to export this report to a .txt file? (Y/N): ");
+        if (!textReport.contains("No medicine data available")) {
+            // 2. Ask User if they want the HTML Version
+            System.out.print("\nWould you like to export a visual HTML version of this report? (Y/N): ");
             String exportChoice = scanner.nextLine().trim();
 
             if (exportChoice.equalsIgnoreCase("Y")) {
-                // CALL THE SHARED UTILITY METHOD HERE
-                Utilities.exportReportToFile(reportText, "MedicineInventoryReport.txt");
+                String htmlContent = medicineRepo.generateInventoryHtmlReport();
+                Utilities.exportReportToFile(htmlContent, "MedicineInventoryReport.html");
+                System.out.println("SUCCESS: HTML Report saved as 'MedicineInventoryReport.html' in GeneratedReports.");
+            } else {
+                System.out.println("Export skipped.");
             }
         }
     }
 
     private void generateExpiryReport() {
-        String htmlContent = medicineRepo.generateExpiryHtmlReport();
+        // 1. Output Text Version to Console First
+        String textReport = medicineRepo.generateExpiryTextReport();
+        System.out.println(textReport);
 
-        if (htmlContent.equals("<h1>No Data Available</h1>")) {
-            System.out.println("No medicine data available.");
-            return;
+        if (!textReport.contains("No medicine data available")) {
+            // 2. Ask User if they want the HTML Version
+            System.out.print("\nWould you like to export a visual HTML version of this report? (Y/N): ");
+            String exportChoice = scanner.nextLine().trim();
+
+            if (exportChoice.equalsIgnoreCase("Y")) {
+                String htmlContent = medicineRepo.generateExpiryHtmlReport();
+                Utilities.exportReportToFile(htmlContent, "MedicineExpiryReport.html");
+                System.out.println("SUCCESS: HTML Report saved as 'MedicineExpiryReport.html' in GeneratedReports.");
+            } else {
+                System.out.println("Export skipped.");
+            }
         }
-
-        // Export the file using your existing Utility class
-        Utilities.exportReportToFile(htmlContent, "MedicineExpiryReport.html");
-
-        System.out.println("\nSUCCESS: Medicine Expiry Report has been generated!");
-        System.out.println(
-                "Please locate 'MedicineExpiryReport.html' in your project folder and open it in Google Chrome/Edge.");
     }
-
+    
     // ==========================================
     // UTILITY METHODS
     // ==========================================

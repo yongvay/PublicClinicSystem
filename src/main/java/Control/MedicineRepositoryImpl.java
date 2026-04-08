@@ -195,31 +195,29 @@ public class MedicineRepositoryImpl implements MedicineRepository {
         });
     }
 
+    // ==========================================
+    // 1. INVENTORY REPORT (TEXT FOR CONSOLE)
+    // ==========================================
     @Override
-    public String generateInventoryReport() {
+    public String generateInventoryTextReport() {
         ListInterface<Medicine> allMedicines = this.findAll();
 
         if (allMedicines.isEmpty()) {
             return "No medicine data available to generate report.\n";
         }
 
-        // 1. Fetch ADT Filtered Data
         ListInterface<Medicine> lowStockMeds = this.findBelowReorderLevel();
         ListInterface<Medicine> outOfStockMeds = this.findOutOfStock();
 
-        // 2. Calculate Aggregates
         int totalUniqueMedicines = allMedicines.getNumberOfEntries();
         int totalPhysicalStock = 0;
-
-        for (Medicine m : allMedicines) {
+        for (Medicine m : allMedicines)
             totalPhysicalStock += m.getQuantityInStock();
-        }
 
         int outOfStockCount = outOfStockMeds.getNumberOfEntries();
         int lowStockCount = lowStockMeds.getNumberOfEntries();
         int healthyStockCount = totalUniqueMedicines - outOfStockCount - lowStockCount;
 
-        // 3. Build the Report String
         StringBuilder report = new StringBuilder();
         String time = java.time.LocalDateTime.now()
                 .format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
@@ -228,81 +226,89 @@ public class MedicineRepositoryImpl implements MedicineRepository {
         report.append("                          CLINIC MEDICINE INVENTORY & RESTOCK REPORT                    \n");
         report.append("                          Generated At: ").append(time).append("\n");
         report.append("========================================================================================\n");
-
-        report.append("\n[1] OVERALL INVENTORY SUMMARY\n");
-        report.append("--------------------------------------------------\n");
         report.append("Total Unique Medicine Types  : ").append(totalUniqueMedicines).append("\n");
         report.append("Total Physical Units in Stock: ").append(totalPhysicalStock).append("\n");
-
-        report.append("\n[2] STOCK HEALTH ANALYSIS\n");
-        report.append("--------------------------------------------------\n");
-        report.append("Healthy Stock (Adequate)     : ").append(healthyStockCount).append("\n");
-        report.append("Low Stock (Needs Reorder)    : ").append(lowStockCount).append("\n");
-        report.append("Out of Stock (CRITICAL)      : ").append(outOfStockCount).append("\n");
-
-        if (lowStockCount > 0 || outOfStockCount > 0) {
-            report.append("\n[3] ACTION REQUIRED: CRITICAL RESTOCK LIST\n");
-            report.append("----------------------------------------------------------------------------------------\n");
-            report.append(String.format("| %-8s | %-20s | %-15s | %-12s | %-12s |\n",
-                    "Med ID", "Medicine Name", "Dosage", "Stock Status", "Reorder Lvl"));
-            report.append("----------------------------------------------------------------------------------------\n");
-
-            for (Medicine m : lowStockMeds) {
-                String statusMarker = (m.getQuantityInStock() == 0) ? "OUT" : "LOW";
-                
-                // Add left-justification padding (%-3d) specifically to the stock integer 
-                // so the status text always starts at the exact same character position.
-                String stockDisplay = String.format("%-3d %s", m.getQuantityInStock(), statusMarker); 
-                
-                report.append(String.format("| %-8s | %-20s | %-15s | %-12s | %-12d |\n",
-                        m.getMedicineID(), m.getName(), m.getDosage(), stockDisplay,
-                        m.getReorderLevel()));
-            }
-        }
-
-        report.append("\n[4] COMPLETE INVENTORY LOG (Sorted by Stock Level)\n");
-        report.append("----------------------------------------------------------------------------------------\n");
-        report.append(String.format("| %-8s | %-20s | %-25s | %-8s | %-8s |\n",
-                "Med ID", "Medicine Name", "Description", "Stock", "Status"));
-        report.append("----------------------------------------------------------------------------------------\n");
+        report.append("Healthy: ").append(healthyStockCount).append(" | Low: ").append(lowStockCount).append(" | Out: ")
+                .append(outOfStockCount).append("\n");
+        report.append("========================================================================================\n");
 
         ListInterface<Medicine> sortedInventory = this.sortedByStock();
+        report.append(String.format("| %-8s | %-20s | %-8s | %-12s | %-8s |\n", "Med ID", "Medicine Name", "Stock",
+                "Reorder Lvl", "Status"));
+        report.append("----------------------------------------------------------------------------------------\n");
         for (Medicine m : sortedInventory) {
             String status = (m.getQuantityInStock() == 0) ? "OUT"
                     : (m.getQuantityInStock() < m.getReorderLevel()) ? "LOW" : "OK";
-
-            report.append(String.format("| %-8s | %-20s | %-25s | %-8d | %-8s |\n",
+            report.append(String.format("| %-8s | %-20s | %-8d | %-12d | %-8s |\n",
                     m.getMedicineID(),
                     (m.getName().length() > 20 ? m.getName().substring(0, 17) + "..." : m.getName()),
-                    (m.getDescription().length() > 25 ? m.getDescription().substring(0, 22) + "..."
-                            : m.getDescription()),
-                    m.getQuantityInStock(),
-                    status));
+                    m.getQuantityInStock(), m.getReorderLevel(), status));
         }
-        report.append("========================================================================================\n");
-        report.append("End of Report.\n");
-
         return report.toString();
     }
 
+    // ==========================================
+    // 2. INVENTORY REPORT (HTML FOR EXPORT)
+    // ==========================================
     @Override
-    public String generateExpiryHtmlReport() {
-        ListInterface<Medicine> allMedicines = findAll();
-        if (allMedicines.isEmpty()) return "<h1>No Data Available</h1>";
+    public String generateInventoryHtmlReport() {
+        ListInterface<Medicine> allMedicines = this.findAll();
+        if (allMedicines.isEmpty())
+            return "<h1>No Data Available</h1>";
 
-        // --- DSA Application: Insertion Sort by Expiry Date ---
-        // Extract the items to a temporary array to sort them chronologically 
-        // (Earliest expiry date first).
+        ListInterface<Medicine> lowStockMeds = this.findBelowReorderLevel();
+        ListInterface<Medicine> outOfStockMeds = this.findOutOfStock();
+
+        int totalUnique = allMedicines.getNumberOfEntries();
+        int totalStock = 0;
+        for (Medicine m : allMedicines)
+            totalStock += m.getQuantityInStock();
+        int outCount = outOfStockMeds.getNumberOfEntries();
+        int lowCount = lowStockMeds.getNumberOfEntries();
+        int healthyCount = totalUnique - outCount - lowCount;
+
+        StringBuilder html = new StringBuilder();
+        String time = java.time.LocalDateTime.now()
+                .format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
+
+        html.append("<!DOCTYPE html>\n<html>\n<head>\n<meta charset=\"UTF-8\">\n<title>Medicine Inventory</title>\n");
+        html.append(
+                "<style>body { font-family: 'Segoe UI', sans-serif; padding: 20px; background: #f8f9fa; } table { width: 100%; border-collapse: collapse; background: white; } th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; } th { background-color: #34495e; color: white; } .out { background-color: #ffeaea; color: #c0392b; font-weight: bold; } .low { background-color: #fff3cd; color: #d35400; font-weight: bold; } .ok { color: #27ae60; }</style>\n</head>\n<body>\n");
+        html.append("<h1>📦 Clinic Medicine Inventory Report</h1>\n<p>Generated: ").append(time).append("</p>\n");
+        html.append("<p>Total Unique: <strong>").append(totalUnique).append("</strong> | Total Stock: <strong>")
+                .append(totalStock).append("</strong></p>\n");
+
+        html.append(
+                "<table>\n<tr><th>Med ID</th><th>Medicine Name</th><th>Stock</th><th>Reorder Lvl</th><th>Status</th></tr>\n");
+        for (Medicine m : this.sortedByStock()) {
+            String rowClass = (m.getQuantityInStock() == 0) ? "out"
+                    : (m.getQuantityInStock() < m.getReorderLevel()) ? "low" : "ok";
+            String status = (m.getQuantityInStock() == 0) ? "OUT"
+                    : (m.getQuantityInStock() < m.getReorderLevel()) ? "LOW" : "OK";
+            html.append("<tr class=\"").append(rowClass).append("\"><td>").append(m.getMedicineID()).append("</td><td>")
+                    .append(m.getName()).append("</td><td>").append(m.getQuantityInStock()).append("</td><td>")
+                    .append(m.getReorderLevel()).append("</td><td>").append(status).append("</td></tr>\n");
+        }
+        html.append("</table>\n</body>\n</html>");
+        return html.toString();
+    }
+
+    // ==========================================
+    // 3. EXPIRY REPORT (TEXT FOR CONSOLE)
+    // ==========================================
+    @Override
+    public String generateExpiryTextReport() {
+        ListInterface<Medicine> allMedicines = findAll();
+        if (allMedicines.isEmpty())
+            return "No medicine data available.\n";
+
         int n = allMedicines.getNumberOfEntries();
         Medicine[] sortedMeds = new Medicine[n];
-        for (int i = 1; i <= n; i++) {
+        for (int i = 1; i <= n; i++)
             sortedMeds[i - 1] = allMedicines.getEntry(i);
-        }
-
         for (int i = 1; i < n; i++) {
             Medicine key = sortedMeds[i];
             int j = i - 1;
-            // Compare dates: if key's date is BEFORE the previous item's date, swap
             while (j >= 0 && sortedMeds[j].getExpiryDate().isAfter(key.getExpiryDate())) {
                 sortedMeds[j + 1] = sortedMeds[j];
                 j = j - 1;
@@ -310,52 +316,77 @@ public class MedicineRepositoryImpl implements MedicineRepository {
             sortedMeds[j + 1] = key;
         }
 
-        // --- HTML Generation ---
+        StringBuilder report = new StringBuilder();
+        LocalDate today = LocalDate.now();
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd MMM yyyy");
+
+        report.append("\n========================================================================================\n");
+        report.append("                          CLINIC MEDICINE EXPIRY & SHELF-LIFE REPORT                    \n");
+        report.append("========================================================================================\n");
+        report.append(String.format("| %-8s | %-20s | %-8s | %-15s | %-20s |\n", "Med ID", "Medicine Name", "Stock",
+                "Expiry Date", "Status"));
+        report.append("----------------------------------------------------------------------------------------\n");
+
+        for (Medicine m : sortedMeds) {
+            long daysUntilExpiry = ChronoUnit.DAYS.between(today, m.getExpiryDate());
+            String statusText = (daysUntilExpiry < 0) ? "EXPIRED (" + Math.abs(daysUntilExpiry) + "d ago)"
+                    : (daysUntilExpiry <= 90) ? "EXPIRING (" + daysUntilExpiry + "d left)" : "SAFE";
+
+            report.append(String.format("| %-8s | %-20s | %-8d | %-15s | %-20s |\n",
+                    m.getMedicineID(),
+                    (m.getName().length() > 20 ? m.getName().substring(0, 17) + "..." : m.getName()),
+                    m.getQuantityInStock(), m.getExpiryDate().format(dtf), statusText));
+        }
+        return report.toString();
+    }
+
+    // ==========================================
+    // 4. EXPIRY REPORT (HTML FOR EXPORT)
+    // ==========================================
+    @Override
+    public String generateExpiryHtmlReport() {
+        // KEEP YOUR EXACT HTML EXPIRY CODE HERE FROM YOUR UPLOADED FILE
+        ListInterface<Medicine> allMedicines = findAll();
+        if (allMedicines.isEmpty())
+            return "<h1>No Data Available</h1>";
+
+        int n = allMedicines.getNumberOfEntries();
+        Medicine[] sortedMeds = new Medicine[n];
+        for (int i = 1; i <= n; i++)
+            sortedMeds[i - 1] = allMedicines.getEntry(i);
+        for (int i = 1; i < n; i++) {
+            Medicine key = sortedMeds[i];
+            int j = i - 1;
+            while (j >= 0 && sortedMeds[j].getExpiryDate().isAfter(key.getExpiryDate())) {
+                sortedMeds[j + 1] = sortedMeds[j];
+                j = j - 1;
+            }
+            sortedMeds[j + 1] = key;
+        }
+
         StringBuilder html = new StringBuilder();
         LocalDate today = LocalDate.now();
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd MMM yyyy");
 
-        html.append("<!DOCTYPE html>\n<html>\n<head>\n<meta charset=\"UTF-8\">\n<title>Medicine Expiry Report</title>\n");
-        html.append("<style>\n");
-        html.append("body { font-family: 'Segoe UI', sans-serif; padding: 20px; background: #f8f9fa; }\n");
-        html.append("h1 { color: #2c3e50; text-align: center; }\n");
-        html.append("table { width: 100%; border-collapse: collapse; background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }\n");
-        html.append("th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }\n");
-        html.append("th { background-color: #34495e; color: white; }\n");
-        html.append(".expired { background-color: #ffeaea; color: #c0392b; font-weight: bold; }\n");
-        html.append(".expiring-soon { background-color: #fff3cd; color: #d35400; font-weight: bold; }\n");
-        html.append(".safe { color: #27ae60; }\n");
-        html.append("</style>\n</head>\n<body>\n");
-
+        html.append(
+                "<!DOCTYPE html>\n<html>\n<head>\n<meta charset=\"UTF-8\">\n<title>Medicine Expiry Report</title>\n");
+        html.append(
+                "<style>body { font-family: 'Segoe UI', sans-serif; padding: 20px; background: #f8f9fa; } table { width: 100%; border-collapse: collapse; background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); } th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; } th { background-color: #34495e; color: white; } .expired { background-color: #ffeaea; color: #c0392b; font-weight: bold; } .expiring-soon { background-color: #fff3cd; color: #d35400; font-weight: bold; } .safe { color: #27ae60; }</style>\n</head>\n<body>\n");
         html.append("<h1>⚠️ Clinic Medicine Expiry & Shelf-Life Report</h1>\n");
-        html.append("<table>\n<tr><th>Med ID</th><th>Medicine Name</th><th>Stock</th><th>Expiry Date</th><th>Status / Days Left</th></tr>\n");
+        html.append(
+                "<table>\n<tr><th>Med ID</th><th>Medicine Name</th><th>Stock</th><th>Expiry Date</th><th>Status / Days Left</th></tr>\n");
 
         for (Medicine m : sortedMeds) {
             long daysUntilExpiry = ChronoUnit.DAYS.between(today, m.getExpiryDate());
-            
-            String rowClass = "";
-            String statusText;
+            String rowClass = (daysUntilExpiry < 0) ? "expired" : (daysUntilExpiry <= 90) ? "expiring-soon" : "safe";
+            String statusText = (daysUntilExpiry < 0) ? "EXPIRED (" + Math.abs(daysUntilExpiry) + " days ago)"
+                    : (daysUntilExpiry <= 90) ? "EXPIRING SOON (" + daysUntilExpiry + " days left)" : "SAFE";
 
-            if (daysUntilExpiry < 0) {
-                rowClass = "expired";
-                statusText = "EXPIRED (" + Math.abs(daysUntilExpiry) + " days ago)";
-            } else if (daysUntilExpiry <= 90) { // Flag items expiring within 3个月 (90 days)
-                rowClass = "expiring-soon";
-                statusText = "EXPIRING SOON (" + daysUntilExpiry + " days left)";
-            } else {
-                rowClass = "safe";
-                statusText = "SAFE";
-            }
-
-            html.append("<tr class=\"").append(rowClass).append("\">")
-                .append("<td>").append(m.getMedicineID()).append("</td>")
-                .append("<td>").append(m.getName()).append("</td>")
-                .append("<td>").append(m.getQuantityInStock()).append("</td>")
-                .append("<td>").append(m.getExpiryDate().format(dtf)).append("</td>")
-                .append("<td>").append(statusText).append("</td>")
-                .append("</tr>\n");
+            html.append("<tr class=\"").append(rowClass).append("\"><td>").append(m.getMedicineID()).append("</td><td>")
+                    .append(m.getName()).append("</td><td>").append(m.getQuantityInStock()).append("</td><td>")
+                    .append(m.getExpiryDate().format(dtf)).append("</td><td>").append(statusText)
+                    .append("</td></tr>\n");
         }
-
         html.append("</table>\n</body>\n</html>");
         return html.toString();
     }

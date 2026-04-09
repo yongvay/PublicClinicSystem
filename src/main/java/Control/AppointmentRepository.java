@@ -5,7 +5,7 @@ import Entity.Appointment;
 import Entity.Medicine;
 
 /**
- * @author Ng Yong Vay
+ * @author All Members
  */
 public interface AppointmentRepository {
     

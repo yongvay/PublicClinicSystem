@@ -1,16 +1,19 @@
 package Entity;
 
+/**
+ * @author All Members
+ */
 import ADT.List;
 import ADT.ListInterface;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 public class Appointment {
-    private String appointmentID;
-    private Patient patient;
+    private final String appointmentID;
+    private final Patient patient;
     private Doctor doctor;
     private Room room; // Can be null if Waitlisted
-    private LocalDate appointmentDate;
+    private final LocalDate appointmentDate;
     private String status;
     private ListInterface<Medicine> prescribedMedicines;
 

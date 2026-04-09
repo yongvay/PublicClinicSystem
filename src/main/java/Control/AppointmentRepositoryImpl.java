@@ -49,15 +49,33 @@ public class AppointmentRepositoryImpl implements AppointmentRepository {
     }
     
     private String processMedicines(Appointment apt, ListInterface<Medicine> meds) {
+
         if (meds != null && !meds.isEmpty()) {
-            apt.setPrescribedMedicines(meds);
+
+            // get old list
+            ListInterface<Medicine> current = apt.getPrescribedMedicines();
+
+            // if null create and initialize new list
+            if (current == null) {
+                current = new List<>();
+            }
+
+            // add new medicine instaed of replace
             for (int i = 1; i <= meds.getNumberOfEntries(); i++) {
                 Medicine m = meds.getEntry(i);
-                m.setQuantityInStock(m.getQuantityInStock() - 1);
-                medicineRepo.update(m); 
+                current.add(m);
+
+//                // update stock quantity
+//                m.setQuantityInStock(m.getQuantityInStock() - 1);
+                medicineRepo.update(m);
             }
-            return "\n[Inventory] Medicines successfully assigned and stock deducted.";
+
+            // set back the updated medicine into current to ensure safe saving
+            apt.setPrescribedMedicines(current);
+
+            return "\n[Inventory] Medicines added (merged) and stock deducted.";
         }
+
         return "";
     }
 

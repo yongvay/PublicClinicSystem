@@ -18,7 +18,7 @@ import java.time.format.DateTimeParseException;
 import java.util.Scanner;
 
 /**
- * @author Ng Yong Vay
+ * @author All Members
  */
 public class AppointmentUI {
 
@@ -34,9 +34,41 @@ public class AppointmentUI {
         this.medicineRepo = medicineRepo;
     }
 
+    // SAFE INPUT HELPERS
+    private int inputInt(Scanner scanner, String prompt) {
+        while (true) {
+            System.out.print(prompt);
+            String input = scanner.nextLine().trim();
+
+            if (input.isEmpty()) {
+                System.out.println("Input cannot be empty.");
+                continue;
+            }
+
+            try {
+                return Integer.parseInt(input);
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid number.");
+            }
+        }
+    }
+
+    private boolean inputYesNo(Scanner scanner, String prompt) {
+        while (true) {
+            System.out.print(prompt);
+            String input = scanner.nextLine().trim();
+
+            if (input.equalsIgnoreCase("Y")) return true;
+            if (input.equalsIgnoreCase("N")) return false;
+
+            System.out.println("Invalid input. Please enter Y or N.");
+        }
+    }  
+
     public void displayAppointmentMenu() {
         Scanner scanner = new Scanner(System.in);
         int choice;
+
         do {
             System.out.println("\n==========================================");
             System.out.println("          APPOINTMENT MANAGEMENT          ");
@@ -47,47 +79,102 @@ public class AppointmentUI {
             System.out.println("4. Delete / Cancel Appointment");
             System.out.println("0. Back to Main Menu");
             System.out.println("==========================================");
-            System.out.print("Choice: ");
-            choice = scanner.nextInt();
-            scanner.nextLine(); 
+
+            choice = inputInt(scanner, "Choice: "); 
 
             switch (choice) {
                 case 1 -> bookAppointment(scanner);
                 case 2 -> processAppointment(scanner);
                 case 3 -> viewAppointments();
                 case 4 -> deleteAppointment(scanner);
+                case 0 -> System.out.println("Returning...");
+                default -> System.out.println("Invalid choice.");
             }
-        } while (choice != 0);
-    }
 
+        } while (choice != 0);
+    }  
+    
+    // SELECT MEDICINES
     private ListInterface<Medicine> selectMedicines(Scanner scanner) {
         ListInterface<Medicine> prescribedMeds = new List<>();
-        System.out.print("Does the patient require medicine? (Y/N): ");
-        if (scanner.nextLine().equalsIgnoreCase("Y")) {
-            boolean addMore = true;
-            while (addMore) {
-                System.out.print("Enter Medicine ID (e.g., M001): ");
-                String medId = scanner.nextLine();
-                Medicine m = medicineRepo.findById(medId);
-                
-                if (m != null) {
-                    if (m.getQuantityInStock() > 0) {
-                        prescribedMeds.add(m);
-                        System.out.println("Added: " + m.getName() + " to prescription.");
-                    } else {
-                        System.out.println("Error: " + m.getName() + " is currently OUT OF STOCK.");
-                    }
-                } else {
-                    System.out.println("Error: Medicine ID not found.");
-                }
-                
-                System.out.print("Assign another medicine? (Y/N): ");
-                addMore = scanner.nextLine().equalsIgnoreCase("Y");
-            }
+
+        if (!inputYesNo(scanner, "Does the patient require medicine? (Y/N): ")) {
+            return prescribedMeds;
         }
+
+        boolean addMore = true;
+
+        while (addMore) {
+
+            // display all medicines
+            ListInterface<Medicine> allMeds = medicineRepo.findAll();
+
+            if (allMeds.isEmpty()) {
+                System.out.println("No medicines available.");
+                break;
+            }
+
+            System.out.println("\n========== AVAILABLE MEDICINES ==========");
+
+            int displayIndex = 1;
+            ListInterface<Medicine> availableList = new List<>();
+
+            for (int i = 1; i <= allMeds.getNumberOfEntries(); i++) {
+                Medicine m = allMeds.getEntry(i);
+
+                if (m.getQuantityInStock() > 0) {
+                    System.out.printf("[%d] %-5s | %-20s | Stock: %d\n",
+                            displayIndex,
+                            m.getMedicineID(),
+                            m.getName(),
+                            m.getQuantityInStock()
+                    );
+                    availableList.add(m);
+                    displayIndex++;
+                }
+            }
+
+            if (availableList.isEmpty()) {
+                System.out.println("All medicines are out of stock.");
+                break;
+            }
+
+            System.out.println("=========================================");
+            System.out.print("Select Medicine (Enter number): ");
+
+            String input = scanner.nextLine().trim();
+            int choice;
+
+            try {
+                choice = Integer.parseInt(input);
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input. Please enter a number.");
+                continue;
+            }
+
+            if (choice < 1 || choice > availableList.getNumberOfEntries()) {
+                System.out.println("Invalid selection.");
+                continue;
+            }
+
+            Medicine selected = availableList.getEntry(choice);
+
+            selected.setQuantityInStock(selected.getQuantityInStock() - 1);
+            medicineRepo.update(selected);
+
+            // add to list
+            prescribedMeds.add(selected);
+
+            System.out.println("Added: " + selected.getName());
+
+            System.out.println("Remaining Stock: " + selected.getQuantityInStock());
+
+            addMore = inputYesNo(scanner, "Assign another medicine? (Y/N): ");
+        }
+
         return prescribedMeds;
     }
-
+    
     // TABLE DISPLAY 
     private String limit(String text, int max) {
         if (text == null) return "";
@@ -121,6 +208,7 @@ public class AppointmentUI {
         System.out.println("=================================================================================================");
     }     
     
+    // QUICK REGISTER NEW PATIENT FOR MAKING AN APPOINMENT
     private Patient handleQuickRegistration(Scanner scanner) {
         System.out.println("\n--- Quick Patient Registration ---");
         System.out.print("Enter Patient Name: ");
@@ -128,8 +216,7 @@ public class AppointmentUI {
       
         if (name.isEmpty()) {
             System.out.println("Patient name cannot be empty!");
-            System.out.print("Proceed with new registration? (Y/N): ");
-            if (!scanner.nextLine().equalsIgnoreCase("Y")) {
+            if (!inputYesNo(scanner, "Proceed with new registration? (Y/N): ")) {
                 System.out.println("Registration cancelled.");
                 return null;
             }            
@@ -174,6 +261,7 @@ public class AppointmentUI {
         return patient;
     }
 
+    // EXISTING PATIENT APPOINMENT BOOKING
     private Patient handleExistingPatient(Scanner scanner) {
         System.out.print("\nEnter Patient ID: ");
         String patientId = scanner.nextLine().trim();
@@ -193,12 +281,12 @@ public class AppointmentUI {
         System.out.println("1. Register New Patient & Book");
         System.out.println("2. Book for Existing Patient");
         System.out.print("Choice: ");
-        String ptChoice = scanner.nextLine().trim();
+        int ptChoice = inputInt(scanner, "Choice: ");
 
         Patient patient;
         switch (ptChoice) {
-            case "1" -> patient = handleQuickRegistration(scanner);
-            case "2" -> patient = handleExistingPatient(scanner);
+            case 1 -> patient = handleQuickRegistration(scanner);
+            case 2 -> patient = handleExistingPatient(scanner);
             default -> {
                 System.out.println("Invalid choice. Returning to menu.");
                 return;
@@ -241,16 +329,9 @@ public class AppointmentUI {
         System.out.println("==========================================");
 
         System.out.print("Select Specialization (Enter number): ");
-        int specChoice;
-        if (scanner.hasNextInt()) {
-            specChoice = scanner.nextInt();
-            scanner.nextLine(); 
-        } else {
-            System.out.println("Error: Invalid input. Please enter a number.");
-            scanner.nextLine(); 
-            return;
-        }
-
+        
+        int specChoice = inputInt(scanner, "Select Specialization: ");
+        
         if (specChoice < 1 || specChoice > specializations.getNumberOfEntries()) {
             System.out.println("Error: Invalid selection. Returning to menu.");
             return;
@@ -261,13 +342,16 @@ public class AppointmentUI {
         String resultMessage = appointmentRepo.bookAppointment(patient.getPatientID(), specialization);
         System.out.println("\n" + resultMessage);
     }
-
+    
+    // PROCESS APPOINMENT
     private void processAppointment(Scanner scanner) {
-        System.out.print("Enter Appointment ID to process/transfer/discharge: ");
-        String appId = scanner.nextLine();
-        
+
+        System.out.print("-- Process Appointment --\nEnter Appointment ID to process/transfer/discharge: ");
+        String appId = scanner.nextLine().trim();
+
         Appointment targetApt = null;
         ListInterface<Appointment> list = appointmentRepo.getAllAppointments();
+
         for (int i = 1; i <= list.getNumberOfEntries(); i++) {
             Appointment a = list.getEntry(i);
             if (a.getAppointmentID().equalsIgnoreCase(appId)) {
@@ -281,32 +365,55 @@ public class AppointmentUI {
             return;
         }
 
+        // Display current patient status
         if (targetApt.getStatus().equalsIgnoreCase("Scheduled")) {
-            System.out.println("Current Status: Scheduled for Consultation.");
-            System.out.println("Does the patient need further admission?");
-            System.out.print("Enter 'Treatment', 'Observation', or type 'None' if going home: ");
+            System.out.println("\nCurrent Status: Scheduled for Consultation.");
+            System.out.print("Enter 'Treatment' / 'Observation' for Admission, or 'None' for Complete Diagnosis: ");
         } else if (targetApt.getStatus().equalsIgnoreCase("Admitted")) {
-            System.out.println("Current Status: Admitted in " + targetApt.getRoom().getRoomType() + ".");
-            System.out.println("Where is the admitted patient moving to?");
-            System.out.print("Enter 'Treatment', 'Observation', or type 'None' to discharge them home: ");
+            System.out.println("\nCurrent Status: Admitted in " + targetApt.getRoom().getRoomType() + ".");
+            System.out.print("Enter 'Treatment' / 'Observation' for Transfer Patient, or 'None' for Complete Diagnosis: ");
         } else {
-            System.out.println("Error: Cannot process. Appointment is already marked as '" + targetApt.getStatus() + "'.");
+            System.out.println("Error: Cannot process. Appointment already '" + targetApt.getStatus() + "'.");
             return;
         }
 
-        String targetRoomType = Utilities.capitalizeWords(scanner.nextLine());
-        ListInterface<Medicine> meds = selectMedicines(scanner); 
-        
+        // input validation
+        String targetRoomType;
+        while (true) {
+            String input = scanner.nextLine().trim();
+
+            if (input.equalsIgnoreCase("Treatment")) {
+                targetRoomType = "Treatment";
+                break;
+            } else if (input.equalsIgnoreCase("Observation")) {
+                targetRoomType = "Observation";
+                break;
+            } else if (input.equalsIgnoreCase("None")) {
+                targetRoomType = "None";
+                break;
+            } else {
+                System.out.print("Invalid input. Please enter Treatment / Observation / None: ");
+            }
+        }
+        ListInterface<Medicine> meds = selectMedicines(scanner);
+
+        // avoid passing empty
+        if (meds == null || meds.getNumberOfEntries() == 0) {
+            meds = null;
+        }
+
         String resultMessage = "";
+
         if (targetApt.getStatus().equalsIgnoreCase("Scheduled")) {
             resultMessage = appointmentRepo.completeAppointment(appId, targetRoomType, meds);
         } else if (targetApt.getStatus().equalsIgnoreCase("Admitted")) {
             resultMessage = appointmentRepo.transferPatient(appId, targetRoomType, meds);
         }
-        
+
         System.out.println("\n" + resultMessage);
     }
-
+    
+    // READ APPOINTMENTS
     private void viewAppointments() {
         System.out.println("\n--- All Appointments ---");
         ListInterface<Appointment> list = appointmentRepo.getAllAppointments();
@@ -319,15 +426,35 @@ public class AppointmentUI {
             }
         }
     }
-
+    
+    // DELETE APPOINMENT
     private void deleteAppointment(Scanner scanner) {
-        System.out.print("\nEnter Appointment ID to delete/cancel (e.g., A001): ");
-        String appId = scanner.nextLine();
-        
-        System.out.print("Are you sure you want to delete appointment " + appId + "? (Y/N): ");
-        String confirm = scanner.nextLine();
-        
-        if (confirm.equalsIgnoreCase("Y")) {
+
+        System.out.print("\nEnter Appointment ID to cancel it (e.g., A001): ");
+        String appId = scanner.nextLine().trim();
+
+        Appointment target = null;
+        ListInterface<Appointment> list = appointmentRepo.getAllAppointments();
+
+        // find matched appoinment
+        for (int i = 1; i <= list.getNumberOfEntries(); i++) {
+            Appointment a = list.getEntry(i);
+            if (a.getAppointmentID().equalsIgnoreCase(appId)) {
+                target = a;
+                break;
+            }
+        }
+
+        if (target == null) {
+            System.out.println("Error: Appointment ID not found.");
+            return;
+        }
+
+        System.out.println("\n========== APPOINTMENT DETAILS ==========");
+        System.out.println(target.toString());
+        System.out.println("=========================================");
+
+        if (inputYesNo(scanner, "Are you sure you want to delete this appointment? (Y/N): ")) {
             String resultMessage = appointmentRepo.deleteAppointment(appId);
             System.out.println("\n" + resultMessage);
         } else {

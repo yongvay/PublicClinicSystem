@@ -16,13 +16,9 @@ public interface MedicineRepository {
 
   // Read
   ListInterface<Medicine> findAll();
-
-  Medicine findById(String id); // Not used but implemented
-
+  Medicine findById(String id);
   ListInterface<Medicine> findByName(String name);
-
   ListInterface<Medicine> findOutOfStock();
-
   ListInterface<Medicine> findBelowReorderLevel();
 
   // Update
@@ -33,17 +29,12 @@ public interface MedicineRepository {
 
   // Sorting methods
   ListInterface<Medicine> sortedByName();
-
   ListInterface<Medicine> sortedByStock();
-
-  ListInterface<Medicine> lowStockSorted(); // Not used
+  ListInterface<Medicine> lowStockSorted();
 
   // Reporting methods
   String generateInventoryTextReport();
-
   String generateInventoryHtmlReport();
-
   String generateExpiryTextReport();
-
   String generateExpiryHtmlReport();
 }

@@ -47,7 +47,6 @@ public class MedicineRepositoryImpl implements MedicineRepository {
                 }
             }
         }
-
         // Add 1 to the max ID found, and format it back to "M" + 3 digits (e.g., M005)
         return String.format("M%03d", maxId + 1);
     }
@@ -152,7 +151,7 @@ public class MedicineRepositoryImpl implements MedicineRepository {
 
         boolean success = medicineList.remove(medicine);
         if (success) {
-            medicineDAO.saveToFile(medicineList); // Save after deleting
+            medicineDAO.saveToFile(medicineList);
         }
         return success;
     }
@@ -183,7 +182,6 @@ public class MedicineRepositoryImpl implements MedicineRepository {
 
     @Override
     public ListInterface<Medicine> lowStockSorted() {
-        // First, filter the list to only those below reorder level
         ListInterface<Medicine> lowStock = findBelowReorderLevel();
 
         // Then sort the filtered list by stock (ascending)
@@ -256,30 +254,45 @@ public class MedicineRepositoryImpl implements MedicineRepository {
         if (allMedicines.isEmpty())
             return "<h1>No Data Available</h1>";
 
-        //ListInterface<Medicine> lowStockMeds = this.findBelowReorderLevel();
-        //ListInterface<Medicine> outOfStockMeds = this.findOutOfStock();
+        // UNCOMMENTED: Fetch the lists
+        ListInterface<Medicine> lowStockMeds = this.findBelowReorderLevel();
+        ListInterface<Medicine> outOfStockMeds = this.findOutOfStock();
 
         int totalUnique = allMedicines.getNumberOfEntries();
         int totalStock = 0;
-        for (Medicine m : allMedicines)
+        for (Medicine m : allMedicines) {
             totalStock += m.getQuantityInStock();
-        //int outCount = outOfStockMeds.getNumberOfEntries();
-        //int lowCount = lowStockMeds.getNumberOfEntries();
-        //int healthyCount = totalUnique - outCount - lowCount;
+        }
+
+        // UNCOMMENTED: Calculate the counts
+        int outCount = outOfStockMeds.getNumberOfEntries();
+        int lowCount = lowStockMeds.getNumberOfEntries();
+        int healthyCount = totalUnique - outCount - lowCount;
 
         StringBuilder html = new StringBuilder();
         String time = java.time.LocalDateTime.now()
                 .format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
 
         html.append("<!DOCTYPE html>\n<html>\n<head>\n<meta charset=\"UTF-8\">\n<title>Medicine Inventory</title>\n");
+
+        // Original CSS
         html.append(
-                "<style>body { font-family: 'Segoe UI', sans-serif; padding: 20px; background: #f8f9fa; } table { width: 100%; border-collapse: collapse; background: white; } th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; } th { background-color: #34495e; color: white; } .out { background-color: #ffeaea; color: #c0392b; font-weight: bold; } .low { background-color: #fff3cd; color: #d35400; font-weight: bold; } .ok { color: #27ae60; }</style>\n</head>\n<body>\n");
+                "<style>body { font-family: 'Segoe UI', sans-serif; padding: 20px; background: #f8f9fa; } table { width: 100%; border-collapse: collapse; background: white; } th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; } th { background-color: #34495e; color: white; } .out { background-color: #ffeaea; color: #c0392b; font-weight: bold; } .low { background-color: #fff3cd; color: #d35400; font-weight: bold; } .ok { color: #27ae60; }</style>\n");
+        html.append("</head>\n<body>\n");
         html.append("<h1>📦 Clinic Medicine Inventory Report</h1>\n<p>Generated: ").append(time).append("</p>\n");
+
         html.append("<p>Total Unique: <strong>").append(totalUnique).append("</strong> | Total Stock: <strong>")
                 .append(totalStock).append("</strong></p>\n");
 
+        // NEW: Injecting the Status Summary to utilize the uncommented data
+        html.append("<p>Status Summary: ")
+                .append("<span class=\"ok\">Healthy: ").append(healthyCount).append("</span> | ")
+                .append("<span class=\"low\">Low: ").append(lowCount).append("</span> | ")
+                .append("<span class=\"out\">Out of Stock: ").append(outCount).append("</span></p>\n");
+
         html.append(
                 "<table>\n<tr><th>Med ID</th><th>Medicine Name</th><th>Stock</th><th>Reorder Lvl</th><th>Status</th></tr>\n");
+
         for (Medicine m : this.sortedByStock()) {
             String rowClass = (m.getQuantityInStock() == 0) ? "out"
                     : (m.getQuantityInStock() < m.getReorderLevel()) ? "low" : "ok";
@@ -289,6 +302,7 @@ public class MedicineRepositoryImpl implements MedicineRepository {
                     .append(m.getName()).append("</td><td>").append(m.getQuantityInStock()).append("</td><td>")
                     .append(m.getReorderLevel()).append("</td><td>").append(status).append("</td></tr>\n");
         }
+
         html.append("</table>\n</body>\n</html>");
         return html.toString();
     }

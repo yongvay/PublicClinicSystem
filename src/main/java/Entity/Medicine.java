@@ -1,4 +1,5 @@
 package Entity;
+
 import java.time.LocalDate;
 
 /**
@@ -10,19 +11,19 @@ public class Medicine {
     private String medicineID;
     private String name;
     private String description;
-    private String dosage;  // e.g., "tablet", "mg", "ml", "capsule"
+    private String dosage; // e.g., "tablet", "mg", "ml", "capsule"
     private int quantityInStock;
     private int reorderLevel; // e.g., if stock drops below 10, trigger a reorder alert
     private LocalDate expiryDate;
 
-    // For search dummy only
-    // This allows creating "dummy" objects for searching using only an ID.
+    // Used to create a temporary "search key" or "dummy object" to efficiently find, replace, or remove items from your ADT List based purely on the ID.
     public Medicine(String medicineID) {
         this.medicineID = medicineID;
     }
-    
-    // Constructor
-    public Medicine(String medicineID, String name, String description, String dosage, int quantityInStock, int reorderLevel, LocalDate expiryDate) {
+
+    // Used to create actual data records with all attributes for storage and manipulation.
+    public Medicine(String medicineID, String name, String description, String dosage, int quantityInStock,
+            int reorderLevel, LocalDate expiryDate) {
         this.medicineID = medicineID;
         this.name = name;
         this.description = description;
@@ -55,14 +56,14 @@ public class Medicine {
         return quantityInStock;
     }
 
-    public int getReorderLevel() { 
-        return reorderLevel; 
+    public int getReorderLevel() {
+        return reorderLevel;
     }
 
-    public LocalDate getExpiryDate() { 
-        return expiryDate; 
+    public LocalDate getExpiryDate() {
+        return expiryDate;
     }
-    
+
     // ==========================================
     // SETTERS
     // ==========================================
@@ -85,9 +86,9 @@ public class Medicine {
     public void setQuantityInStock(int quantityInStock) {
         this.quantityInStock = quantityInStock;
     }
-    
-    public void setReorderLevel(int reorderLevel) { 
-        this.reorderLevel = reorderLevel; 
+
+    public void setReorderLevel(int reorderLevel) {
+        this.reorderLevel = reorderLevel;
     }
 
     public void setExpiryDate(LocalDate expiryDate) {
@@ -106,7 +107,7 @@ public class Medicine {
             return false;
         }
         Medicine other = (Medicine) obj;
-        
+
         // Use equalsIgnoreCase for case-insensitive ID comparison.
         // This ensures "M001" matches "m001" during ADT searches.
         return this.medicineID != null && this.medicineID.equalsIgnoreCase(other.medicineID);

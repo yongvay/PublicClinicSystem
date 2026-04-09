@@ -4,8 +4,9 @@ import java.util.Iterator;
 import java.util.Comparator;
 
 /**
- * @author Ng Yong Vay Custom List Implementation using an array. Note:
- *         Positional methods use 1-based indexing (1 to numberOfEntries) as per
+ * @author Ng Yong Vay Custom List Implementation using an array.
+ *         Note: Positional methods use 1-based indexing (1 to numberOfEntries)
+ *         as per
  *         the assignment's recommended good practices.
  */
 
@@ -187,7 +188,7 @@ public class List<T> implements ListInterface<T> {
         return sortedList;
     }
 
-    // --- Iterator Implementation ---
+    // Iterator Implementation
     @Override
     public Iterator<T> iterator() {
         return new Iterator<T>() {
@@ -208,7 +209,7 @@ public class List<T> implements ListInterface<T> {
         };
     }
 
-    // --- Private Helper Methods ---
+    // Private Helper Methods
     @SuppressWarnings("unchecked")
     private void ensureCapacity() {
         if (numberOfEntries >= elements.length) {
@@ -239,7 +240,7 @@ public class List<T> implements ListInterface<T> {
         }
     }
 
-    // --- Merge Sort Logic ---
+    // Merge Sort Logic
     private void mergeSort(T[] arr, int left, int right, Comparator<T> comparator) {
         if (left < right) {
             int mid = left + (right - left) / 2;

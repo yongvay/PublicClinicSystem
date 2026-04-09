@@ -35,11 +35,11 @@ public class MedicineUI {
             // Basic input validation to prevent crashes
             if (scanner.hasNextInt()) {
                 choice = scanner.nextInt();
-                scanner.nextLine(); // Consume the leftover newline character
+                scanner.nextLine();
                 processChoice(choice);
             } else {
                 System.out.println("Invalid input. Please enter a number.");
-                scanner.nextLine(); // Clear the bad input
+                scanner.nextLine();
             }
         } while (choice != 0);
     }
@@ -112,7 +112,6 @@ public class MedicineUI {
         String id = medicineRepo.generateNextMedicineId();
         System.out.println("Auto-generated Medicine ID: " + id);
 
-        // 2. Continue asking for the rest of the details
         System.out.print("Enter Name: ");
         String name = scanner.nextLine();
 
@@ -128,12 +127,12 @@ public class MedicineUI {
         LocalDate expiryDate = null;
         boolean validDate = false;
 
+        // Basic input validation to ensure correct date format
         while (!validDate) {
             System.out.print("Enter Expiry Date (YYYY-MM-DD): ");
             String dateInput = scanner.nextLine().trim();
 
             try {
-                // This attempts to convert the string into a real Date object
                 expiryDate = LocalDate.parse(dateInput);
 
                 if (expiryDate.isBefore(LocalDate.now())) {
@@ -252,17 +251,13 @@ public class MedicineUI {
             System.out.print("Enter New Expiry Date (YYYY-MM-DD) or press [Enter] to keep current: ");
             String dateInput = scanner.nextLine().trim();
 
-            // 1. The "Skip" Check
             if (dateInput.isEmpty()) {
                 System.out.println("No changes made to Expiry Date.");
                 validDate = true; // Break the loop, leave the existing date intact
             }
-            // 2. The "Update" Check
             else {
                 try {
                     LocalDate newExpiryDate = LocalDate.parse(dateInput);
-
-                    // Optional Business Logic Warning
                     if (newExpiryDate.isBefore(LocalDate.now())) {
                         System.out.println("⚠️ Warning: You are changing this to an EXPIRED date!");
                         System.out.print("Proceed anyway? (Y/N): ");
@@ -271,8 +266,6 @@ public class MedicineUI {
                             continue; // Restarts the loop
                         }
                     }
-
-                    // 3. Apply the update using the Setter
                     existing.setExpiryDate(newExpiryDate);
                     System.out.println("✅ Expiry Date updated to: " + newExpiryDate);
                     validDate = true;
@@ -401,5 +394,4 @@ public class MedicineUI {
             System.out.println(m.toString());
         }
     }
-
 }

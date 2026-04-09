@@ -17,15 +17,11 @@ public class MedicineDAO {
     private static final String DELIMITER = "\\|"; // Regex for splitting
     private static final String SEPARATOR = "|"; // String for joining
 
-    /**
-     * Saves the entire custom list to the text file.
-     */
     public void saveToFile(ListInterface<Medicine> medicineList) {
         // Using try-with-resources to ensure the file writer closes automatically
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_NAME))) {
 
             for (Medicine m : medicineList) {
-                // Construct a single delimited string line (Added expiry date at the end)
                 String line = m.getMedicineID() + SEPARATOR +
                         m.getName() + SEPARATOR +
                         m.getDescription() + SEPARATOR +
@@ -42,9 +38,7 @@ public class MedicineDAO {
         }
     }
 
-    /**
-     * Reads the text file and populates a new custom list.
-     */
+    // Reads the text file and populates a new custom list.
     public ListInterface<Medicine> loadFromFile() {
         ListInterface<Medicine> loadedList = new List<>();
         File file = new File(FILE_NAME);
@@ -62,7 +56,7 @@ public class MedicineDAO {
 
                 String[] parts = line.split(DELIMITER);
 
-                // Ensure the line has exactly 7 parts before parsing (Updated from 6)
+                // Ensure the line has exactly 7 parts before parsing
                 if (parts.length == 7) {
                     try {
                         Medicine m = new Medicine(

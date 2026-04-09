@@ -1,5 +1,3 @@
-                    TARUMT PUBLIC CLINIC SYSTEM
-
 Welcome to the TARUMT Public Clinic System! 👋
 
 If you're reading this, you are likely evaluating our system or joining the 

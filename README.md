@@ -95,8 +95,3 @@ summaries and rich HTML visual dashboards (like the Medicine Expiry Report or
 the Doctor Specialization Chart). These are saved directly to the 
 `GeneratedReports` folder. You can double-click the HTML files to view them in 
 any web browser.
-
---------------------------------------------------------------------------------
-Happy Coding! 
-- The Architecture Team
-================================================================================

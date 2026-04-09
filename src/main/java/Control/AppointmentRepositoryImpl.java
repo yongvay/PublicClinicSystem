@@ -55,22 +55,18 @@ public class AppointmentRepositoryImpl implements AppointmentRepository {
             // get old list
             ListInterface<Medicine> current = apt.getPrescribedMedicines();
 
-            // if null create and initialize new list
+            // if null, create and initialize new list
             if (current == null) {
                 current = new List<>();
             }
 
-            // add new medicine instaed of replace
+            // append new medicine instaed of replace
             for (int i = 1; i <= meds.getNumberOfEntries(); i++) {
                 Medicine m = meds.getEntry(i);
                 current.add(m);
-
-//                // update stock quantity
-//                m.setQuantityInStock(m.getQuantityInStock() - 1);
-                medicineRepo.update(m);
             }
 
-            // set back the updated medicine into current to ensure safe saving
+            // set back the updated medicine into current list in appoinment 
             apt.setPrescribedMedicines(current);
 
             return "\n[Inventory] Medicines added (merged) and stock deducted.";

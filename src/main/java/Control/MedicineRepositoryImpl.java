@@ -161,7 +161,7 @@ public class MedicineRepositoryImpl implements MedicineRepository {
     // ==========================================
     @Override
     public ListInterface<Medicine> sortedByName() {
-        // Passing a custom Comparator to your ADT's merge sort
+        // Passing a custom Comparator to ADT's merge sort
         return medicineList.sort(new Comparator<Medicine>() {
             @Override
             public int compare(Medicine m1, Medicine m2) {
@@ -254,7 +254,6 @@ public class MedicineRepositoryImpl implements MedicineRepository {
         if (allMedicines.isEmpty())
             return "<h1>No Data Available</h1>";
 
-        // UNCOMMENTED: Fetch the lists
         ListInterface<Medicine> lowStockMeds = this.findBelowReorderLevel();
         ListInterface<Medicine> outOfStockMeds = this.findOutOfStock();
 
@@ -263,8 +262,7 @@ public class MedicineRepositoryImpl implements MedicineRepository {
         for (Medicine m : allMedicines) {
             totalStock += m.getQuantityInStock();
         }
-
-        // UNCOMMENTED: Calculate the counts
+        
         int outCount = outOfStockMeds.getNumberOfEntries();
         int lowCount = lowStockMeds.getNumberOfEntries();
         int healthyCount = totalUnique - outCount - lowCount;
@@ -275,7 +273,6 @@ public class MedicineRepositoryImpl implements MedicineRepository {
 
         html.append("<!DOCTYPE html>\n<html>\n<head>\n<meta charset=\"UTF-8\">\n<title>Medicine Inventory</title>\n");
 
-        // Original CSS
         html.append(
                 "<style>body { font-family: 'Segoe UI', sans-serif; padding: 20px; background: #f8f9fa; } table { width: 100%; border-collapse: collapse; background: white; } th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; } th { background-color: #34495e; color: white; } .out { background-color: #ffeaea; color: #c0392b; font-weight: bold; } .low { background-color: #fff3cd; color: #d35400; font-weight: bold; } .ok { color: #27ae60; }</style>\n");
         html.append("</head>\n<body>\n");
@@ -284,7 +281,6 @@ public class MedicineRepositoryImpl implements MedicineRepository {
         html.append("<p>Total Unique: <strong>").append(totalUnique).append("</strong> | Total Stock: <strong>")
                 .append(totalStock).append("</strong></p>\n");
 
-        // NEW: Injecting the Status Summary to utilize the uncommented data
         html.append("<p>Status Summary: ")
                 .append("<span class=\"ok\">Healthy: ").append(healthyCount).append("</span> | ")
                 .append("<span class=\"low\">Low: ").append(lowCount).append("</span> | ")
@@ -359,7 +355,6 @@ public class MedicineRepositoryImpl implements MedicineRepository {
     // ==========================================
     @Override
     public String generateExpiryHtmlReport() {
-        // KEEP YOUR EXACT HTML EXPIRY CODE HERE FROM YOUR UPLOADED FILE
         ListInterface<Medicine> allMedicines = findAll();
         if (allMedicines.isEmpty())
             return "<h1>No Data Available</h1>";

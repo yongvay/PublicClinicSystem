@@ -256,16 +256,16 @@ public class MedicineRepositoryImpl implements MedicineRepository {
         if (allMedicines.isEmpty())
             return "<h1>No Data Available</h1>";
 
-        ListInterface<Medicine> lowStockMeds = this.findBelowReorderLevel();
-        ListInterface<Medicine> outOfStockMeds = this.findOutOfStock();
+        //ListInterface<Medicine> lowStockMeds = this.findBelowReorderLevel();
+        //ListInterface<Medicine> outOfStockMeds = this.findOutOfStock();
 
         int totalUnique = allMedicines.getNumberOfEntries();
         int totalStock = 0;
         for (Medicine m : allMedicines)
             totalStock += m.getQuantityInStock();
-        int outCount = outOfStockMeds.getNumberOfEntries();
-        int lowCount = lowStockMeds.getNumberOfEntries();
-        int healthyCount = totalUnique - outCount - lowCount;
+        //int outCount = outOfStockMeds.getNumberOfEntries();
+        //int lowCount = lowStockMeds.getNumberOfEntries();
+        //int healthyCount = totalUnique - outCount - lowCount;
 
         StringBuilder html = new StringBuilder();
         String time = java.time.LocalDateTime.now()

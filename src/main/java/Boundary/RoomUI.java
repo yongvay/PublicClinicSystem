@@ -157,27 +157,18 @@ public class RoomUI {
         }
         updateIfNotEmpty(type, existing::setRoomType);
 
-        // ---------------------------------------------------------
-        // DEFENSIVE INPUT PARSING PLACEHOLDER
-        // If an integer field (e.g., bedCapacity) is added to Room, 
-        // parse the user input defensively using try-catch to prevent crashes.
-        // ---------------------------------------------------------
-        /*
-        String newCapacity = Utilities.getString("New Bed Capacity [" + existing.getBedCapacity() + "]: ");
-        if (!newCapacity.isEmpty()) {
-            try {
-                existing.setBedCapacity(Integer.parseInt(newCapacity));
-            } catch (NumberFormatException e) {
-                System.out.println("Invalid format. Skipping capacity update. Please enter numbers only.");
-            }
-        }
-        */
-        // ---------------------------------------------------------
-
         if (!existing.isAvailable()) {
             System.out.println("Status: This room is currently occupied. Status cannot be manually changed. Please process patient discharge in the Appointment System to free the room.");
         } else {
-            String statusInput = Utilities.getString("Is Room Available? (Y/N) [" + (existing.isAvailable() ? "Y" : "N") + "]: ").trim();
+            String statusInput = "";
+            while (true) {
+                statusInput = Utilities.getString("Is Room Available? (Y/N) [" + (existing.isAvailable() ? "Y" : "N") + "]: ").trim();
+                if (statusInput.equalsIgnoreCase("Y") || statusInput.equalsIgnoreCase("N") || statusInput.isEmpty()) {
+                    break;
+                }
+                System.out.println("Error: Please enter 'Y' for Yes or 'N' for No, or press Enter to skip.");
+            }
+            
             if (statusInput.equalsIgnoreCase("Y")) existing.setAvailable(true);
             else if (statusInput.equalsIgnoreCase("N")) existing.setAvailable(false);
         }
@@ -215,29 +206,35 @@ public class RoomUI {
     }
 
     private void viewSortedRooms() {
-        System.out.println("\n--- Sort Rooms ---");
-        System.out.println("1. Sort by Room Number");
-        System.out.println("2. Sort by Room Type (A-Z)");
-        System.out.print("Enter choice: ");
+        while (true) {
+            System.out.println("\n--- Sort Rooms ---");
+            System.out.println("1. Sort by Room Number");
+            System.out.println("2. Sort by Room Type (A-Z)");
+            System.out.println("0. Cancel");
+            System.out.print("Enter choice: ");
 
-        if (scanner.hasNextInt()) {
-            int choice = scanner.nextInt();
-            scanner.nextLine();
+            if (scanner.hasNextInt()) {
+                int choice = scanner.nextInt();
+                scanner.nextLine(); // clear buffer
 
-            ListInterface<Room> sortedList = null;
-            if (choice == 1) {
-                sortedList = roomRepo.sortedByRoomNumber();
-            } else if (choice == 2) {
-                sortedList = roomRepo.sortedByType();
+                if (choice == 0) return; // Exit back to main menu
+                
+                ListInterface<Room> sortedList = null;
+                if (choice == 1) {
+                    sortedList = roomRepo.sortedByRoomNumber();
+                    displayList(sortedList);
+                    break;
+                } else if (choice == 2) {
+                    sortedList = roomRepo.sortedByType();
+                    displayList(sortedList);
+                    break;
+                } else {
+                    System.out.println("Invalid choice. Please enter 1, 2, or 0.");
+                }
             } else {
-                System.out.println("Invalid choice.");
-                return;
+                System.out.println("Invalid input. Please enter a number.");
+                scanner.nextLine(); // clear bad input
             }
-
-            displayList(sortedList);
-        } else {
-            System.out.println("Invalid input.");
-            scanner.nextLine();
         }
     }
 

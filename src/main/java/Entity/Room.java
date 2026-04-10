@@ -59,6 +59,12 @@ public class Room {
     }
 
     @Override
+    public int hashCode() {
+        // Hash code must align with equals() which uses ignoreCase
+        return roomNumber != null ? roomNumber.toLowerCase().hashCode() : 0;
+    }
+
+    @Override
     public String toString() {
         String statusStr = isAvailable ? "Available" : "Occupied";
         return String.format("Room No: %-5s | Type: %-15s | Status: %s", 

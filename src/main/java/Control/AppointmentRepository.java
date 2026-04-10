@@ -18,4 +18,12 @@ public interface AppointmentRepository {
     String deleteAppointment(String appointmentID);
     
     ListInterface<Appointment> getAllAppointments();
+    
+    // Report 1: Appointment Status
+    String generateAppointmentStatusTextReport();
+    String generateAppointmentStatusHtmlReport();
+    
+    // Report 2: Medication Audit
+    String generateMedicationAuditTextReport();
+    String generateMedicationAuditHtmlReport();
 }

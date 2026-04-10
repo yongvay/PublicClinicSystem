@@ -9,7 +9,7 @@ import Control.MedicineRepository;
 import Entity.Appointment;
 import Entity.Patient;
 import Entity.Medicine;
-import Entity.Doctor; 
+import Entity.Doctor;
 import Utility.Utilities;
 
 import java.time.LocalDate;
@@ -23,11 +23,12 @@ import java.util.Scanner;
 public class AppointmentUI {
 
     private final AppointmentRepository appointmentRepo;
-    private final PatientRepository patientRepo; 
-    private final DoctorRepository doctorRepo;   
-    private final MedicineRepository medicineRepo; 
+    private final PatientRepository patientRepo;
+    private final DoctorRepository doctorRepo;
+    private final MedicineRepository medicineRepo;
 
-    public AppointmentUI(AppointmentRepository appointmentRepo, PatientRepository patientRepo, DoctorRepository doctorRepo, MedicineRepository medicineRepo) {
+    public AppointmentUI(AppointmentRepository appointmentRepo, PatientRepository patientRepo,
+            DoctorRepository doctorRepo, MedicineRepository medicineRepo) {
         this.appointmentRepo = appointmentRepo;
         this.patientRepo = patientRepo;
         this.doctorRepo = doctorRepo;
@@ -58,12 +59,14 @@ public class AppointmentUI {
             System.out.print(prompt);
             String input = scanner.nextLine().trim();
 
-            if (input.equalsIgnoreCase("Y")) return true;
-            if (input.equalsIgnoreCase("N")) return false;
+            if (input.equalsIgnoreCase("Y"))
+                return true;
+            if (input.equalsIgnoreCase("N"))
+                return false;
 
             System.out.println("Invalid input. Please enter Y or N.");
         }
-    }  
+    }
 
     public void displayAppointmentMenu() {
         Scanner scanner = new Scanner(System.in);
@@ -77,23 +80,27 @@ public class AppointmentUI {
             System.out.println("2. Process / Transfer / Discharge Patient");
             System.out.println("3. View Appointments");
             System.out.println("4. Delete / Cancel Appointment");
+            System.out.println("5. Generate Status Reports");
+            System.out.println("6. Generate Medication Audit Reports");
             System.out.println("0. Back to Main Menu");
             System.out.println("==========================================");
 
-            choice = inputInt(scanner, "Choice: "); 
+            choice = inputInt(scanner, "Choice: ");
 
             switch (choice) {
                 case 1 -> bookAppointment(scanner);
                 case 2 -> processAppointment(scanner);
                 case 3 -> viewAppointments();
                 case 4 -> deleteAppointment(scanner);
+                case 5 -> generateStatusReport(scanner);
+                case 6 -> generateMedicationAuditReport(scanner);
                 case 0 -> System.out.println("Returning...");
                 default -> System.out.println("Invalid choice.");
             }
 
         } while (choice != 0);
-    }  
-    
+    }
+
     // SELECT MEDICINES
     private ListInterface<Medicine> selectMedicines(Scanner scanner) {
         ListInterface<Medicine> prescribedMeds = new List<>();
@@ -127,8 +134,7 @@ public class AppointmentUI {
                             displayIndex,
                             m.getMedicineID(),
                             m.getName(),
-                            m.getQuantityInStock()
-                    );
+                            m.getQuantityInStock());
                     availableList.add(m);
                     displayIndex++;
                 }
@@ -174,11 +180,13 @@ public class AppointmentUI {
 
         return prescribedMeds;
     }
-    
-    // TABLE DISPLAY 
+
+    // TABLE DISPLAY
     private String limit(String text, int max) {
-        if (text == null) return "";
-        if (text.length() <= max) return text;
+        if (text == null)
+            return "";
+        if (text.length() <= max)
+            return text;
         return text.substring(0, max - 3) + "...";
     }
 
@@ -189,10 +197,12 @@ public class AppointmentUI {
         }
 
         System.out.println("\nCurrent Patient Data:");
-        System.out.println("=================================================================================================");
+        System.out.println(
+                "=================================================================================================");
         System.out.printf("%-6s | %-15s | %-4s | %-30s | %-30s\n",
                 "ID", "Name", "Age", "Medical History", "Allergies");
-        System.out.println("=================================================================================================");
+        System.out.println(
+                "=================================================================================================");
 
         String history = limit(p.formatList(p.getMedicalHistory()), 30);
         String allergy = limit(p.formatList(p.getAllergies()), 30);
@@ -202,24 +212,24 @@ public class AppointmentUI {
                 limit(p.getPatientName(), 15),
                 p.getAge(),
                 history,
-                allergy
-        );
+                allergy);
 
-        System.out.println("=================================================================================================");
-    }     
-    
+        System.out.println(
+                "=================================================================================================");
+    }
+
     // QUICK REGISTER NEW PATIENT FOR MAKING AN APPOINMENT
     private Patient handleQuickRegistration(Scanner scanner) {
         System.out.println("\n--- Quick Patient Registration ---");
         System.out.print("Enter Patient Name: ");
         String name = Utilities.capitalizeWords(scanner.nextLine().trim());
-      
+
         if (name.isEmpty()) {
             System.out.println("Patient name cannot be empty!");
             if (!inputYesNo(scanner, "Proceed with new registration? (Y/N): ")) {
                 System.out.println("Registration cancelled.");
                 return null;
-            }            
+            }
         }
 
         DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy");
@@ -255,7 +265,7 @@ public class AppointmentUI {
         Patient patient = patientRepo.registerPatient(name, birthDate, historyList, allergyList);
 
         System.out.println("Success! New Patient ID: " + patient.getPatientID());
-       
+
         displaySinglePatient(patient);
 
         return patient;
@@ -271,7 +281,7 @@ public class AppointmentUI {
             return null;
         }
         System.out.println("Patient Found: " + patient.getPatientName());
-        
+
         displaySinglePatient(patient);
         return patient;
     }
@@ -308,7 +318,7 @@ public class AppointmentUI {
         for (int i = 1; i <= allDoctors.getNumberOfEntries(); i++) {
             String spec = allDoctors.getEntry(i).getSpecialization();
             boolean exists = false;
-            
+
             for (int j = 1; j <= specializations.getNumberOfEntries(); j++) {
                 if (specializations.getEntry(j).equalsIgnoreCase(spec)) {
                     exists = true;
@@ -329,9 +339,9 @@ public class AppointmentUI {
         System.out.println("==========================================");
 
         System.out.print("Select Specialization (Enter number): ");
-        
+
         int specChoice = inputInt(scanner, "Select Specialization: ");
-        
+
         if (specChoice < 1 || specChoice > specializations.getNumberOfEntries()) {
             System.out.println("Error: Invalid selection. Returning to menu.");
             return;
@@ -342,7 +352,7 @@ public class AppointmentUI {
         String resultMessage = appointmentRepo.bookAppointment(patient.getPatientID(), specialization);
         System.out.println("\n" + resultMessage);
     }
-    
+
     // PROCESS APPOINMENT
     private void processAppointment(Scanner scanner) {
 
@@ -371,7 +381,8 @@ public class AppointmentUI {
             System.out.print("Enter 'Treatment' / 'Observation' for Admission, or 'None' for Complete Diagnosis: ");
         } else if (targetApt.getStatus().equalsIgnoreCase("Admitted")) {
             System.out.println("\nCurrent Status: Admitted in " + targetApt.getRoom().getRoomType() + ".");
-            System.out.print("Enter 'Treatment' / 'Observation' for Transfer Patient, or 'None' for Complete Diagnosis: ");
+            System.out.print(
+                    "Enter 'Treatment' / 'Observation' for Transfer Patient, or 'None' for Complete Diagnosis: ");
         } else {
             System.out.println("Error: Cannot process. Appointment already '" + targetApt.getStatus() + "'.");
             return;
@@ -412,7 +423,7 @@ public class AppointmentUI {
 
         System.out.println("\n" + resultMessage);
     }
-    
+
     // READ APPOINTMENTS
     private void viewAppointments() {
         System.out.println("\n--- All Appointments ---");
@@ -426,7 +437,7 @@ public class AppointmentUI {
             }
         }
     }
-    
+
     // DELETE APPOINMENT
     private void deleteAppointment(Scanner scanner) {
 
@@ -459,6 +470,47 @@ public class AppointmentUI {
             System.out.println("\n" + resultMessage);
         } else {
             System.out.println("\nDeletion cancelled.");
+        }
+    }
+
+    // REPORTS
+    private void generateStatusReport(Scanner scanner) {
+        // 1. Output Text Version to Console First
+        String textReport = appointmentRepo.generateAppointmentStatusTextReport();
+        System.out.println(textReport);
+
+        if (!textReport.contains("No appointments available")) {
+            // 2. Ask User if they want the HTML Version
+            System.out.print("\nWould you like to export a visual HTML version of this report? (Y/N): ");
+            String exportChoice = scanner.nextLine().trim();
+
+            if (exportChoice.equalsIgnoreCase("Y")) {
+                String htmlContent = appointmentRepo.generateAppointmentStatusHtmlReport();
+                Utilities.exportReportToFile(htmlContent, "AppointmentStatusReport.html");
+                System.out.println("SUCCESS: HTML Report saved as 'AppointmentStatusReport.html' in GeneratedReports.");
+            } else {
+                System.out.println("Export skipped.");
+            }
+        }
+    }
+
+    private void generateMedicationAuditReport(Scanner scanner) {
+        // 1. Output Text Version to Console First
+        String textReport = appointmentRepo.generateMedicationAuditTextReport();
+        System.out.println(textReport);
+
+        if (!textReport.contains("No appointments available")) {
+            // 2. Ask User if they want the HTML Version
+            System.out.print("\nWould you like to export a visual HTML version of this report? (Y/N): ");
+            String exportChoice = scanner.nextLine().trim();
+
+            if (exportChoice.equalsIgnoreCase("Y")) {
+                String htmlContent = appointmentRepo.generateMedicationAuditHtmlReport();
+                Utilities.exportReportToFile(htmlContent, "MedicationAuditReport.html");
+                System.out.println("SUCCESS: HTML Report saved as 'MedicationAuditReport.html' in GeneratedReports.");
+            } else {
+                System.out.println("Export skipped.");
+            }
         }
     }
 }

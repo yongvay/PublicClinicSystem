@@ -252,7 +252,7 @@ public class PatientUI {
         System.out.print("Has allergy? (Y/N): ");
         if (scanner.nextLine().equalsIgnoreCase("Y")) {
             while (true) {
-                String a = inputWithMaxLength("Enter 'done' to stop inserting data: ", 15, true);
+                String a = inputWithMaxLength("Enter 'done' to stop inserting data: ", 30, true);
                 if (a.equalsIgnoreCase("done")) break;
                 if (!a.isEmpty()) {
                     a = Utilities.capitalizeWords(a);

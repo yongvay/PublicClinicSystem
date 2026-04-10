@@ -18,8 +18,7 @@ public class PatientRepositoryImpl implements PatientRepository {
         patientDAO = new PatientDAO();
         patientList = patientDAO.loadFromFile();
     }
-    
-    
+   
     // AUTO ID GENERATION
     @Override
     public String generatePatientID() {

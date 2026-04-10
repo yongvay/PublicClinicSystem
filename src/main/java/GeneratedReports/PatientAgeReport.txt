@@ -1,0 +1,34 @@
+
+=========== PATIENT AGE ANALYSIS REPORT ===========
+[1] SUMMARY
+----------------------
+Total Patients : 20
+Average Age    : 36
+Youngest Age   : 0
+Oldest Age     : 126
+
+[2] AGE GROUP
+----------------------
+Child (0-12)   : 5
+Teen (13-18)   : 0
+Adult (19-40)  : 9
+Senior (41+)   : 6
+
+[3] TOP 5 OLDEST
+----------------------
+P013 - Diana Prince (126)
+P003 - Robert Ford (71)
+P004 - Martha Kent (63)
+P007 - Michael Scott (48)
+P011 - Clark Kent (46)
+
+[4] TOP 5 YOUNGEST
+----------------------
+P017 - Victor Stone (0)
+P018 - Oliver Queen (2)
+P012 - Bruce Wayne (3)
+P002 - Lily Evans (4)
+P001 - Timmy Turner (7)
+
+============================================================
+

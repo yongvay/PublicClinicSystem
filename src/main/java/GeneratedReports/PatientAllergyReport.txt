@@ -1,0 +1,39 @@
+
+=========== PATIENT ALLERGY ANALYSIS REPORT ===========
+
+--- Patients WITH Allergies ---
+ID     Name            Age   Allergies                     
+--------------------------------------------------------------
+P001   Timmy Turner    7     1. Peanuts                    
+P002   Lily Evans      4     1. Penicillin                 
+P004   Martha Kent     63    1. Sulfa Drugs                
+P006   David Rose      37    1. Latex                      
+P007   Michael Scott   48    1. Dust Mites                 
+P008   Pam Beesly      40    1. Pollen                     
+P009   Jake Peralta    35    1. Ibuprofen                  
+P010   Amy Santiago    34    1. Seafood                    
+P011   Clark Kent      46    1. Kryptonite                 
+P014   Barry Allen     33    1. Cold Medicine              
+P015   Hal Jordan      37    1. Yellow Dye                 
+P020   John Constan... 43    1. Holy Water                 
+
+--- Allergy Frequency & Percentage ---
+Peanuts         : 1   (8.33%)
+Penicillin      : 1   (8.33%)
+Sulfa Drugs     : 1   (8.33%)
+Latex           : 1   (8.33%)
+Dust Mites      : 1   (8.33%)
+Pollen          : 1   (8.33%)
+Ibuprofen       : 1   (8.33%)
+Seafood         : 1   (8.33%)
+Kryptonite      : 1   (8.33%)
+Cold Medicine   : 1   (8.33%)
+Yellow Dye      : 1   (8.33%)
+Holy Water      : 1   (8.33%)
+
+--- Top Allergy ---
+No Top Allergy (Tie detected)
+
+--- Summary ---
+Allergy Rate: 60.00%
+

@@ -215,7 +215,7 @@ public class DoctorRepositoryImpl implements DoctorRepository {
         report.append("                                                                         Generated At: ").append(time).append("                                                                           \n");
         report.append(separator);
 
-        report.append(String.format("| %-9s | %-18s | %-15s | %-5s | %-9s | %-10s | %-9s | %-10s | %-18s | %-11s | %-30s |\n",
+        report.append(String.format("| %-9s | %-22s | %-22s | %-5s | %-9s | %-10s | %-9s | %-10s | %-18s | %-11s | %-30s |\n",
                 "Doctor ID", "Doctor Name", "Specialization", "Total", "Completed", "Waitlisted", "Scheduled", "Patient ID", "Patient Name", "Appt Status", "Treatment (Meds)"));
         report.append(line);
 
@@ -263,7 +263,7 @@ public class DoctorRepositoryImpl implements DoctorRepository {
                 specApptCounts.add(total); 
             }
 
-            report.append(String.format("| %-9s | %-18s | %-15s | %-5d | %-9d | %-10d | %-9d | %-10s | %-18s | %-11s | %-30s |\n",
+            report.append(String.format("| %-9s | %-22s | %-22s | %-5d | %-9d | %-10d | %-9d | %-10s | %-18s | %-11s | %-30s |\n",
                     doc.getDoctorID(), doc.getName(), doc.getSpecialization(), total, completed, waitlisted, scheduled, "", "", "", ""));
 
             if (total > 0) {
@@ -282,7 +282,7 @@ public class DoctorRepositoryImpl implements DoctorRepository {
                     if (pName.length() > 18) pName = pName.substring(0, 15) + "...";
                     if (medsStr.length() > 30) medsStr = medsStr.substring(0, 27) + "...";
 
-                    report.append(String.format("| %-9s | %-18s | %-15s | %-5s | %-9s | %-10s | %-9s | %-10s | %-18s | %-11s | %-30s |\n",
+                    report.append(String.format("| %-9s | %-22s | %-22s | %-5s | %-9s | %-10s | %-9s | %-10s | %-18s | %-11s | %-30s |\n",
                             "", "", "", "", "", "", "", 
                             appt.getPatient().getPatientID(), pName, appt.getStatus(), medsStr));
                 }

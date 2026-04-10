@@ -8,3 +8,13 @@ P007|Michael Scott|15/02/1978|Chronic Migraines|Dust Mites
 P008|Pam Beesly|10/10/1985|None|Pollen
 P009|Jake Peralta|18/06/1990|None|Ibuprofen
 P010|Amy Santiago|25/03/1992|GERD (Acid Reflux)|Seafood
+P011|Clark Kent|28/02/1980|None|Kryptonite
+P012|Bruce Wayne|19/05/2022|Insomnia|None
+P013|Diana Prince|22/03/1900|None|None
+P014|Barry Allen|14/08/1992|High Metabolism|Cold Medicine
+P015|Hal Jordan|10/10/1988|None|Yellow Dye
+P016|Arthur Curry|29/01/1986|Dehydration|None
+P017|Victor Stone|15/06/2025|Cybernetic Rejection|None
+P018|Oliver Queen|16/05/2023|PTSD|None
+P019|Dinah Lance|10/04/1988|Sore Throat|None
+P020|John Constantine|10/05/1982|Lung Cancer|Holy Water

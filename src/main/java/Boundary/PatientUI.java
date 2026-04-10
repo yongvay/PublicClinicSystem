@@ -262,7 +262,7 @@ public class PatientUI {
         }
 
         patientRepo.create(new Patient(id, name, birthDate, history, allergy));
-        System.out.println("Patient added.");
+        System.out.println("\n[Patient " +id +":"+ name + " is successfully added]");
     }
 
     // UPDATE LIST

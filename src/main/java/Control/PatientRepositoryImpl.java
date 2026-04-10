@@ -5,8 +5,6 @@ import ADT.ListInterface;
 import DAO.PatientDAO;
 import Entity.Patient;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
 /**
  * @author Tam Wan Jin
@@ -79,7 +77,7 @@ public class PatientRepositoryImpl implements PatientRepository {
     public boolean addPatientAllergy(String patientId, String allergy) {
         Patient p = findById(patientId);
         if (p != null && allergy != null && !allergy.trim().isEmpty()) {
-            p.getAllergies().add(allergy);   // ⭐ 操作 List
+            p.getAllergies().add(allergy);   
             patientDAO.saveToFile(patientList);
             return true;
         }
@@ -258,8 +256,14 @@ public class PatientRepositoryImpl implements PatientRepository {
     }
 
     // REPORT GENERATION
+    private String limit(String text, int max) {
+        if (text == null) return "";
+        if (text.length() <= max) return text;
+        return text.substring(0, max - 3) + "...";
+    }
+    
     @Override
-    public String generatePatientReport() {
+    public String generatePatientAgeReport() {
 
         ListInterface<Patient> list = findAll();
 
@@ -282,7 +286,6 @@ public class PatientRepositoryImpl implements PatientRepository {
             if (age < minAge) minAge = age;
             if (age > maxAge) maxAge = age;
 
-            // Age Group 
             if (age <= 12) child++;
             else if (age <= 18) teen++;
             else if (age <= 40) adult++;
@@ -294,15 +297,9 @@ public class PatientRepositoryImpl implements PatientRepository {
         ListInterface<Patient> sortedAsc = getPatientsSortedByAgeAsc();
         ListInterface<Patient> sortedDesc = getPatientsSortedByAgeDesc();        
 
-        LocalDateTime now = LocalDateTime.now();
-        String time = now.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
-
         StringBuilder report = new StringBuilder();
 
-        report.append("============================================================\n");
-        report.append("                 CLINIC PATIENT REPORT\n");
-        report.append("Generated At: ").append(time).append("\n");
-        report.append("============================================================\n\n");
+        report.append("\n=========== PATIENT AGE ANALYSIS REPORT ===========\n");
 
         report.append("[1] SUMMARY\n");
         report.append("----------------------\n");
@@ -344,5 +341,130 @@ public class PatientRepositoryImpl implements PatientRepository {
         report.append("\n============================================================\n");
         
         return report.toString();
+    }
+    
+    @Override
+    public String generatePatientAllergyReport() {
+        ListInterface<Patient> list = findAll();
+        StringBuilder sb = new StringBuilder();
+
+        if (list.isEmpty()) {
+            return "No patient records found.";
+        }
+
+        ListInterface<String> allergyList = new List<>();
+        ListInterface<Integer> countList = new List<>();
+
+        int totalAllergyRecords = 0;
+
+        sb.append("\n=========== PATIENT ALLERGY ANALYSIS REPORT ===========\n");
+        sb.append("\n--- Patients WITH Allergies ---\n");
+        sb.append(String.format("%-6s %-15s %-5s %-30s\n",
+                "ID", "Name", "Age", "Allergies"));
+        sb.append("--------------------------------------------------------------\n");
+
+        int patientWithAllergy = 0;
+
+        for (int i = 1; i <= list.getNumberOfEntries(); i++) {
+            Patient p = list.getEntry(i);
+
+            String allergy = p.formatList(p.getAllergies());
+
+            if (!allergy.equalsIgnoreCase("None") && !allergy.isEmpty()) {
+
+                patientWithAllergy++;
+
+                sb.append(String.format("%-6s %-15s %-5d %-30s\n",
+                        p.getPatientID(),
+                        limit(p.getPatientName(), 15),
+                        p.getAge(),
+                        limit(allergy, 30)
+                ));
+            }
+        }
+        
+        for (int i = 1; i <= list.getNumberOfEntries(); i++) {
+            Patient p = list.getEntry(i);
+            ListInterface<String> allergies = p.getAllergies();
+
+            for (int j = 1; j <= allergies.getNumberOfEntries(); j++) {
+                String allergy = allergies.getEntry(j);
+
+                if (allergy.equalsIgnoreCase("None") || allergy.isEmpty()) {
+                    continue;
+                }
+
+                totalAllergyRecords++;
+
+                int index = -1;
+
+                for (int k = 1; k <= allergyList.getNumberOfEntries(); k++) {
+                    if (allergyList.getEntry(k).equalsIgnoreCase(allergy)) {
+                        index = k;
+                        break;
+                    }
+                }
+
+                if (index != -1) {
+                    int current = countList.getEntry(index);
+                    countList.replace(index, current + 1);
+                } else {
+                    allergyList.add(allergy);
+                    countList.add(1);
+                }
+            }
+        }
+
+        sb.append("\n--- Allergy Frequency & Percentage ---\n");
+
+        int maxCount = 0;
+        int maxIndex = -1;
+        boolean hasUniqueTop = true;
+
+        for (int i = 1; i <= allergyList.getNumberOfEntries(); i++) {
+            int count = countList.getEntry(i);
+
+            if (count > maxCount) {
+                maxCount = count;
+                maxIndex = i;
+                hasUniqueTop = true;
+            } else if (count == maxCount) {
+                hasUniqueTop = false; // all 1
+            }
+        }
+
+        for (int i = 1; i <= allergyList.getNumberOfEntries(); i++) {
+            String name = allergyList.getEntry(i);
+            int count = countList.getEntry(i);
+
+            double percentage = (totalAllergyRecords == 0)
+                    ? 0
+                    : (count * 100.0 / totalAllergyRecords);
+
+            sb.append(String.format("%-15s : %-3d (%.2f%%)\n",
+                    name, count, percentage));
+        }
+
+        sb.append("\n--- Top Allergy ---\n");
+
+        if (totalAllergyRecords == 0) {
+            sb.append("No Top Allergy (No allergy records)\n");
+        } else if (!hasUniqueTop) {
+            sb.append("No Top Allergy (Tie detected)\n");
+        } else {
+            sb.append(allergyList.getEntry(maxIndex))
+              .append(" (")
+              .append(maxCount)
+              .append(" cases)\n");
+        }
+
+        sb.append("\n--- Summary ---\n");
+        double ratio = (list.getNumberOfEntries() == 0)
+                ? 0
+                : (patientWithAllergy * 100.0 / list.getNumberOfEntries());
+
+        sb.append(String.format("Allergy Rate: %.2f%%\n", ratio));
+
+        return sb.toString();
     }
 }

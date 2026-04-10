@@ -40,5 +40,7 @@ public interface PatientRepository {
     ListInterface<Patient> getPatientsSortedByAgeDesc();
     
     // Generate Report
-    String generatePatientReport();
+    String generatePatientAgeReport();
+    String generatePatientAllergyReport();
+    
 }

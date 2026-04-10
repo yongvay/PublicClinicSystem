@@ -200,7 +200,8 @@ public class PatientUI {
                 case 6 -> searchByName();
                 case 7 -> searchPatientsWithAllergy();
                 case 8 -> printAllPatientsSortedByName();
-                case 9 -> generateReport();
+                case 9 -> generateAllergyReport();
+                case 10 -> generatePatientAgeReport();
                 case 0 -> System.out.println("Exiting...");
                 default -> System.out.println("Invalid choice.");
             }
@@ -210,15 +211,16 @@ public class PatientUI {
 
     private void displayMenu() {
         System.out.println("\n========== PATIENT MENU ==========");
-        System.out.println("1 Add Patient");
-        System.out.println("2 View All Patients");
-        System.out.println("3 Update Patient");
-        System.out.println("4 Delete Patient");
-        System.out.println("5 Search by ID");
-        System.out.println("6 Search by Name");
-        System.out.println("7 Search Patient with Allergy");
-        System.out.println("8 View Patient List (A-Z)");
-        System.out.println("9 Generate Patient Report");
+        System.out.println("1  Add Patient");
+        System.out.println("2  View All Patients");
+        System.out.println("3  Update Patient");
+        System.out.println("4  Delete Patient");
+        System.out.println("5  Search by ID");
+        System.out.println("6  Search by Name");
+        System.out.println("7  Search Patient with Allergy");
+        System.out.println("8  View Patient List (A-Z)");
+        System.out.println("9  Generate Patient Medical Report");
+        System.out.println("10 Generate Patient Age Report");        
         System.out.println("0 Exit");
     }
 
@@ -437,13 +439,24 @@ public class PatientUI {
     }
     
     // REPORT
-    private void generateReport() {
-        String report = patientRepo.generatePatientReport();
+    private void generateAllergyReport() {
+        String report = patientRepo.generatePatientAllergyReport();
         System.out.println(report);
 
         System.out.print("Export? (Y/N): ");
         if (scanner.nextLine().equalsIgnoreCase("Y")) {
-            Utilities.exportReportToFile(report, "PatientReport.txt");
+            Utilities.exportReportToFile(report, "PatientAllergyReport.txt");
         }
     }
+    
+    private void generatePatientAgeReport() {
+        String report = patientRepo.generatePatientAgeReport();
+        System.out.println(report);
+
+        System.out.print("Export? (Y/N): ");
+        if (scanner.nextLine().equalsIgnoreCase("Y")) {
+            Utilities.exportReportToFile(report, "PatientAgeReport.txt");
+        }
+    }    
+    
 }

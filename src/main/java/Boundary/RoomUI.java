@@ -15,6 +15,11 @@ public class RoomUI {
     private RoomRepository roomRepo;
     private AppointmentRepository appointmentRepo;
     private Scanner scanner;
+    
+    // Define the strictly allowed room types for the clinic
+    private final String[] ALLOWED_ROOM_TYPES = {
+        "Consultation", "Treatment", "Observation", "Ward", "Surgery", "Pharmacy"
+    };
 
     public RoomUI(RoomRepository roomRepo, AppointmentRepository appointmentRepo) {
         this.roomRepo = roomRepo;
@@ -22,19 +27,22 @@ public class RoomUI {
         this.scanner = new Scanner(System.in);
     }
 
+    // ==========================================
+    // MENU & NAVIGATION
+    // ==========================================
     public void start() {
         int choice = -1;
         do {
             displayMenu();
             System.out.print("Enter your choice: ");
+            String input = scanner.nextLine().trim(); 
             
-            if (scanner.hasNextInt()) {
-                choice = scanner.nextInt();
-                scanner.nextLine(); 
+            try {
+                choice = Integer.parseInt(input); 
                 processChoice(choice);
-            } else {
-                System.out.println("Invalid input. Please enter a number.");
-                scanner.nextLine(); 
+            } catch (NumberFormatException e) {
+                System.out.println("Error: Invalid input. Please enter a numerical value.");
+                choice = -1; 
             }
         } while (choice != 0);
     }
@@ -74,18 +82,15 @@ public class RoomUI {
         }
     }
 
+    // ==========================================
+    // CORE FUNCTIONALITIES
+    // ==========================================
     private void addRoom() {
         System.out.println("\n--- Add New Room ---");
         String roomNumber = roomRepo.generateNextRoomId();
         System.out.println("Auto-generated Room Number: " + roomNumber);
 
-        String roomType = "";
-        while (roomType.trim().isEmpty()) {
-            roomType = Utilities.getString("Enter Room Type (e.g., Consult, Treatment, Observation): ");
-            if (roomType.trim().isEmpty()) {
-                System.out.println("Error: Room Type cannot be empty. Please try again.");
-            }
-        }
+        String roomType = getValidRoomType(false, "");
         
         Room newRoom = new Room(roomNumber, roomType, true);
         
@@ -102,7 +107,7 @@ public class RoomUI {
     }
 
     private void searchByRoomNumber() {
-        String roomNumber = Utilities.getString("\nEnter Room Number to search: ");
+        String roomNumber = getValidRoomNumberInput("\nEnter Room Number to search (e.g., R001): ");
         Room found = roomRepo.findById(roomNumber);
         
         if (found != null) {
@@ -117,7 +122,7 @@ public class RoomUI {
         ListInterface<Room> results = roomRepo.findByType(type);
         
         if (results.isEmpty()) {
-            System.out.println("No rooms found of type: " + type);
+            System.out.println("No rooms found containing type: " + type);
         } else {
             System.out.println("Search Results:");
             displayList(results);
@@ -136,7 +141,7 @@ public class RoomUI {
 
     private void updateRoom() {
         Utilities.printHeader("Update Room Details");
-        String roomNumber = Utilities.getString("Enter Room Number to update: ");
+        String roomNumber = getValidRoomNumberInput("Enter Room Number to update (e.g., R001): ");
         Room existing = roomRepo.findById(roomNumber);
         
         if (existing == null) {
@@ -147,37 +152,25 @@ public class RoomUI {
         System.out.println("Current Details: " + existing.toString());
         System.out.println("Enter new details (press Enter to keep current value):");
 
-        String type;
-        while (true) {
-            type = Utilities.getString("New Room Type [" + existing.getRoomType() + "]: ");
-            if (type.isEmpty() || !type.trim().isEmpty()) {
-                break; 
-            }
-            System.out.println("Error: Room Type cannot be blank spaces. Please enter a valid type or press Enter to skip.");
+        // Validate Room Type Update
+        String newType = getValidRoomType(true, existing.getRoomType());
+        if (!newType.isEmpty()) {
+            existing.setRoomType(newType);
         }
-        updateIfNotEmpty(type, existing::setRoomType);
 
-        // ---------------------------------------------------------
-        // DEFENSIVE INPUT PARSING PLACEHOLDER
-        // If an integer field (e.g., bedCapacity) is added to Room, 
-        // parse the user input defensively using try-catch to prevent crashes.
-        // ---------------------------------------------------------
-        /*
-        String newCapacity = Utilities.getString("New Bed Capacity [" + existing.getBedCapacity() + "]: ");
-        if (!newCapacity.isEmpty()) {
-            try {
-                existing.setBedCapacity(Integer.parseInt(newCapacity));
-            } catch (NumberFormatException e) {
-                System.out.println("Invalid format. Skipping capacity update. Please enter numbers only.");
-            }
-        }
-        */
-        // ---------------------------------------------------------
-
+        // Validate Availability Status Update
         if (!existing.isAvailable()) {
             System.out.println("Status: This room is currently occupied. Status cannot be manually changed. Please process patient discharge in the Appointment System to free the room.");
         } else {
-            String statusInput = Utilities.getString("Is Room Available? (Y/N) [" + (existing.isAvailable() ? "Y" : "N") + "]: ").trim();
+            String statusInput = "";
+            while (true) {
+                statusInput = Utilities.getString("Is Room Available? (Y/N) [" + (existing.isAvailable() ? "Y" : "N") + "]: ").trim();
+                if (statusInput.equalsIgnoreCase("Y") || statusInput.equalsIgnoreCase("N") || statusInput.isEmpty()) {
+                    break;
+                }
+                System.out.println("Error: Please enter 'Y' for Yes or 'N' for No, or press Enter to skip.");
+            }
+            
             if (statusInput.equalsIgnoreCase("Y")) existing.setAvailable(true);
             else if (statusInput.equalsIgnoreCase("N")) existing.setAvailable(false);
         }
@@ -190,7 +183,7 @@ public class RoomUI {
     }
 
     private void deleteRoom() {
-        String roomNumber = Utilities.getString("\nEnter Room Number to delete: ");
+        String roomNumber = getValidRoomNumberInput("\nEnter Room Number to delete (e.g., R001): ");
         Room target = roomRepo.findById(roomNumber);
         
         if (target != null) {
@@ -215,30 +208,84 @@ public class RoomUI {
     }
 
     private void viewSortedRooms() {
-        System.out.println("\n--- Sort Rooms ---");
-        System.out.println("1. Sort by Room Number");
-        System.out.println("2. Sort by Room Type (A-Z)");
-        System.out.print("Enter choice: ");
+        while (true) {
+            System.out.println("\n--- Sort Rooms ---");
+            System.out.println("1. Sort by Room Number");
+            System.out.println("2. Sort by Room Type (A-Z)");
+            System.out.println("0. Cancel");
+            System.out.print("Enter choice: ");
+            String input = scanner.nextLine().trim();
 
-        if (scanner.hasNextInt()) {
-            int choice = scanner.nextInt();
-            scanner.nextLine();
+            try {
+                int choice = Integer.parseInt(input);
+                if (choice == 0) return; 
+                
+                ListInterface<Room> sortedList = null;
+                if (choice == 1) {
+                    sortedList = roomRepo.sortedByRoomNumber();
+                    displayList(sortedList);
+                    break;
+                } else if (choice == 2) {
+                    sortedList = roomRepo.sortedByType();
+                    displayList(sortedList);
+                    break;
+                } else {
+                    System.out.println("Invalid choice. Please enter 1, 2, or 0.");
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Error: Invalid input. Please enter a number.");
+            }
+        }
+    }
 
-            ListInterface<Room> sortedList = null;
-            if (choice == 1) {
-                sortedList = roomRepo.sortedByRoomNumber();
-            } else if (choice == 2) {
-                sortedList = roomRepo.sortedByType();
-            } else {
-                System.out.println("Invalid choice.");
-                return;
+    // ==========================================
+    // HELPER & VALIDATION METHODS
+    // ==========================================
+    
+    // Reusable method to ensure correct Room ID format
+    private String getValidRoomNumberInput(String promptMessage) {
+        String roomNumber;
+        while (true) {
+            roomNumber = Utilities.getString(promptMessage).trim().toUpperCase();
+            if (roomNumber.matches("^R\\d+$")) {
+                break;
+            }
+            System.out.println("Error: Invalid format. Room number must start with 'R' followed by numbers (e.g., R001).");
+        }
+        return roomNumber;
+    }
+
+    // Reusable method to ensure room types fit the clinic categories
+    private String getValidRoomType(boolean allowEmpty, String currentValue) {
+        String roomType = "";
+        boolean isValidType = false;
+        
+        // Build a display string of allowed types for the prompt
+        String typesList = String.join(", ", ALLOWED_ROOM_TYPES);
+        String prompt = allowEmpty ? 
+            String.format("New Room Type (%s) [%s]: ", typesList, currentValue) : 
+            String.format("Enter Room Type (%s): ", typesList);
+
+        while (!isValidType) {
+            roomType = Utilities.getString(prompt).trim();
+            
+            if (allowEmpty && roomType.isEmpty()) {
+                return ""; // Skip update
             }
 
-            displayList(sortedList);
-        } else {
-            System.out.println("Invalid input.");
-            scanner.nextLine();
+            for (String allowed : ALLOWED_ROOM_TYPES) {
+                if (roomType.equalsIgnoreCase(allowed)) {
+                    roomType = allowed; // Standardize casing
+                    isValidType = true;
+                    break;
+                }
+            }
+            
+            if (!isValidType) {
+                System.out.println("Error: Invalid Room Type. Please choose exactly from the provided list.");
+            }
         }
+        return roomType;
     }
 
     private void displayList(ListInterface<Room> list) {
@@ -251,6 +298,9 @@ public class RoomUI {
         }
     }
 
+    // ==========================================
+    // REPORT GENERATION
+    // ==========================================
     public void generateUtilizationReport() {
         String reportText = roomRepo.generateRoomReport(appointmentRepo.getAllAppointments());
         System.out.println(reportText);
@@ -284,12 +334,6 @@ public class RoomUI {
             } else {
                 System.out.println("Export skipped.");
             }
-        }
-    }
-
-    private void updateIfNotEmpty(String input, java.util.function.Consumer<String> setter) {
-        if (input != null && !input.trim().isEmpty()) {
-            setter.accept(input.trim());
         }
     }
 }

@@ -259,7 +259,7 @@ public class MedicineUI {
                 try {
                     LocalDate newExpiryDate = LocalDate.parse(dateInput);
                     if (newExpiryDate.isBefore(LocalDate.now())) {
-                        System.out.println("⚠️ Warning: You are changing this to an EXPIRED date!");
+                        System.out.println("Warning: You are changing this to an EXPIRED date!");
                         System.out.print("Proceed anyway? (Y/N): ");
                         String confirm = scanner.nextLine().trim();
                         if (!confirm.equalsIgnoreCase("Y")) {
@@ -267,11 +267,11 @@ public class MedicineUI {
                         }
                     }
                     existing.setExpiryDate(newExpiryDate);
-                    System.out.println("✅ Expiry Date updated to: " + newExpiryDate);
+                    System.out.println("Expiry Date updated to: " + newExpiryDate);
                     validDate = true;
 
                 } catch (DateTimeParseException e) {
-                    System.out.println("❌ Invalid format! Please use exactly YYYY-MM-DD (e.g., 2026-10-15).");
+                    System.out.println("Invalid format! Please use exactly YYYY-MM-DD (e.g., 2026-10-15).");
                 }
             }
         }

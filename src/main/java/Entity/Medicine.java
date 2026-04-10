@@ -115,7 +115,7 @@ public class Medicine {
 
     @Override
     public String toString() {
-        return String.format("ID: %s | Name: %s | Desc: %s | Dosage: %s | Stock: %d",
-                medicineID, name, description, dosage, quantityInStock);
+        return String.format("ID: %s | Name: %s | Desc: %s | Dosage: %s | Stock: %d | Reorder: %d | Expiry: %s",
+                medicineID, name, description, dosage, quantityInStock, reorderLevel, expiryDate);
     }
 }

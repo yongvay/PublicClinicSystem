@@ -1,5 +1,4 @@
 M001|Panaldo|Pain Killer|10000mg|100|20|2026-01-25
-M002|Amoxil|Antibiotic|250mg|50|10|2026-05-6
 M003|CoughSyrup|Relieves cough|100ml|15|20|2026-05-03
 M004|VitaminC|Immunity booster|1000mg|200|50|2026-06-23
 M005|GastricPill|Relieves stomach acid|100mg|5|15|2026-08-20

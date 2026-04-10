@@ -151,6 +151,7 @@ public class PatientRepositoryImpl implements PatientRepository {
         }
         return false;
     }
+    
     // DELETE
     @Override
     public boolean delete(Patient patient) {
@@ -193,7 +194,8 @@ public class PatientRepositoryImpl implements PatientRepository {
             return success;
         }
         return false;
-    }    
+    }  
+    
     // SEARCH 
     @Override
     public Patient findById(String id) {
@@ -218,14 +220,7 @@ public class PatientRepositoryImpl implements PatientRepository {
             p.getAllergies() != null &&
             !p.getAllergies().isEmpty()
         );
-    }
-    
-    public ListInterface<Patient> findPatientsWithMedicalHistory() {
-        return patientList.findAll((Patient p) ->
-            p.getMedicalHistory() != null &&
-            !p.getMedicalHistory().isEmpty()
-        );
-    }  
+    } 
     
     // SORTING 
     @Override

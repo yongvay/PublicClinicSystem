@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Clinic Room Report</title>
+<style>body { font-family: 'Segoe UI', sans-serif; padding: 20px; background: #f8f9fa; } table { width: 100%; border-collapse: collapse; background: white; } th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; } th { background-color: #34495e; color: white; } .occupied { background-color: #ffeaea; color: #c0392b; font-weight: bold; } .available { color: #27ae60; font-weight: bold; }</style>
+</head>
+<body>
+<h1>🏥 Clinic Room Utilization Report</h1>
+<p>Generated At: <strong>10/04/2026 14:08</strong></p>
+<p>Total Rooms: <strong>9</strong> | Available: <span class="available">5</span> | Occupied: <span class="occupied">4</span></p>
+<p>Current Occupancy Rate: <strong>44.44%</strong></p>
+<h2>Distribution by Room Type</h2>
+<table>
+<tr><th>Room Type</th><th>Total Count</th><th>Available</th><th>Occupied</th></tr>
+<tr><td>Consult</td><td>3</td><td class="available">0</td><td class="occupied">3</td></tr>
+<tr><td>Treatment</td><td>3</td><td class="available">2</td><td class="occupied">1</td></tr>
+<tr><td>Observation</td><td>3</td><td class="available">3</td><td class="occupied">0</td></tr>
+</table>
+<h2>Occupied Rooms Details</h2>
+<table>
+<tr><th>Room Number</th><th>Room Type</th><th>Occupant Name</th><th>Status</th></tr>
+<tr class="occupied"><td>R001</td><td>Consult</td><td>Dinah Lance</td><td>Scheduled</td></tr>
+<tr class="occupied"><td>R002</td><td>Consult</td><td>Bruce Wayne</td><td>Scheduled</td></tr>
+<tr class="occupied"><td>R003</td><td>Consult</td><td>Timmy Turner</td><td>Scheduled</td></tr>
+<tr class="occupied"><td>R004</td><td>Treatment</td><td>Oliver Queen</td><td>Admitted</td></tr>
+</table>
+</body>
+</html>

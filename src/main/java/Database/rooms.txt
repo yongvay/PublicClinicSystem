@@ -1,7 +1,7 @@
-R001|Consult|true
-R002|Consult|true
-R003|Consult|true
-R004|Treatment|true
+R001|Consult|false
+R002|Consult|false
+R003|Consult|false
+R004|Treatment|false
 R005|Treatment|true
 R006|Treatment|true
 R007|Observation|true

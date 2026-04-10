@@ -182,7 +182,7 @@ public class DoctorUI {
         Doctor existing = doctorRepo.findById(id);
         
         if (existing == null) {
-            System.out.println("Error: Doctor not found!");
+            System.out.println("Error: Doctor not found! Follow the format Dxxx.");
             return;
         }
 
@@ -229,7 +229,7 @@ public class DoctorUI {
                 System.out.println("Deletion cancelled.");
             }
         } else {
-            System.out.println("Error: Doctor not found.");
+            System.out.println("Error: Doctor not found.Follow the format Dxxx.");
         }
     }
 

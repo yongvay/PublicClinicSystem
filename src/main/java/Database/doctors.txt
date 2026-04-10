@@ -1,11 +1,10 @@
 D001|Dr. Alan Smith|Family Medicine|012-1111111|false
-D002|Dr. Brenda Lee|Pediatrics|012-2222222|false
+D002|Dr. Brenda Lee|Pediatrics|012-2222222|true
 D003|Dr. Charles Xavier|Internal Medicine|012-3333333|false
-D004|Dr. Diana Prince|General Practice|012-4444444|true
+D004|Dr. Diana Prince|General Practice|012-4444444|false
 D005|Dr. Evan Wright|Dermatology|012-5555555|false
 D006|Dr. Fiona Gallagher|General Practice|012-6666666|true
 D007|Dr. George Miller|Internal Medicine|012-7777777|false
 D008|Dr. Hannah Abbott|Pediatrics|012-8888888|true
 D010|Dr. Jane Doe|General Practice|012-6611289|true
-D011|Dr.  Lionel  Messi|Dermatology|010-2059239|true
-D012|Dr.  Ronaldo|Time Stone|010-2059239|false
+D011|Dr. Lionel  Messi|Dermatology|010-2059239|true

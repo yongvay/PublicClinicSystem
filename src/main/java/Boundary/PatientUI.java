@@ -15,7 +15,7 @@ public class PatientUI {
 
     private final PatientRepository patientRepo;
     private final Scanner scanner;
-    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/mm/yyyy");
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     public PatientUI(PatientRepository patientRepo) {
         this.patientRepo = patientRepo;
@@ -71,14 +71,14 @@ public class PatientUI {
             }
             return date;
         } catch (DateTimeParseException e) {
-            System.out.println("Format must be dd/mm/yyyy");
+            System.out.println("Format must be dd/MM/yyyy");
             return null;
         }
     }
 
     private LocalDate addBirthDate() {
         while (true) {
-            String input = inputString("Birth Date (dd/mm/yyyy): ");
+            String input = inputString("Birth Date (dd/MM/yyyy): ");
             LocalDate date = getValidBirthDate(input);
             if (date != null) return date;
         }
@@ -86,7 +86,7 @@ public class PatientUI {
 
     private LocalDate updateBirthDate(LocalDate currentDate) {
         while (true) {
-            String input = inputString("New Birth Date [dd/mm/yyyy] (Enter to skip): ");
+            String input = inputString("New Birth Date [dd/MM/yyyy] (Enter to skip): ");
             if (input.isEmpty()) return currentDate;
             LocalDate date = getValidBirthDate(input);
             if (date != null) return date;

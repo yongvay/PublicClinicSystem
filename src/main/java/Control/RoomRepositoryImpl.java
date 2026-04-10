@@ -27,25 +27,25 @@ public class RoomRepositoryImpl implements RoomRepository {
     }
 
     // ==========================================
-    // AUTO-GENERATE ID
+    // AUTO-GENERATE ID (Standardized)
     // ==========================================
     @Override
     public String generateNextRoomId() {
         int maxId = 0;
         for (Room r : roomList) {
             String currentIdStr = r.getRoomNumber();
-            if (currentIdStr != null) {
-                String numericPart = currentIdStr.replaceAll("\\D+", ""); 
-                if (!numericPart.isEmpty()) {
-                    int currentIdNum = Integer.parseInt(numericPart);
+            if (currentIdStr != null && currentIdStr.toUpperCase().startsWith("R")) {
+                try {
+                    int currentIdNum = Integer.parseInt(currentIdStr.substring(1));
                     if (currentIdNum > maxId) {
                         maxId = currentIdNum;
                     }
+                } catch (NumberFormatException e) {
+                    // Ignore any badly formatted IDs
                 }
             }
         }
-        if (maxId == 0) return "101";
-        return String.valueOf(maxId + 1); 
+        return String.format("R%03d", maxId + 1); 
     }
 
     // ==========================================
@@ -107,8 +107,7 @@ public class RoomRepositoryImpl implements RoomRepository {
         });
     }
 
-    // UPDATED: Changed to private to match ECB architecture boundaries
-    private ListInterface<Room> findAllOccupiedRooms() {
+    public ListInterface<Room> findAllOccupiedRooms() {
         return roomList.findAll(new SearchCriteria<Room>() {
             @Override
             public boolean isMatch(Room r) {
@@ -180,7 +179,7 @@ public class RoomRepositoryImpl implements RoomRepository {
     }
 
     // ==========================================
-    // REPORT GENERATION
+    // REPORT 1: UTILIZATION & OCCUPANCY (TEXT)
     // ==========================================
     @Override
     public String generateRoomReport(ListInterface<Appointment> allApts) {
@@ -277,5 +276,209 @@ public class RoomRepositoryImpl implements RoomRepository {
         report.append("End of Report.\n");
 
         return report.toString();
+    }
+
+    // ==========================================
+    // REPORT 1: UTILIZATION & OCCUPANCY (HTML)
+    // ==========================================
+    @Override
+    public String generateRoomHtmlReport(ListInterface<Appointment> allApts) {
+        if (roomList.isEmpty()) {
+            return "<h1>No Room Data Available to generate report.</h1>";
+        }
+
+        ListInterface<Room> availableRooms = this.findAllAvailableRooms();
+        ListInterface<Room> occupiedRooms = this.findAllOccupiedRooms();
+
+        int totalRooms = roomList.getNumberOfEntries();
+        int availableCount = availableRooms.getNumberOfEntries();
+        int occupiedCount = occupiedRooms.getNumberOfEntries();
+
+        ListInterface<String> roomTypes = new List<>();
+        ListInterface<Integer> typeTotalCounts = new List<>();
+        ListInterface<Integer> typeAvailableCounts = new List<>();
+
+        for (Room r : roomList) {
+            String type = r.getRoomType();
+            boolean found = false;
+            
+            for (int j = 1; j <= roomTypes.getNumberOfEntries(); j++) {
+                if (roomTypes.getEntry(j).equalsIgnoreCase(type)) {
+                    typeTotalCounts.replace(j, typeTotalCounts.getEntry(j) + 1); 
+                    if (r.isAvailable()) {
+                        typeAvailableCounts.replace(j, typeAvailableCounts.getEntry(j) + 1); 
+                    }
+                    found = true;
+                    break;
+                }
+            }
+            
+            if (!found) {
+                roomTypes.add(type); 
+                typeTotalCounts.add(1);
+                typeAvailableCounts.add(r.isAvailable() ? 1 : 0);
+            }
+        }
+
+        double occupancyRate = (double) occupiedCount / totalRooms * 100;
+        String time = java.time.LocalDateTime.now()
+                .format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
+
+        StringBuilder html = new StringBuilder();
+        html.append("<!DOCTYPE html>\n<html>\n<head>\n<meta charset=\"UTF-8\">\n<title>Clinic Room Report</title>\n");
+        html.append("<style>body { font-family: 'Segoe UI', sans-serif; padding: 20px; background: #f8f9fa; } table { width: 100%; border-collapse: collapse; background: white; } th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; } th { background-color: #34495e; color: white; } .occupied { background-color: #ffeaea; color: #c0392b; font-weight: bold; } .available { color: #27ae60; font-weight: bold; }</style>\n");
+        html.append("</head>\n<body>\n");
+        
+        html.append("<h1>🏥 Clinic Room Utilization Report</h1>\n");
+        html.append("<p>Generated At: <strong>").append(time).append("</strong></p>\n");
+        html.append("<p>Total Rooms: <strong>").append(totalRooms).append("</strong> | ");
+        html.append("Available: <span class=\"available\">").append(availableCount).append("</span> | ");
+        html.append("Occupied: <span class=\"occupied\">").append(occupiedCount).append("</span></p>\n");
+        html.append("<p>Current Occupancy Rate: <strong>").append(String.format("%.2f%%", occupancyRate)).append("</strong></p>\n");
+
+        html.append("<h2>Distribution by Room Type</h2>\n");
+        html.append("<table>\n<tr><th>Room Type</th><th>Total Count</th><th>Available</th><th>Occupied</th></tr>\n");
+        for (int k = 1; k <= roomTypes.getNumberOfEntries(); k++) {
+            String rType = roomTypes.getEntry(k);
+            int tCount = typeTotalCounts.getEntry(k);
+            int aCount = typeAvailableCounts.getEntry(k);
+            int oCount = tCount - aCount;
+            html.append("<tr><td>").append(rType).append("</td><td>").append(tCount)
+                .append("</td><td class=\"available\">").append(aCount)
+                .append("</td><td class=\"occupied\">").append(oCount).append("</td></tr>\n");
+        }
+        html.append("</table>\n");
+
+        html.append("<h2>Occupied Rooms Details</h2>\n");
+        if (occupiedRooms.isEmpty()) { 
+            html.append("<p>All rooms are currently empty.</p>\n");
+        } else {
+            html.append("<table>\n<tr><th>Room Number</th><th>Room Type</th><th>Occupant Name</th><th>Status</th></tr>\n");
+            for (Room r : occupiedRooms) {
+                String occupantName = "Unknown Patient";
+                String status = "";
+                
+                for (Appointment apt : allApts) {
+                    if (apt.getRoom() != null && apt.getRoom().getRoomNumber().equals(r.getRoomNumber())) {
+                        if (apt.getStatus().equalsIgnoreCase("Scheduled") || apt.getStatus().equalsIgnoreCase("Admitted")) {
+                            occupantName = apt.getPatient().getPatientName();
+                            status = apt.getStatus();
+                            break;
+                        }
+                    }
+                }
+                html.append("<tr class=\"occupied\"><td>").append(r.getRoomNumber())
+                    .append("</td><td>").append(r.getRoomType())
+                    .append("</td><td>").append(occupantName)
+                    .append("</td><td>").append(status).append("</td></tr>\n");
+            }
+            html.append("</table>\n");
+        }
+
+        html.append("</body>\n</html>");
+        return html.toString();
+    }
+
+    // ==========================================
+    // REPORT 2: AVAILABILITY DIRECTORY (TEXT)
+    // ==========================================
+    @Override
+    public String generateAvailabilityDirectoryTextReport() {
+        ListInterface<Room> availableRooms = this.findAllAvailableRooms();
+        if (availableRooms.isEmpty()) {
+            return "No rooms are currently available.\n";
+        }
+
+        ListInterface<String> uniqueTypes = new ADT.List<>();
+        for (Room r : availableRooms) {
+            boolean exists = false;
+            for (int i = 1; i <= uniqueTypes.getNumberOfEntries(); i++) {
+                if (uniqueTypes.getEntry(i).equalsIgnoreCase(r.getRoomType())) {
+                    exists = true;
+                    break;
+                }
+            }
+            if (!exists) {
+                uniqueTypes.add(r.getRoomType());
+            }
+        }
+
+        String time = java.time.LocalDateTime.now()
+                .format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
+
+        StringBuilder report = new StringBuilder();
+        report.append("\n======================================================\n");
+        report.append("           CLINIC ROOM AVAILABILITY DIRECTORY         \n");
+        report.append("======================================================\n");
+        report.append("Generated At: ").append(time).append("\n\n");
+
+        for (int i = 1; i <= uniqueTypes.getNumberOfEntries(); i++) {
+            String currentType = uniqueTypes.getEntry(i);
+            report.append("[ ").append(currentType.toUpperCase()).append(" ]\n");
+            
+            for (Room r : availableRooms) {
+                if (r.getRoomType().equalsIgnoreCase(currentType)) {
+                    report.append("  - Room ").append(r.getRoomNumber()).append("\n");
+                }
+            }
+            report.append("\n");
+        }
+        report.append("======================================================\n");
+        report.append("End of Directory.\n");
+        
+        return report.toString();
+    }
+
+    // ==========================================
+    // REPORT 2: AVAILABILITY DIRECTORY (HTML)
+    // ==========================================
+    @Override
+    public String generateAvailabilityDirectoryHtmlReport() {
+        ListInterface<Room> availableRooms = this.findAllAvailableRooms();
+        if (availableRooms.isEmpty()) {
+            return "<h1>No Rooms are currently available.</h1>";
+        }
+
+        ListInterface<String> uniqueTypes = new ADT.List<>();
+        for (Room r : availableRooms) {
+            boolean exists = false;
+            for (int i = 1; i <= uniqueTypes.getNumberOfEntries(); i++) {
+                if (uniqueTypes.getEntry(i).equalsIgnoreCase(r.getRoomType())) {
+                    exists = true;
+                    break;
+                }
+            }
+            if (!exists) {
+                uniqueTypes.add(r.getRoomType());
+            }
+        }
+
+        String time = java.time.LocalDateTime.now()
+                .format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
+
+        StringBuilder html = new StringBuilder();
+        html.append("<!DOCTYPE html>\n<html>\n<head>\n<meta charset=\"UTF-8\">\n<title>Room Availability Directory</title>\n");
+        html.append("<style>body { font-family: 'Segoe UI', sans-serif; padding: 20px; background: #f8f9fa; } .category-card { background: white; padding: 15px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); border-left: 5px solid #27ae60; } h2 { color: #2c3e50; margin-top: 0; } .room-tag { display: inline-block; background: #e8f8f5; color: #27ae60; padding: 8px 15px; margin: 5px; border-radius: 20px; font-weight: bold; }</style>\n");
+        html.append("</head>\n<body>\n");
+        
+        html.append("<h1>✅ Clinic Room Availability Directory</h1>\n");
+        html.append("<p>Generated At: <strong>").append(time).append("</strong></p>\n");
+
+        for (int i = 1; i <= uniqueTypes.getNumberOfEntries(); i++) {
+            String currentType = uniqueTypes.getEntry(i);
+            html.append("<div class=\"category-card\">\n");
+            html.append("<h2>").append(currentType.toUpperCase()).append("</h2>\n");
+            html.append("<div>\n");
+            
+            for (Room r : availableRooms) {
+                if (r.getRoomType().equalsIgnoreCase(currentType)) {
+                    html.append("<span class=\"room-tag\">Room ").append(r.getRoomNumber()).append("</span>\n");
+                }
+            }
+            html.append("</div>\n</div>\n");
+        }
+
+        html.append("</body>\n</html>");
+        return html.toString();
     }
 }

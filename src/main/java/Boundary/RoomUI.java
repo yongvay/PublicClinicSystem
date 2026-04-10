@@ -51,7 +51,8 @@ public class RoomUI {
         System.out.println("6. Update Room Details");
         System.out.println("7. Delete Room");
         System.out.println("8. View Sorted Rooms (By Number/Type)");
-        System.out.println("9. View Room Report");
+        System.out.println("9. Generate Utilization Report");
+        System.out.println("10. Generate Availability Directory Report");
         System.out.println("0. Exit to Main Menu");
         System.out.println("==========================================");
     }
@@ -66,7 +67,8 @@ public class RoomUI {
             case 6: updateRoom(); break;
             case 7: deleteRoom(); break;
             case 8: viewSortedRooms(); break;
-            case 9: generateRoomReport(); break;
+            case 9: generateUtilizationReport(); break;
+            case 10: generateAvailabilityDirectory(); break;
             case 0: System.out.println("Exiting Room Subsystem..."); break;
             default: System.out.println("Invalid choice. Please try again.");
         }
@@ -145,18 +147,33 @@ public class RoomUI {
         System.out.println("Current Details: " + existing.toString());
         System.out.println("Enter new details (press Enter to keep current value):");
 
-        // UPDATED: Input validation to prevent saving whitespace-only strings
         String type;
         while (true) {
             type = Utilities.getString("New Room Type [" + existing.getRoomType() + "]: ");
             if (type.isEmpty() || !type.trim().isEmpty()) {
-                break; // Proceed if user skips (presses enter) or provides valid text
+                break; 
             }
             System.out.println("Error: Room Type cannot be blank spaces. Please enter a valid type or press Enter to skip.");
         }
         updateIfNotEmpty(type, existing::setRoomType);
 
-        // UPDATED: Data consistency lock to prevent users from making an occupied room "available"
+        // ---------------------------------------------------------
+        // DEFENSIVE INPUT PARSING PLACEHOLDER
+        // If an integer field (e.g., bedCapacity) is added to Room, 
+        // parse the user input defensively using try-catch to prevent crashes.
+        // ---------------------------------------------------------
+        /*
+        String newCapacity = Utilities.getString("New Bed Capacity [" + existing.getBedCapacity() + "]: ");
+        if (!newCapacity.isEmpty()) {
+            try {
+                existing.setBedCapacity(Integer.parseInt(newCapacity));
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid format. Skipping capacity update. Please enter numbers only.");
+            }
+        }
+        */
+        // ---------------------------------------------------------
+
         if (!existing.isAvailable()) {
             System.out.println("Status: This room is currently occupied. Status cannot be manually changed. Please process patient discharge in the Appointment System to free the room.");
         } else {
@@ -234,16 +251,38 @@ public class RoomUI {
         }
     }
 
-    public void generateRoomReport() {
+    public void generateUtilizationReport() {
         String reportText = roomRepo.generateRoomReport(appointmentRepo.getAllAppointments());
         System.out.println(reportText);
 
         if (!reportText.equals("No room data available to generate report.\n")) {
-            System.out.print("\nWould you like to export this report to a .txt file? (Y/N): ");
+            System.out.print("\nWould you like to export a visual HTML version of this report? (Y/N): ");
             String exportChoice = scanner.nextLine().trim();
 
             if (exportChoice.equalsIgnoreCase("Y")) {
-                Utilities.exportReportToFile(reportText, "RoomReport.txt");
+                String htmlContent = roomRepo.generateRoomHtmlReport(appointmentRepo.getAllAppointments());
+                Utilities.exportReportToFile(htmlContent, "RoomUtilizationReport.html");
+                System.out.println("SUCCESS: HTML Report saved as 'RoomUtilizationReport.html' in GeneratedReports.");
+            } else {
+                System.out.println("Export skipped.");
+            }
+        }
+    }
+
+    public void generateAvailabilityDirectory() {
+        String reportText = roomRepo.generateAvailabilityDirectoryTextReport();
+        System.out.println(reportText);
+
+        if (!reportText.contains("No rooms are currently available.")) {
+            System.out.print("\nWould you like to export a visual HTML version of this report? (Y/N): ");
+            String exportChoice = scanner.nextLine().trim();
+
+            if (exportChoice.equalsIgnoreCase("Y")) {
+                String htmlContent = roomRepo.generateAvailabilityDirectoryHtmlReport();
+                Utilities.exportReportToFile(htmlContent, "RoomAvailabilityDirectory.html");
+                System.out.println("SUCCESS: HTML Report saved as 'RoomAvailabilityDirectory.html' in GeneratedReports.");
+            } else {
+                System.out.println("Export skipped.");
             }
         }
     }

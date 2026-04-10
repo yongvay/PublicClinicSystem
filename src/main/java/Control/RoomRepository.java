@@ -8,29 +8,23 @@ import Entity.Appointment;
  * @author Ng Zhi Xuan
  */
 public interface RoomRepository {
-
-    // Auto Generate Room Number
+    
     String generateNextRoomId();
-
-    // Create 
     boolean create(Room room);
-
-    // Read 
     ListInterface<Room> findAll();
     Room findById(String roomNumber);
     ListInterface<Room> findByType(String type);
     ListInterface<Room> findAllAvailableRooms();
-
-    // Update 
-    boolean update(Room room);
-
-    // Delete 
+    boolean update(Room updatedRoom);
     boolean delete(Room room);
-    
-    // Sorting methods
     ListInterface<Room> sortedByRoomNumber();
     ListInterface<Room> sortedByType();
     
-    // Reporting method
+    // REPORT 1: Utilization & Occupancy
     String generateRoomReport(ListInterface<Appointment> allApts);
+    String generateRoomHtmlReport(ListInterface<Appointment> allApts);
+
+    // REPORT 2: Availability Directory
+    String generateAvailabilityDirectoryTextReport();
+    String generateAvailabilityDirectoryHtmlReport();
 }

@@ -337,16 +337,30 @@ public class PatientUI {
 
         while (true) {
             System.out.println("\n--- " + type + " ---");
+
             // Display Current List
-            ListInterface<String> list = type.equals("Medical History") ? p.getMedicalHistory() : p.getAllergies();
+            ListInterface<String> list = type.equals("Medical History")
+                    ? p.getMedicalHistory()
+                    : p.getAllergies();
+
             System.out.println(p.formatList(list));
 
             System.out.println("Choice <1. Add  2. Update  3. Remove  0. Exit>");
+
             int choice = inputInt("Choose: ");
+
+            if (choice < 0 || choice > 3) {
+                System.out.println("Invalid choice! Please enter 0, 1, 2, or 3.");
+                continue;
+            }
+
             if (choice == 0) break;
 
             boolean changed = modifyPatientListItem(p, type, choice);
-            if (changed) displaySinglePatient(p);
+
+            if (changed) {
+                displaySinglePatient(p);
+            }
         }
     }
 
